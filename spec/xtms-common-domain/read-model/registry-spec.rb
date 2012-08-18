@@ -1,6 +1,6 @@
 require 'spec-helper'
 
-describe CommonDomain::Infrastructure::ReadModelsRegistry do
+describe CommonDomain::ReadModel::Registry do
   let(:event_bus) { mock(:event_bus, :register => nil) }
   let(:read_model) { mock(:read_model) }
   let(:subject) { described_class.new event_bus }
@@ -22,7 +22,7 @@ describe CommonDomain::Infrastructure::ReadModelsRegistry do
     
     it "should fail to register another model with same key" do
       subject.register :read_model_one, read_model
-      lambda { subject.register :read_model_one, read_model }.should raise_error(CommonDomain::Infrastructure::ReadModelsRegistry::DuplicateKeyError)
+      lambda { subject.register :read_model_one, read_model }.should raise_error(CommonDomain::ReadModel::Registry::DuplicateKeyError)
     end
     
     it "should raise NoMethodError for unknown read model" do

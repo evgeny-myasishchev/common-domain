@@ -14,7 +14,7 @@ module CommonDomain
     protected
       def bootstrap_read_models(&block)
         @event_bus   = CommonDomain::EventBus.new
-        @read_models = CommonDomain::Infrastructure::ReadModelsRegistry.new @event_bus
+        @read_models = CommonDomain::ReadModel::Registry.new @event_bus
         yield(@read_models)
       end
     

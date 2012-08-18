@@ -1,5 +1,5 @@
-module CommonDomain::Infrastructure
-  class ReadModelsRegistry
+module CommonDomain::ReadModel
+  class Registry
     class DuplicateKeyError < ::StandardError
     end
     

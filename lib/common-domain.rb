@@ -11,13 +11,15 @@ module CommonDomain
     autoload :AggregateId, 'common-domain/infrastructure/aggregate-id'
     autoload :MessagesHandler, 'common-domain/infrastructure/messages-handler'
     autoload :MessagesRouter, 'common-domain/infrastructure/messages-router'
-    autoload :ReadModel, 'common-domain/infrastructure/read-model'
-    autoload :ReadModelsRegistry, 'common-domain/infrastructure/read-models-registry'
   end
   autoload :Logger, 'common-domain/logger'
   module Persistence
     autoload :AggregatesBuilder, 'common-domain/persistence/aggregates-builder'
     autoload :EventStoreRepository, 'common-domain/persistence/event-store-repository'
     autoload :Repository, 'common-domain/persistence/repository'
+  end
+  module ReadModel
+    autoload :Base, 'common-domain/read-model/base'
+    autoload :Registry, 'common-domain/read-model/registry'
   end
 end
