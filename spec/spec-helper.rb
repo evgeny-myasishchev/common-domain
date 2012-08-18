@@ -6,6 +6,7 @@ require 'bundler/setup'
 
 gem 'rspec'
 require 'rspec'
+require 'sequel'
 require 'event-store'
 require 'common-domain'
 require 'log4r'

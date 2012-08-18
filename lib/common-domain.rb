@@ -21,6 +21,6 @@ module CommonDomain
   module ReadModel
     autoload :Base, 'common-domain/read-model/base'
     autoload :Registry, 'common-domain/read-model/registry'
-    autoload :Sql, 'common-domain/read-model/sql-read-model'
+    autoload :SqlReadModel, 'common-domain/read-model/sql-read-model'
   end
 end
