@@ -17,6 +17,7 @@ module CommonDomain::ReadModel
       end
       
       def table(key, name, &block)
+        raise "Table name can not be nil for key: #{key}" if name.nil?
         unless @connection.table_exists? name
           Log.debug "Creating table: #{name}"
           @connection.create_table(name, &block)
