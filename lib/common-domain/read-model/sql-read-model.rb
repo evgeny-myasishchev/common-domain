@@ -50,8 +50,8 @@ module CommonDomain::ReadModel
     end
     
     def setup
-      setup_schema
-      prepare_statements
+      setup_schema(schema)
+      prepare_statements(schema)
       @initialized = true
     end
     
@@ -61,33 +61,31 @@ module CommonDomain::ReadModel
       schema.table_names.each do |table_name|
         connection.drop_table table_name
       end
-      setup_schema
+      setup_schema(schema)
     end
     
     def ensure_initialized!
       raise SchemaNotInitialized.new unless @initialized
     end
     
-    private
-      def setup_schema
-        self.class.schema_setup.call(schema) if self.class.schema_setup
+    protected
+      def setup_schema(schema)
       end
       
-      def prepare_statements
-        self.class.statements_preparation.call(schema) if self.class.statements_preparation
+      def prepare_statements(schema)
       end
     
     class << self
-      attr_reader :schema_setup, :statements_preparation
-      
       # &block to be called with schema
       def setup_schema(&block)
-        @schema_setup = block
+        define_method(:setup_schema, block)
+        protected :setup_schema
       end
       
       # &block to be called with schema
       def prepare_statements(&block)
-        @statements_preparation = block
+        define_method(:prepare_statements, block)
+        protected :setup_schema
       end
     end
   end

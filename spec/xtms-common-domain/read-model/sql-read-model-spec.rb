@@ -4,15 +4,14 @@ describe CommonDomain::ReadModel::SqlReadModel do
   module ReadModel
     include CommonDomain::ReadModel
   end
-  class SubjectClass < ReadModel::SqlReadModel
-  end
   
+  let(:described_class) { Class.new(ReadModel::SqlReadModel) }
   let(:connection) { Sequel.connect adapter: "sqlite", database: ":memory:" }
-  subject { SubjectClass.new connection, perform_setup: false }
+  subject { described_class.new connection, perform_setup: false }
   
   describe "initialization" do
     it "should initialize schema by default" do
-      subject = SubjectClass.new connection, perform_setup: true
+      subject = described_class.new connection, perform_setup: true
       subject.ensure_initialized!
     end
     
@@ -23,18 +22,8 @@ describe CommonDomain::ReadModel::SqlReadModel do
   
   describe "setup" do
     it "should setup schema and prepare_statements" do
-      schema_setup           = mock(:schema_setup)
-      statements_preparation = mock(:statements_preparation)
-      schema_setup.should_receive(:call).with(subject.schema)
-      statements_preparation.should_receive(:call).with(subject.schema)
-      SubjectClass.should_receive(:schema_setup).any_number_of_times.and_return(schema_setup)
-      SubjectClass.should_receive(:statements_preparation).twice.and_return(statements_preparation)
-      subject.setup
-    end
-    
-    it "should do nothing if schema_setup and statements_preparation are nil" do
-      SubjectClass.should_receive(:schema_setup).and_return(nil)
-      SubjectClass.should_receive(:statements_preparation).and_return(nil)
+      subject.should_receive(:setup_schema).with(subject.schema)
+      subject.should_receive(:prepare_statements).with(subject.schema)
       subject.setup
     end
   end
@@ -46,10 +35,26 @@ describe CommonDomain::ReadModel::SqlReadModel do
       subject.connection.should_receive(:drop_table).with(:table1)
       subject.connection.should_receive(:drop_table).with(:table2)
       subject.connection.should_receive(:drop_table).with(:table3)
-      schema_setup = mock(:schema_setup)
-      schema_setup.should_receive(:call).with(subject.schema)
-      SubjectClass.should_receive(:schema_setup).any_number_of_times.and_return(schema_setup)
+      subject.should_receive(:setup_schema).with(subject.schema)
       subject.purge!
+    end
+  end
+  
+  describe "setup_schema" do
+    it "should create instance method that with passed block" do
+      expect { |b| 
+        described_class.setup_schema(&b)
+        subject.send(:setup_schema, subject.schema)
+      }.to yield_with_args(subject.schema)
+    end
+  end
+  
+  describe "prepare_statements" do
+    it "should create instance method that with passed block" do
+      expect { |b| 
+        described_class.prepare_statements(&b)
+        subject.send(:prepare_statements, subject.schema)
+      }.to yield_with_args(subject.schema)
     end
   end
 end
