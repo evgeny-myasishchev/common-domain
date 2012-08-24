@@ -31,6 +31,14 @@ module CommonDomain
     # end
     module DSL
       module ClassMethods
+        def events_group(group_name, &block)
+          group = Module.new do
+            include DSL
+          end
+          group.module_exec &block
+          const_set(group_name, group)
+        end
+        
         def event(const_name, *args)
           event_class = Class.new(CommonDomain::DomainEvent) do
             attr_reader *args

@@ -40,4 +40,30 @@ describe CommonDomain::DomainEvent::DSL do
       instance.aggregate_id.should eql "aggregate-100"
     end
   end
+  
+  describe "events_group" do
+    subject {
+      Module.new do
+        include CommonDomain::DomainEvent::DSL
+        
+        events_group :AccountEvents do
+          event :AccountCreated
+          event :AccountRemoved
+        end
+      end
+    }
+    
+    it "should define a new module" do
+      subject.const_defined?(:AccountEvents).should be_true
+    end
+    
+    it "should include DSL in the module" do
+      subject::AccountEvents.included_modules.should include(CommonDomain::DomainEvent::DSL)
+    end
+    
+    it "should eval passed block so events can be defined" do
+      subject::AccountEvents.const_defined?(:AccountCreated).should be_true
+      subject::AccountEvents.const_defined?(:AccountRemoved).should be_true
+    end
+  end
 end
