@@ -8,7 +8,7 @@ module CommonDomain
   class Command
     attr_reader :aggregate_id
 
-    def initialize(aggregate_id, attributes = {})
+    def initialize(aggregate_id = nil, attributes = {})
       @aggregate_id = aggregate_id
       attributes.each_key { |key| instance_variable_set("@#{key}", attributes[key]) }
     end
@@ -40,6 +40,34 @@ module CommonDomain
           end
           constant
         end
+    end
+  
+    # Commands DSL to simplify commands definition.
+    # Sample:
+    # include CommonDomain::Command::DSL
+    # command :CreateAccount, :login, :email
+    #
+    # Sample above is an equivalent to:
+    # class CreateAccount < CommonDomain::Command
+    #   attr_reader :login, :email
+    # end
+    module DSL
+      module ClassMethods
+        def command(const_name, *args)
+          event_class = Class.new(CommonDomain::Command) do
+            attr_reader *args
+            define_method :initialize do |*args|
+              super(*args)
+            end
+          end
+          const_set(const_name, event_class)
+        end
+
+      end
+      
+      def self.included(receiver)
+        receiver.extend         ClassMethods
+      end
     end
   end
 end
