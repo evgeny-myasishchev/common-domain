@@ -25,43 +25,36 @@ module CommonDomain::Infrastructure
     class UnknownHandlerError < ::StandardError
     end
     
+    module Helpers
+      private
+        def message_handler_name(message_class)
+          "on-#{message_class.name}-message".to_sym
+        end
+    end
+    
     module ClassMethods
+      include Helpers
       protected
         def on message_class, &block
-          if handlers_store.key?(message_class)
+          handler_method = message_handler_name(message_class)
+          if instance_methods.include?(handler_method)
             raise HandlerAlreadyRegistered.new("Handler for message '#{message_class}' already registered") 
           end
-          
-          method_name = "on-#{message_class.name}-message"
-          define_method method_name, &block
-          handlers_store[message_class] = method_name
-        end
-        
-      private
-        def handlers_store
-          @registered_handlers ||= {}
+          define_method message_handler_name(message_class), &block
         end
     end
     
     module InstanceMethods
-      def registered_message_handlers
-        handlers_store.keys
-      end
+      include Helpers
       
       def can_handle_message?(message)
-        handlers_store.key? message.class
+        respond_to?(message_handler_name(message.class))
       end
       
       def handle_message(message)
         raise UnknownHandlerError.new "Handler for message '#{message.class}' not found." unless can_handle_message?(message)
-        handler = handlers_store[message.class]
-        send(handler, message)
+        send(message_handler_name(message.class), message)
       end
-      
-      private
-        def handlers_store
-          @handlers_store ||= self.class.send(:handlers_store)
-        end
     end
     
     def self.included(receiver)
