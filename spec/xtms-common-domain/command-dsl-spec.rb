@@ -7,7 +7,7 @@ describe CommonDomain::Command::DSL do
     end
   }
   
-  describe "domain_event" do
+  describe "event" do
     before(:each) do
       subject.class_eval do
         command :CreateAccount, :login_name, :email_address

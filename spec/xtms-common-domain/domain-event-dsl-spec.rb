@@ -7,11 +7,11 @@ describe CommonDomain::DomainEvent::DSL do
     end
   }
   
-  describe "domain_event" do
+  describe "event" do
     before(:each) do
       subject.class_eval do
-        domain_event :AccountCreated, :login_name, :email_address
-        domain_event :AccountRemoved
+        event :AccountCreated, :login_name, :email_address
+        event :AccountRemoved
       end
     end
     

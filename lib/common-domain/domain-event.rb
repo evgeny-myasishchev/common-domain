@@ -19,7 +19,7 @@ module CommonDomain
     # DomainEvents DSL to simplify events definition.
     # Sample:
     # include CommonDomain::DomainEvent::DSL
-    # domain_event :AccountCreated, :login, :email
+    # event :AccountCreated, :login, :email
     #
     # Sample above is an equivalent to:
     # class AccountCreated < CommonDomain::DomainEvent
@@ -31,7 +31,7 @@ module CommonDomain
     # end
     module DSL
       module ClassMethods
-        def domain_event(const_name, *args)
+        def event(const_name, *args)
           event_class = Class.new(CommonDomain::DomainEvent) do
             attr_reader *args
             define_method :initialize do |aggregate_id, *values|
