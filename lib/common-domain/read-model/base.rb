@@ -10,6 +10,10 @@ module CommonDomain::ReadModel
       raise "Not implemented"
     end
     
+    def rebuild_required?
+      raise "Not implemented"
+    end
+    
     def ensure_initialized!
       raise "Not implemented"
     end

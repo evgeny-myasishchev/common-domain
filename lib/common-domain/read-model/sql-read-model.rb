@@ -78,7 +78,10 @@ module CommonDomain::ReadModel
     
     class << self
       # &block to be called with schema
-      def setup_schema(&block)
+      def setup_schema(options = {}, &block)
+        options = {
+          version: 0
+        }.merge! options
         define_method(:setup_schema, block)
         protected :setup_schema
       end

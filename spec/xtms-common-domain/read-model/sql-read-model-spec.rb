@@ -45,11 +45,15 @@ describe CommonDomain::ReadModel::SqlReadModel do
   end
   
   describe "setup_schema" do
-    it "should create instance method that with passed block" do
+    it "should create instance method with passed block" do
       expect { |b| 
         described_class.setup_schema(&b)
         subject.send(:setup_schema, subject.schema)
       }.to yield_with_args(subject.schema)
+    end
+    
+    it "should define " do
+      
     end
   end
   
@@ -88,7 +92,7 @@ describe CommonDomain::ReadModel::SqlReadModel do
       subject.rebuild_required?.should be_false
     end
     
-    it "should be true if actual schema of any table is outdated" do
+    it "should be true if actual schema is older than the one that is required by read model" do
       
     end
   end
