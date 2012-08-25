@@ -6,7 +6,11 @@ describe CommonDomain::ReadModel::SqlReadModel do
   end
   
   let(:described_class) { Class.new(ReadModel::SqlReadModel) }
-  let(:connection) { Sequel.connect adapter: "sqlite", database: ":memory:" }
+  let(:connection) { 
+    con = Sequel.connect adapter: "sqlite", database: ":memory:" 
+    con.loggers << CommonDomain::Logger.get("common-domain::sql-read-model-spec::orm")
+    con
+  }
   subject { described_class.new connection, perform_setup: false }
   
   describe "initialization" do
@@ -55,6 +59,37 @@ describe CommonDomain::ReadModel::SqlReadModel do
         described_class.prepare_statements(&b)
         subject.send(:prepare_statements, subject.schema)
       }.to yield_with_args(subject.schema)
+    end
+  end
+  
+  describe "rebuild_required?" do
+    before(:each) do
+      described_class.class_eval do
+        setup_schema do |schema|
+          schema.table :accounts, :accounts do
+            String :id, :primary_key=>true, :size => 50, :null=>false
+            String :name, :size => 50, :null=>false
+            Boolean :is_active, :null=>false
+          end
+          schema.table :roles, :roles do
+            String :id, :primary_key=>true, :size => 50, :null=>false
+            String :name, :size => 50, :null=>false
+          end
+        end
+      end
+    end
+    
+    it "should be false if schema is the most actual version" do
+      subject.setup
+      subject.rebuild_required?.should be_true
+    end
+    
+    it "should be true if schema has not been initialized" do
+      subject.rebuild_required?.should be_false
+    end
+    
+    it "should be true if actual schema of any table is outdated" do
+      
     end
   end
 end
