@@ -1,15 +1,15 @@
 require 'spec-helper'
 
 describe CommonDomain::ReadModel::SqlReadModel do
+  include SqlConnectionHelper
   module ReadModel
     include CommonDomain::ReadModel
   end
   
   let(:described_class) { Class.new(ReadModel::SqlReadModel) }
-  let(:connection) { 
-    con = Sequel.connect adapter: "sqlite", database: ":memory:" 
-    con.loggers << CommonDomain::Logger.get("common-domain::sql-read-model-spec::orm")
-    con
+  
+  let(:connection) {
+    sqlite_memory_connection "common-domain::sql-read-model-spec::orm"
   }
   subject { described_class.new connection, perform_setup: false }
   

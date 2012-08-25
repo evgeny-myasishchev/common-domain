@@ -1,8 +1,9 @@
 require 'spec-helper'
 
 describe CommonDomain::ReadModel::SqlReadModel::Schema do
+  include SqlConnectionHelper
   let(:connection) {
-    Sequel.connect adapter: "sqlite", database: ":memory:"
+    sqlite_memory_connection
   }
   
   subject {
