@@ -6,8 +6,37 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
   }
   
   subject {
-    described_class.new connection
+    described_class.new connection, identifier: "schema-1" do |schema|
+      
+    end
   }
+  
+  describe "initialize" do
+    it "should raise error if identifier is no provided" do
+      lambda { described_class.new connection, {} }.should raise_error(RuntimeError)
+    end
+  end
+  
+  describe "setup_required?" do
+    it "should return true the schema has never been initialized"
+    
+    it "should return true if the schema is outdated"
+    
+    it "should return false if actual schema is the most recent version"
+  end
+  
+  describe "setup" do
+    it "should call block passed to initializer" do
+      subject = nil
+      expect {|b| 
+        subject = described_class.new connection, {identifier: "schema-1"}, &b
+        subject.setup
+      }.to yield_with_args(subject)
+    end
+    it "should create special table to record schema versions"
+    it "should insert new schema version"
+    it "should update schema version"
+  end
   
   describe "table" do
     before(:each) do

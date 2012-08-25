@@ -7,10 +7,26 @@ class CommonDomain::ReadModel::SqlReadModel
 
   class Schema
     attr_reader :table_names
-    def initialize(connection)
+    
+    def initialize(connection, options, &block)
+      @options = {
+        version: 0,
+        identifier: nil
+      }.merge! options
+      raise ":identifier must be provided. Schema can not be initialized without an identifier." if @options[:identifier].nil?
+      
       @connection  = connection
       @datasets    = {}
       @table_names = []
+      @block       = block
+    end
+    
+    def setup_required?
+      
+    end
+    
+    def setup
+      @block.call(self)
     end
 
     def table(key, name, &block)
