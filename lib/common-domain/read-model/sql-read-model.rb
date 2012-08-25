@@ -1,42 +1,8 @@
 module CommonDomain::ReadModel
   class SqlReadModel < Base
+    autoload :Schema, 'common-domain/read-model/sql-read-model/schema'
+    
     Log = CommonDomain::Logger.get "common-domain::read-model::sql-read-model"
-    
-    class SchemaNotInitialized < ::StandardError
-      def initialize
-        super("Database schema has not been initialized yet.")
-      end
-    end
-    
-    class SchemaDefinition
-      attr_reader :table_names
-      def initialize(connection)
-        @connection  = connection
-        @datasets    = {}
-        @table_names = []
-      end
-      
-      def table(key, name, &block)
-        raise "Table name can not be nil for key: #{key}" if name.nil?
-        unless @connection.table_exists? name
-          Log.debug "Creating table: #{name}"
-          @connection.create_table(name, &block)
-        end
-        @table_names << name
-        @datasets[key] = @connection[name]
-        nil
-      end
-      
-      def respond_to?(sym)
-        return true if @datasets.key?(sym)
-        super(sym)
-      end
-      
-      def method_missing(meth, *args, &blk)
-        return @datasets[meth] if @datasets.key?(meth)
-        super(meth, *args, &blk)
-      end
-    end
     
     attr_reader :connection, :schema
     
@@ -45,7 +11,7 @@ module CommonDomain::ReadModel
         perform_setup: true
       }.merge! options
       @connection  = connection
-      @schema      = SchemaDefinition.new connection
+      @schema      = Schema.new connection
       @initialized = false
       setup if @options[:perform_setup]
     end
@@ -63,6 +29,10 @@ module CommonDomain::ReadModel
         connection.drop_table table_name
       end
       setup_schema(schema)
+    end
+    
+    def rebuild_required?
+      schema.outdated?
     end
     
     def ensure_initialized!

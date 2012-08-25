@@ -51,10 +51,6 @@ describe CommonDomain::ReadModel::SqlReadModel do
         subject.send(:setup_schema, subject.schema)
       }.to yield_with_args(subject.schema)
     end
-    
-    it "should define " do
-      
-    end
   end
   
   describe "prepare_statements" do
@@ -67,33 +63,14 @@ describe CommonDomain::ReadModel::SqlReadModel do
   end
   
   describe "rebuild_required?" do
+    let(:schema) { mock(:schema) }
     before(:each) do
-      described_class.class_eval do
-        setup_schema do |schema|
-          schema.table :accounts, :accounts do
-            String :id, :primary_key=>true, :size => 50, :null=>false
-            String :name, :size => 50, :null=>false
-            Boolean :is_active, :null=>false
-          end
-          schema.table :roles, :roles do
-            String :id, :primary_key=>true, :size => 50, :null=>false
-            String :name, :size => 50, :null=>false
-          end
-        end
-      end
+      subject.should_receive(:schema).and_return(schema)
     end
     
-    it "should be false if schema is the most actual version" do
-      subject.setup
+    it "should return true if schema is outdated" do
+      schema.should_receive(:outdated?).and_return(true)
       subject.rebuild_required?.should be_true
-    end
-    
-    it "should be true if schema has not been initialized" do
-      subject.rebuild_required?.should be_false
-    end
-    
-    it "should be true if actual schema is older than the one that is required by read model" do
-      
     end
   end
 end
