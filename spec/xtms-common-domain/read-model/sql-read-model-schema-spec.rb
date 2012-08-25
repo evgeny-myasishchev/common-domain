@@ -2,13 +2,11 @@ require 'spec-helper'
 
 describe CommonDomain::ReadModel::SqlReadModel::Schema do
   include SqlConnectionHelper
-  let(:connection) {
-    sqlite_memory_connection
-  }
-  
+  include SchemaHelper
+  let(:connection) { sqlite_memory_connection }
+  let(:info_table_name) { described_class::MetaStoreTableName }
   subject {
-    described_class.new connection, identifier: "schema-1" do |schema|
-      
+    described_class.new connection, identifier: "schema-1", version: 20 do |schema|
     end
   }
   
@@ -18,15 +16,39 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
     end
   end
   
-  describe "setup_required?" do
-    it "should return true the schema has never been initialized"
+  describe "rebuild_required?" do
+    before(:each) do
+      subject.setup
+    end
     
-    it "should return true if the schema is outdated"
+    it "should return true if there is no schema info table" do
+      connection.drop_table info_table_name
+      subject.rebuild_required?.should be_true
+    end
     
-    it "should return false if actual schema is the most recent version"
+    it "should return true the schema has never been initialized" do
+      connection[info_table_name].delete
+      subject.rebuild_required?.should be_true
+    end
+    
+    it "should return true if the schema is outdated" do
+      subject.setup
+      dataset = connection[info_table_name]
+      dataset.update(:'schema-version' => 19)
+      subject.rebuild_required?.should be_true
+    end
+    
+    it "should return false if actual schema is the most recent version" do
+      subject.setup
+      subject.rebuild_required?.should be_false
+    end
   end
   
   describe "setup" do
+    before(:each) do
+      subject.setup
+    end
+    
     it "should call block passed to initializer" do
       subject = nil
       expect {|b| 
@@ -34,9 +56,38 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
         subject.setup
       }.to yield_with_args(subject)
     end
-    it "should create special table to record schema versions"
-    it "should insert new schema version"
-    it "should update schema version"
+    
+    it "should create special table to record schema versions" do
+      connection.should have_table info_table_name
+      check_column(connection, info_table_name, :identifier) do |column|
+        column[:allow_null].should be_false
+        column[:primary_key].should be_true
+        column[:type].should be :string
+        column[:db_type].should eql "varchar(200)"
+      end
+      
+      check_column(connection, info_table_name, :'schema-version') do |column|
+        column[:allow_null].should be_false
+        column[:type].should be :integer
+      end      
+    end
+    
+    it "should insert new schema version for given identifier" do
+      dataset = connection[info_table_name]
+      dataset.should have(1).items
+      rec = dataset.first
+      rec[:identifier].should eql "schema-1"
+      rec[:'schema-version'].should eql 20
+    end
+    
+    it "should update schema version" do
+      dataset = connection[info_table_name]
+      dataset.update :'schema-version' => 10
+      subject.setup
+      rec = dataset.first
+      rec[:identifier].should eql "schema-1"
+      rec[:'schema-version'].should eql 20
+    end
   end
   
   describe "table" do

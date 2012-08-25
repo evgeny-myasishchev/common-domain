@@ -7,6 +7,7 @@ class CommonDomain::ReadModel::SqlReadModel
 
   class Schema
     attr_reader :table_names
+    MetaStoreTableName = :'read-model-schema-infos'
     
     def initialize(connection, options, &block)
       @options = {
@@ -21,12 +22,23 @@ class CommonDomain::ReadModel::SqlReadModel
       @block       = block
     end
     
-    def setup_required?
-      
+    def rebuild_required?
+      return true unless @connection.table_exists?(MetaStoreTableName)
+      query = @connection[MetaStoreTableName].filter(identifier: @options[:identifier])
+      return true unless query.count == 1
+      return true unless @options[:version] == query.first[:'schema-version']
+      return false
     end
     
     def setup
+      meta_store = init_meta_store
       @block.call(self)
+      query = meta_store.filter(identifier: @options[:identifier])
+      if query.count == 1
+        query.update(:'schema-version' => @options[:version])
+      else
+        meta_store.insert(:identifier => @options[:identifier], :'schema-version' => @options[:version])
+      end
     end
 
     def table(key, name, &block)
@@ -49,5 +61,14 @@ class CommonDomain::ReadModel::SqlReadModel
       return @datasets[meth] if @datasets.key?(meth)
       super(meth, *args, &blk)
     end
+    
+    private
+      def init_meta_store
+        @connection.create_table?(MetaStoreTableName) do
+          String :identifier, :size => 200, :primary_key => true, :allow_null => false
+          Integer :'schema-version', :allow_null => false
+        end
+        @connection[MetaStoreTableName]
+      end
   end
 end
