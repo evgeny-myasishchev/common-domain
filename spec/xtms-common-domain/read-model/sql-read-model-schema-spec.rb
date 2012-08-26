@@ -91,9 +91,35 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
   end
   
   describe "cleanup" do
-    it "should drop all tables"
+    subject {
+      schema = described_class.new connection, identifier: "schema-cleanup-spec", version: 20 do |schema|
+        schema.table :table_one, :'table-one' do
+          Integer :id, :primary_key => true
+        end
+        schema.table :table_two, :'table-two' do
+          Integer :id, :primary_key => true
+        end
+      end
+      schema
+    }
     
-    it "should return all info from info table"
+    before(:each) do
+      subject.setup
+      connection.create_table :'table-three' do
+        Integer :id, :primary_key => true
+      end
+      subject.cleanup
+    end
+    
+    it "should drop all tables" do
+      connection.tables.should include(:'table-three')
+      connection.tables.should_not include(:'table-one')
+      connection.tables.should_not include(:'table-two')
+    end
+    
+    it "should remove all info from info table" do
+      connection[info_table_name].where(:identifier => "schema-cleanup-spec").should be_empty
+    end
   end
   
   describe "table" do

@@ -17,14 +17,14 @@ class CommonDomain::ReadModel::SqlReadModel
     
     def rebuild_required?
       return true unless @connection.table_exists?(MetaStoreTableName)
-      query = @connection[MetaStoreTableName].filter(identifier: @options[:identifier])
+      query = meta_store.filter(identifier: @options[:identifier])
       return true unless query.count == 1
       return true unless @options[:version] == query.first[:'schema-version']
       return false
     end
     
     def setup
-      meta_store = init_meta_store
+      init_meta_store
       @block.call(self)
       query = meta_store.filter(identifier: @options[:identifier])
       if query.count == 1
@@ -35,7 +35,8 @@ class CommonDomain::ReadModel::SqlReadModel
     end
     
     def cleanup
-      
+      table_names.each { |table_name| @connection.drop_table table_name }
+      meta_store.filter(:identifier => @options[:identifier]).delete
     end
 
     def table(key, name, &block)
@@ -60,12 +61,15 @@ class CommonDomain::ReadModel::SqlReadModel
     end
     
     private
+      def meta_store
+        @meta_store ||= @connection[MetaStoreTableName]
+      end
+    
       def init_meta_store
         @connection.create_table?(MetaStoreTableName) do
           String :identifier, :size => 200, :primary_key => true, :allow_null => false
           Integer :'schema-version', :allow_null => false
         end
-        @connection[MetaStoreTableName]
       end
   end
 end
