@@ -13,11 +13,11 @@ module CommonDomain::ReadModel
       @options = {
       }.merge! options
       @connection = connection
-      prepare_statements(schema)
     end
     
     def setup
       schema.setup
+      prepare_statements(schema)
     end
     
     def purge!
@@ -32,7 +32,7 @@ module CommonDomain::ReadModel
     
     def schema
       nil
-    end    
+    end   
     
     protected
       def prepare_statements(schema)
@@ -43,8 +43,12 @@ module CommonDomain::ReadModel
       def setup_schema(options = {}, &block)
         define_method(:schema) do
           options = { identifier: self.class.name, version: 0 }.merge! options
-          @schema ||= Schema.new(@connection, options, &block)
+          @schema ||= Schema.new(@connection, options) do |schema|
+            setup_schema(schema)
+          end
         end
+        define_method(:setup_schema, &block)
+        private :setup_schema
       end
       
       # &block to be called with schema

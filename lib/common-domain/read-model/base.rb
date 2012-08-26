@@ -13,10 +13,5 @@ module CommonDomain::ReadModel
     def rebuild_required?
       raise "Not implemented"
     end
-    
-    def handle_message(*args)
-      ensure_initialized!
-      super(*args)
-    end
   end
 end

@@ -17,24 +17,18 @@ describe CommonDomain::ReadModel::SqlReadModel do
   }
   subject { described_class.new connection, ensure_rebuilt: false }
   
-  describe "initialization" do
-    it "should prepare statements" do
-      mock_schema = mock(:schema)
-      described_class.send(:define_method, :schema) { mock_schema }
-      statements_prepared = false
-      described_class.send(:define_method, :prepare_statements) {|s| 
-        statements_prepared = true
-        s.should == mock_schema
-      }
-      described_class.new connection
-      statements_prepared.should be_true
-    end
-  end
-  
   describe "setup" do
-    it "should setup schema" do
+    before(:each) do
       subject.stub(:schema) { schema }
+    end
+    it "should setup schema" do
       schema.should_receive(:setup)
+      subject.setup
+    end
+    
+    it "should prepare statements" do
+      schema.stub(:setup)
+      subject.should_receive(:prepare_statements).with(schema)
       subject.setup
     end
   end
@@ -60,7 +54,7 @@ describe CommonDomain::ReadModel::SqlReadModel do
     it "should create instance method with passed block" do
       expect { |b| 
         described_class.setup_schema(&b)
-        subject.schema.setup
+        subject.send(:setup_schema, subject.schema)
       }.to yield_with_args(subject.schema)
     end
   end
