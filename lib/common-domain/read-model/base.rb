@@ -14,10 +14,6 @@ module CommonDomain::ReadModel
       raise "Not implemented"
     end
     
-    def ensure_initialized!
-      raise "Not implemented"
-    end
-    
     def handle_message(*args)
       ensure_initialized!
       super(*args)

@@ -90,6 +90,12 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
     end
   end
   
+  describe "cleanup" do
+    it "should drop all tables"
+    
+    it "should return all info from info table"
+  end
+  
   describe "table" do
     before(:each) do
       subject.table(:table1, :new_table_name) do

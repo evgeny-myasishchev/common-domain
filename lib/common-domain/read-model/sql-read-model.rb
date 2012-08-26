@@ -4,62 +4,53 @@ module CommonDomain::ReadModel
     
     Log = CommonDomain::Logger.get "common-domain::read-model::sql-read-model"
     
-    attr_reader :connection, :schema
+    class InvalidStateError < ::StandardError
+    end
+    
+    attr_reader :connection
     
     def initialize(connection, options = {})
       @options = {
-        perform_setup: true
       }.merge! options
-      @connection  = connection
-      @schema      = Schema.new connection
-      @initialized = false
-      setup if @options[:perform_setup]
+      @connection = connection
+      prepare_statements(schema)
     end
     
     def setup
-      setup_schema(schema)
-      prepare_statements(schema)
-      @initialized = true
+      schema.setup
     end
     
     def purge!
       Log.warn "Purging all data..."
-      ensure_initialized!
-      schema.table_names.each do |table_name|
-        connection.drop_table table_name
-      end
-      setup_schema(schema)
+      schema.cleanup
+      schema.setup
     end
     
     def rebuild_required?
-      schema.outdated?
+      schema.rebuild_required?
     end
     
-    def ensure_initialized!
-      raise SchemaNotInitialized.new unless @initialized
-    end
+    def schema
+      nil
+    end    
     
     protected
-      def setup_schema(schema)
-      end
-      
       def prepare_statements(schema)
       end
     
     class << self
       # &block to be called with schema
       def setup_schema(options = {}, &block)
-        options = {
-          version: 0
-        }.merge! options
-        define_method(:setup_schema, block)
-        protected :setup_schema
+        define_method(:schema) do
+          options = { identifier: self.class.name, version: 0 }.merge! options
+          @schema ||= Schema.new(@connection, options, &block)
+        end
       end
       
       # &block to be called with schema
       def prepare_statements(&block)
         define_method(:prepare_statements, block)
-        protected :setup_schema
+        protected :prepare_statements
       end
     end
   end

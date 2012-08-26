@@ -1,14 +1,7 @@
 class CommonDomain::ReadModel::SqlReadModel
-  class SchemaNotInitialized < ::StandardError
-    def initialize
-      super("Database schema has not been initialized yet.")
-    end
-  end
-
   class Schema
-    attr_reader :table_names
+    attr_reader :table_names, :options
     MetaStoreTableName = :'read-model-schema-infos'
-    
     def initialize(connection, options, &block)
       @options = {
         version: 0,
@@ -39,6 +32,10 @@ class CommonDomain::ReadModel::SqlReadModel
       else
         meta_store.insert(:identifier => @options[:identifier], :'schema-version' => @options[:version])
       end
+    end
+    
+    def cleanup
+      
     end
 
     def table(key, name, &block)
