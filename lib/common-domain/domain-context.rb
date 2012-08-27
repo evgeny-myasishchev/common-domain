@@ -1,7 +1,7 @@
 require 'sequel'
 
 module CommonDomain
-  class Bootstrap
+  class DomainContext
     attr_reader :event_store
     attr_reader :repository
     attr_reader :event_bus

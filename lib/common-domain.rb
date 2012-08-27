@@ -1,10 +1,10 @@
 module CommonDomain
   autoload :Aggregate, 'common-domain/aggregate'
-  autoload :Bootstrap, 'common-domain/bootstrap'
   autoload :CommandDispatcher, 'common-domain/command-dispatcher'
   autoload :CommandHandler, 'common-domain/command-handler'
   autoload :CommandResult, 'common-domain/command-result'
   autoload :Command, 'common-domain/command'
+  autoload :DomainContext, 'common-domain/domain-context'
   autoload :DomainEvent, 'common-domain/domain-event'
   autoload :EventBus, 'common-domain/event-bus'
   module Infrastructure
