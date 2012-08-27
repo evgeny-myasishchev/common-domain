@@ -17,6 +17,24 @@ module CommonDomain
       options = {
         :required_only => true
       }
+      bus = EventBus.new
+      Log.info "Rebuilding read models..."
+      Log.debug "Purging read models..."
+      read_models.for_each do |rm|
+        Log.debug "- purging: #{rm}"
+        rm.purge!
+        
+        #Registering it in the bus for further dispatching
+        bus.register rm
+      end
+      
+      Log.debug "Publishing all events..."
+      event_store.persistence_engine.for_each_commit do |commit|
+        commit.events.each { |event| 
+          bus.publish(event.body) 
+        }
+      end
+      Log.info "Read models rebuilt."
     end
 
     protected

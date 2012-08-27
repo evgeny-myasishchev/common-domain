@@ -20,8 +20,33 @@ describe CommonDomain::DomainContext do
   end
   
   describe "rebuild_read_models" do
+    let(:persistence_engine) { mock(:persistence_engine) }
+    let(:event_store) { mock(:event_store, :persistence_engine => persistence_engine)}
+    let(:event11) { mock(:event11) }
+    let(:event12) { mock(:event12) }
+    let(:event21) { mock(:event21) }
+    let(:event22) { mock(:event22) }
+    let(:all_events) { [event11, event12, event21, event22]}
+    
+    before(:each) do
+      subject.stub(:event_store) { event_store }
+      persistence_engine.should_receive(:for_each_commit) do |&block|
+        block.call mock(:commit1, :events => [mock(:event, :body => event11), mock(:event, :body => event12)])
+        block.call mock(:commit2, :events => [mock(:event, :body => event21), mock(:event, :body => event22)])
+      end
+      register_rmx
+    end
+    
     it "should rebuild read models with all events" do
-      
+      rm1.should_receive(:purge!)
+      rm2.should_receive(:purge!)
+      all_events.each { |e| 
+        rm1.should_receive(:can_handle_message?).with(e).and_return(true)
+        rm1.should_receive(:handle_message).with(e).and_return(true)
+        rm2.should_receive(:can_handle_message?).with(e).and_return(true)
+        rm2.should_receive(:handle_message).with(e).and_return(true)
+      }
+      subject.rebuild_read_models
     end
   end
   
