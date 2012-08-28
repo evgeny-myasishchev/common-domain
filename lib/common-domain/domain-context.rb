@@ -59,12 +59,6 @@ module CommonDomain
         @event_bus   = CommonDomain::EventBus.new
         @read_models = CommonDomain::ReadModel::Registry.new @event_bus
         yield(@read_models)
-        
-        Log.info "Initializing read models..."
-        @read_models.for_each do |read_model|
-          Log.info "- setup: #{read_model}"
-          read_model.setup
-        end
       end
     
       def bootstrap_event_store(&block)

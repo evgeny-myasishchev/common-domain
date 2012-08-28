@@ -70,14 +70,6 @@ describe CommonDomain::DomainContext do
     end
   end
   
-  describe "bootstrap_read_models" do
-    it "should setup each read model" do
-      rm1.should_receive(:setup)
-      rm2.should_receive(:setup)
-      register_rmx
-    end
-  end
-  
   describe "with_dispatch_undispatched_commits" do
     it "should dispatch_undispatched" do
       event_store = mock(:event_store)
