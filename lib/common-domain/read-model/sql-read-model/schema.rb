@@ -10,7 +10,6 @@ class CommonDomain::ReadModel::SqlReadModel
       raise ":identifier must be provided. Schema can not be initialized without an identifier." if @options[:identifier].nil?
       
       @connection  = connection
-      @datasets    = {}
       @table_names = []
       @block       = block
     end
@@ -58,18 +57,7 @@ class CommonDomain::ReadModel::SqlReadModel
         @connection.create_table(name, &block)
       end
       @table_names << name
-      @datasets[key] = @connection[name]
       nil
-    end
-
-    def respond_to?(sym)
-      return true if @datasets.key?(sym)
-      super(sym)
-    end
-
-    def method_missing(meth, *args, &blk)
-      return @datasets[meth] if @datasets.key?(meth)
-      super(meth, *args, &blk)
     end
     
     private

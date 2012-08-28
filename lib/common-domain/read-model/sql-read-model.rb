@@ -1,5 +1,6 @@
 module CommonDomain::ReadModel
   class SqlReadModel < Base
+    autoload :DatasetsRegistry, 'common-domain/read-model/sql-read-model/datasets-registry'
     autoload :Schema, 'common-domain/read-model/sql-read-model/schema'
     
     Log = CommonDomain::Logger.get "common-domain::read-model::sql-read-model"
