@@ -1,5 +1,6 @@
 class CommonDomain::ReadModel::SqlReadModel
   class DatasetsRegistry
+    attr_reader :connection
     def initialize(connection)
       @connection = connection
       @datasets   = {}

@@ -1,6 +1,6 @@
 class CommonDomain::ReadModel::SqlReadModel
   class Schema
-    attr_reader :table_names, :options
+    attr_reader :table_names, :options, :connection
     MetaStoreTableName = :'read-model-schema-infos'
     def initialize(connection, options, &block)
       @options = {

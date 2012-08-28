@@ -17,6 +17,34 @@ describe CommonDomain::ReadModel::SqlReadModel do
   }
   subject { described_class.new connection, ensure_rebuilt: false }
   
+  describe "initialize" do
+    let(:registry) { mock(:registry) }
+    
+    before(:each) do
+      ReadModel::SqlReadModel::DatasetsRegistry.should_receive(:new).with(connection).and_return(registry)
+    end
+    
+    it "should setup registry" do
+      described_class.class_eval do
+        attr_reader :setup_registry_registry
+        def setup_registry(registry)
+          @setup_registry_registry = registry
+        end
+      end
+      subject.setup_registry_registry.should be registry
+    end
+    
+    it "should prepare_statements" do
+      described_class.class_eval do
+        attr_reader :prepare_statements_registry
+        def prepare_statements(registry)
+          @prepare_statements_registry = registry
+        end
+      end
+      subject.prepare_statements_registry.should be registry
+    end
+  end
+  
   describe "setup" do
     before(:each) do
       schema.stub(:meta_store_initialized?) { false }
@@ -53,27 +81,35 @@ describe CommonDomain::ReadModel::SqlReadModel do
   
   describe "setup_schema" do
     it "should assign identifier as read model full name" do
-      described_class.setup_schema {}
+      described_class.setup_schema { |schema| }
       subject.schema.options[:identifier].should eql "CommonDomain::ReadModel::SqlReadModel::SpecReadModel"
     end
     
-    it "should create instance method with passed block" do
+    it "should create instance method setup_schema with passed block" do
       expect { |b| 
         described_class.setup_schema(&b)
         subject.send(:setup_schema, subject.schema)
       }.to yield_with_args(subject.schema)
     end
+    
+    it "should create instance method setup_registry with passed block" do
+      registry = mock(:registry)
+      ReadModel::SqlReadModel::DatasetsRegistry.stub(:new) { registry }
+      expect { |b| 
+        described_class.setup_schema(&b)
+        described_class.new connection
+      }.to yield_successive_args(registry)
+    end
   end
   
   describe "prepare_statements" do
-    before(:each) do
-      described_class.setup_schema {}
-    end
-    it "should create instance method that with passed block" do
+    it "should create instance method with passed block" do
+      registry = mock(:registry)
+      ReadModel::SqlReadModel::DatasetsRegistry.stub(:new) { registry }
       expect { |b| 
         described_class.prepare_statements(&b)
-        subject.send(:prepare_statements, subject.schema)
-      }.to yield_with_args(subject.schema)
+        described_class.new connection
+      }.to yield_with_args(registry)
     end
   end
   
