@@ -77,4 +77,13 @@ describe CommonDomain::DomainContext do
       register_rmx
     end
   end
+  
+  describe "with_dispatch_undispatched_commits" do
+    it "should dispatch_undispatched" do
+      event_store = mock(:event_store)
+      subject.stub(:event_store) {event_store}
+      event_store.should_receive(:dispatch_undispatched)
+      subject.with_dispatch_undispatched_commits
+    end
+  end
 end

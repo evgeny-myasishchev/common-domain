@@ -49,6 +49,10 @@ module CommonDomain
     def with_rebuild_required_read_models
       rebuild_read_models :required_only => true
     end
+    
+    def with_dispatch_undispatched_commits
+      event_store.dispatch_undispatched
+    end
 
     protected
       def bootstrap_read_models(&block)
