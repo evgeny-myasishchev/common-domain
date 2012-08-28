@@ -2,13 +2,13 @@ module CommonDomain::ReadModel
   class Base
     include CommonDomain::Infrastructure::MessagesHandler
     
-    #Setup underlying persistence schema
+    #Setup persistence schema
     def setup
       raise "Not implemented"
     end
     
-    #Recreate underlying persistence schema
-    def purge!
+    #Remove everything related to the read model including schema.
+    def cleanup!
       raise "Not implemented"
     end
     

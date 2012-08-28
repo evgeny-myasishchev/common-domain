@@ -40,15 +40,14 @@ describe CommonDomain::ReadModel::SqlReadModel do
     end
   end
   
-  describe "purge!" do
+  describe "cleanup!" do
     before(:each) do
       subject.should_receive(:schema) { schema }.any_number_of_times
     end
     
-    it "cleanup and setup schema" do
+    it "cleanup schema" do
       schema.should_receive(:cleanup)
-      schema.should_receive(:setup)
-      subject.purge!
+      subject.cleanup!
     end
   end
   

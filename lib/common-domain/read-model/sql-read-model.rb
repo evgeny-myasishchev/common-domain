@@ -23,10 +23,9 @@ module CommonDomain::ReadModel
       prepare_statements(schema)
     end
     
-    def purge!
-      Log.warn "Purging all data..."
+    def cleanup!
+      Log.warn "Read-model schema cleanup..."
       schema.cleanup
-      schema.setup
     end
     
     def rebuild_required?
