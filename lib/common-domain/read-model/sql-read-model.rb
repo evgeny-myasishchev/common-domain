@@ -24,7 +24,6 @@ module CommonDomain::ReadModel
         raise InvalidStateError.new "Looks like schema has already been initialized. Please rebuild your read model instead."
       end
       schema.setup
-      prepare_statements(schema)
     end
     
     def cleanup!

@@ -55,12 +55,6 @@ describe CommonDomain::ReadModel::SqlReadModel do
       subject.setup
     end
     
-    it "should prepare statements" do
-      schema.stub(:setup)
-      subject.should_receive(:prepare_statements).with(schema)
-      subject.setup
-    end
-    
     it "should fail if schema meta_store_initialized? and actual_schema_version is not zero" do
       schema.should_receive(:meta_store_initialized?) { true }
       schema.should_receive(:actual_schema_version) { 10 }
