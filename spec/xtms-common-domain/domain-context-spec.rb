@@ -48,6 +48,26 @@ describe CommonDomain::DomainContext do
       }
       subject.rebuild_read_models
     end
+    
+    context "required only" do
+      it "should rebuild required only read models" do
+        rm1.should_receive(:rebuild_required?) { false }
+        rm2.should_receive(:rebuild_required?) { true }
+        rm2.should_receive(:purge!)
+        all_events.each { |e|
+          rm2.should_receive(:can_handle_message?).with(e).and_return(true)
+          rm2.should_receive(:handle_message).with(e).and_return(true)
+        }
+        subject.rebuild_read_models :required_only => true
+      end
+      
+      it "should not publish all events if no read models needs rebuild" do
+        persistence_engine.rspec_reset
+        rm1.should_receive(:rebuild_required?) { false }
+        rm2.should_receive(:rebuild_required?) { false }
+        subject.rebuild_read_models :required_only => true
+      end
+    end
   end
   
   describe "bootstrap_read_models" do

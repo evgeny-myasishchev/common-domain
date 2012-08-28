@@ -15,26 +15,39 @@ module CommonDomain
     
     def rebuild_read_models(options = {})
       options = {
-        :required_only => true
-      }
-      bus = EventBus.new
-      Log.info "Rebuilding read models..."
-      Log.debug "Purging read models..."
+        :required_only => false
+      }.merge! options
+      bus                   = EventBus.new
+      should_publish_events = false
+      Log.info "Going to rebuild read models. Required only: #{options[:required_only]}..."
       read_models.for_each do |rm|
-        Log.debug "- purging: #{rm}"
-        rm.purge!
+        rebuild_this_one = !options[:required_only] || rm.rebuild_required?
+        if rebuild_this_one
+          Log.warn "Purging read model: #{rm}"
+          rm.purge!
         
-        #Registering it in the bus for further dispatching
-        bus.register rm
+          #Registering it in the bus for further dispatching
+          bus.register rm
+          should_publish_events = true
+        end
       end
       
-      Log.debug "Publishing all events..."
-      event_store.persistence_engine.for_each_commit do |commit|
-        commit.events.each { |event| 
-          bus.publish(event.body) 
-        }
+      if should_publish_events
+        Log.info "Publishing all events..."
+        event_store.persistence_engine.for_each_commit do |commit|
+          commit.events.each { |event| 
+            bus.publish(event.body) 
+          }
+        end
+        Log.info "Read models rebuilt."
+      else
+        Log.info "Rebuild not required this time."
       end
-      Log.info "Read models rebuilt."
+    end
+    
+    # Rebuilds required read models.
+    def with_rebuild_required_read_models
+      rebuild_read_models :required_only => true
     end
 
     protected
