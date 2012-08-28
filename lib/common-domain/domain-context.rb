@@ -65,7 +65,7 @@ module CommonDomain
     
       def bootstrap_event_store(&block)
         raise "Event Bus should be initialized" if event_bus.nil?
-        @event_store = EventStore::Bootstrap.store do |with|
+        @event_store = EventStore.bootstrap do |with|
           # with.log4r_logging
           # with.sql_persistence connection_specification
           yield(with)
