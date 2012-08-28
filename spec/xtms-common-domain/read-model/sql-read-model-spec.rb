@@ -19,6 +19,7 @@ describe CommonDomain::ReadModel::SqlReadModel do
   
   describe "setup" do
     before(:each) do
+      schema.stub(:meta_store_initialized?) { false }
       subject.stub(:schema) { schema }
     end
     it "should setup schema" do
@@ -30,6 +31,12 @@ describe CommonDomain::ReadModel::SqlReadModel do
       schema.stub(:setup)
       subject.should_receive(:prepare_statements).with(schema)
       subject.setup
+    end
+    
+    it "should fail if schema meta_store_initialized? and actual_schema_version is not zero" do
+      schema.should_receive(:meta_store_initialized?) { true }
+      schema.should_receive(:actual_schema_version) { 10 }
+      lambda { subject.setup }.should raise_error(ReadModel::SqlReadModel::InvalidStateError)
     end
   end
   
@@ -79,6 +86,17 @@ describe CommonDomain::ReadModel::SqlReadModel do
     it "should return true if schema needs to be rebuilt" do
       schema.should_receive(:rebuild_required?).and_return(true)
       subject.rebuild_required?.should be_true
+    end
+  end
+  
+  describe "setup_required?" do
+    before(:each) do
+      subject.should_receive(:schema).and_return(schema)
+    end
+    
+    it "should return true if schema needs setup" do
+      schema.should_receive(:setup_required?).and_return(true)
+      subject.setup_required?.should be_true
     end
   end
 end

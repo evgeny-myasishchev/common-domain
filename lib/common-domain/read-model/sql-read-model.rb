@@ -16,6 +16,9 @@ module CommonDomain::ReadModel
     end
     
     def setup
+      if schema.meta_store_initialized? && schema.actual_schema_version != 0
+        raise InvalidStateError.new "Looks like schema has already been initialized. Please rebuild your read model."
+      end
       schema.setup
       prepare_statements(schema)
     end
@@ -28,6 +31,10 @@ module CommonDomain::ReadModel
     
     def rebuild_required?
       schema.rebuild_required?
+    end
+    
+    def setup_required?
+      schema.setup_required?
     end
     
     def schema

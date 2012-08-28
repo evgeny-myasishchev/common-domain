@@ -4,7 +4,7 @@ class CommonDomain::ReadModel::SqlReadModel
     MetaStoreTableName = :'read-model-schema-infos'
     def initialize(connection, options, &block)
       @options = {
-        version: 0,
+        version: 1,
         identifier: nil
       }.merge! options
       raise ":identifier must be provided. Schema can not be initialized without an identifier." if @options[:identifier].nil?
@@ -15,12 +15,24 @@ class CommonDomain::ReadModel::SqlReadModel
       @block       = block
     end
     
-    def rebuild_required?
-      return true unless @connection.table_exists?(MetaStoreTableName)
+    def meta_store_initialized?
+      @connection.table_exists?(MetaStoreTableName)
+    end
+    
+    def actual_schema_version
+      raise "Schema meta store has not been initialized yet. Can not obtain actual schema version." unless meta_store_initialized?
       query = meta_store.filter(identifier: @options[:identifier])
-      return true unless query.count == 1
-      return true unless @options[:version] == query.first[:'schema-version']
-      return false
+      query.count == 1 ? query.first[:'schema-version'] : 0
+    end
+    
+    def setup_required?
+      return true unless meta_store_initialized?
+      actual_schema_version == 0
+    end
+    
+    def rebuild_required?
+      return true unless meta_store_initialized?
+      actual_schema_version != @options[:version]
     end
     
     def setup
