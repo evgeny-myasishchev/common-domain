@@ -13,41 +13,44 @@ module CommonDomain
       yield(self) if block_given?
     end
     
-    def rebuild_read_models(options = {})
+    def initialize_read_models(options = {})
       options = {
-        :required_only => false
+        :cleanup_all => false
       }.merge! options
-      bus                   = EventBus.new
-      should_publish_events = false
-      Log.info "Going to rebuild read models. Required only: #{options[:required_only]}..."
-      read_models.for_each do |rm|
-        rebuild_this_one = !options[:required_only] || rm.rebuild_required?
-        if rebuild_this_one
-          Log.warn "Purging read model: #{rm}"
-          rm.purge!
-        
-          #Registering it in the bus for further dispatching
-          bus.register rm
-          should_publish_events = true
+      bus         = EventBus.new
+      cleanup_all = options[:cleanup_all]
+      Log.info "Initializing read models. Cleanup all option is: #{cleanup_all}"
+      
+      read_models.for_each do |read_model|
+        if cleanup_all || read_model.rebuild_required?
+          Log.info "Cleaning read model: #{read_model}"
+          read_model.cleanup!
+          Log.info "Setup clean read model..."
+          read_model.setup
+          bus.register read_model
+        elsif read_model.setup_required?
+          Log.info "Doing setup of new read model: #{read_model}"
+          read_model.setup
+          bus.register read_model
         end
       end
       
-      if should_publish_events
+      if bus.handlers?
         Log.info "Publishing all events..."
         event_store.persistence_engine.for_each_commit do |commit|
           commit.events.each { |event| 
             bus.publish(event.body) 
           }
         end
-        Log.info "Read models rebuilt."
+        Log.info "Read models initialized."
       else
-        Log.info "Rebuild not required this time."
+        Log.info "Looks like no read models has been initialized this time."
       end
     end
     
     # Rebuilds required read models.
-    def with_rebuild_required_read_models
-      rebuild_read_models :required_only => true
+    def with_read_models_initialization
+      initialize_read_models :cleanup_all => false
     end
     
     def with_dispatch_undispatched_commits

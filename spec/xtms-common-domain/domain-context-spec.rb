@@ -11,15 +11,24 @@ describe CommonDomain::DomainContext do
   subject { described_class.new }
   let(:rm1) { mock(:read_model_one, :setup => nil) }
   let(:rm2) { mock(:read_model_two, :setup => nil) }
+  let(:rm3) { mock(:read_model_three, :setup => nil) }
   
   def register_rmx
     subject.with_read_models do |read_models|
       read_models.register :rm1, rm1
       read_models.register :rm2, rm2
+      read_models.register :rm3, rm3
     end
   end
   
-  describe "rebuild_read_models" do
+  describe "with_read_models_initialization" do
+    it "should initialize_read_models but not clean all" do
+      subject.should_receive(:initialize_read_models).with(:cleanup_all => false) { }
+      subject.with_read_models_initialization
+    end
+  end
+  
+  describe "initialize_read_models" do
     let(:persistence_engine) { mock(:persistence_engine) }
     let(:event_store) { mock(:event_store, :persistence_engine => persistence_engine)}
     let(:event11) { mock(:event11) }
@@ -29,6 +38,10 @@ describe CommonDomain::DomainContext do
     let(:all_events) { [event11, event12, event21, event22]}
     
     before(:each) do
+      rm1.stub(:setup => nil, :cleanup! => nil, :rebuild_required? => false, :setup_required? => false, :can_handle_message? => false)
+      rm2.stub(:setup => nil, :cleanup! => nil, :rebuild_required? => false, :setup_required? => false, :can_handle_message? => false)
+      rm3.stub(:setup => nil, :cleanup! => nil, :rebuild_required? => false, :setup_required? => false, :can_handle_message? => false)
+
       subject.stub(:event_store) { event_store }
       persistence_engine.should_receive(:for_each_commit) do |&block|
         block.call mock(:commit1, :events => [mock(:event, :body => event11), mock(:event, :body => event12)])
@@ -37,35 +50,80 @@ describe CommonDomain::DomainContext do
       register_rmx
     end
     
-    it "should rebuild read models with all events" do
-      rm1.should_receive(:purge!)
-      rm2.should_receive(:purge!)
-      all_events.each { |e| 
-        rm1.should_receive(:can_handle_message?).with(e).and_return(true)
-        rm1.should_receive(:handle_message).with(e).and_return(true)
-        rm2.should_receive(:can_handle_message?).with(e).and_return(true)
-        rm2.should_receive(:handle_message).with(e).and_return(true)
-      }
-      subject.rebuild_read_models
+    it "should not publish events if read models needs rebuild" do
+      persistence_engine.rspec_reset
+      persistence_engine.should_not_receive(:for_each_commit)
+      subject.initialize_read_models cleanup_all: false
     end
     
-    context "required only" do
-      it "should rebuild required only read models" do
-        rm1.should_receive(:rebuild_required?) { false }
-        rm2.should_receive(:rebuild_required?) { true }
-        rm2.should_receive(:purge!)
-        all_events.each { |e|
-          rm2.should_receive(:can_handle_message?).with(e).and_return(true)
-          rm2.should_receive(:handle_message).with(e).and_return(true)
-        }
-        subject.rebuild_read_models :required_only => true
+    context ":cleanup_all => false" do
+      it "should cleanup and setup read models that needs rebuild" do
+        rm1.should_receive(:rebuild_required?) { true }
+        rm3.should_receive(:rebuild_required?) { true }
+        rm1.should_receive(:cleanup!)
+        rm3.should_receive(:cleanup!)
+        rm1.should_receive(:setup)
+        rm3.should_receive(:setup)
+        subject.initialize_read_models cleanup_all: false
       end
       
-      it "should not publish all events if no read models needs rebuild" do
-        persistence_engine.rspec_reset
-        rm1.should_receive(:rebuild_required?) { false }
-        rm2.should_receive(:rebuild_required?) { false }
-        subject.rebuild_read_models :required_only => true
+      it "should dispatch events to all read models that has been rebuilt" do
+        rm1.should_receive(:rebuild_required?) { true }
+        rm3.should_receive(:rebuild_required?) { true }
+        all_events.each { |e| 
+          rm1.should_receive(:can_handle_message?).with(e).and_return(true)
+          rm1.should_receive(:handle_message).with(e).and_return(true)
+          rm3.should_receive(:can_handle_message?).with(e).and_return(true)
+          rm3.should_receive(:handle_message).with(e).and_return(true)
+        }
+        
+        subject.initialize_read_models cleanup_all: false
+      end
+      
+      it "should setup all read models that needs setup" do
+        rm1.should_receive(:setup_required?) { true }
+        rm3.should_receive(:setup_required?) { true }
+        rm1.should_receive(:setup)
+        rm3.should_receive(:setup)
+        subject.initialize_read_models cleanup_all: false
+      end
+      
+      it "should dispatch events to all read models that has been setup" do
+        rm1.should_receive(:setup_required?) { true }
+        rm3.should_receive(:setup_required?) { true }
+
+        all_events.each { |e| 
+          rm1.should_receive(:can_handle_message?).with(e).and_return(true)
+          rm1.should_receive(:handle_message).with(e).and_return(true)
+          rm3.should_receive(:can_handle_message?).with(e).and_return(true)
+          rm3.should_receive(:handle_message).with(e).and_return(true)
+        }
+        
+        subject.initialize_read_models cleanup_all: false
+      end
+    end
+    
+    context ":cleanup_all => true" do
+      it "should cleanup and setup all read models" do
+        rm1.should_receive(:cleanup!)
+        rm2.should_receive(:cleanup!)
+        rm3.should_receive(:cleanup!)
+        rm1.should_receive(:setup)
+        rm2.should_receive(:setup)
+        rm3.should_receive(:setup)
+        subject.initialize_read_models cleanup_all: true
+      end
+      
+      it "should dispatch events to all read models" do
+        all_events.each { |e| 
+          rm1.should_receive(:can_handle_message?).with(e).and_return(true)
+          rm1.should_receive(:handle_message).with(e).and_return(true)
+          rm2.should_receive(:can_handle_message?).with(e).and_return(true)
+          rm2.should_receive(:handle_message).with(e).and_return(true)
+          rm3.should_receive(:can_handle_message?).with(e).and_return(true)
+          rm3.should_receive(:handle_message).with(e).and_return(true)
+        }
+        subject.initialize_read_models cleanup_all: true
       end
     end
   end

@@ -3,6 +3,19 @@ require 'spec-helper'
 describe CommonDomain::Infrastructure::MessagesRouter do
   subject { Class.new { include CommonDomain::Infrastructure::MessagesRouter }.new }
   
+  describe "handlers?" do
+    let(:handler) { mock(:handler) }
+    
+    it "shold return true if there is at least one handler registered" do
+      subject.register(handler)
+      subject.handlers?.should be_true
+    end
+    
+    it "should return false if no handlers registered" do
+      subject.handlers?.should be_false
+    end
+  end
+  
   describe "route" do
     it "should do nothing if no handlers registered" do
       subject.route(mock(:message))

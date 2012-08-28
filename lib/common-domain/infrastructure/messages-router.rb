@@ -16,6 +16,11 @@ module CommonDomain::Infrastructure
       end
     end
     
+    #Returns true if there is at least one handler registered
+    def handlers?
+      registered_handlers.length > 0
+    end
+    
     #Route the message
     def route(message, options = {})
       options = {
