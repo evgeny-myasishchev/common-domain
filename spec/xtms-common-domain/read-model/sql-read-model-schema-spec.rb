@@ -11,7 +11,7 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
   }
   
   describe "initialize" do
-    it "should raise error if identifier is no provided" do
+    it "should raise error if identifier is not provided" do
       lambda { described_class.new connection, {} }.should raise_error(RuntimeError)
     end
     
@@ -218,6 +218,13 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
     
     it "should do nothing if the table already exist" do
       expect { |b| subject.table(:table1, :new_table_name, &b) }.not_to yield_control
+    end
+    
+    it "should record tables into the registry" do
+      subject.datasets_registry.should_receive(:table).with(:table1, :new_table_one)
+      subject.datasets_registry.should_receive(:table).with(:table2, :new_table_two)
+      subject.table(:table1, :new_table_one) {}
+      subject.table(:table2, :new_table_two) {}
     end
   end
 end

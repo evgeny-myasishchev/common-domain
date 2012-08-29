@@ -1,6 +1,6 @@
 class CommonDomain::ReadModel::SqlReadModel
   class Schema
-    attr_reader :options, :connection
+    attr_reader :options, :datasets_registry
     MetaStoreTableName = :'read-model-schema-infos'
     def initialize(connection, options, &block)
       @options = {
@@ -13,6 +13,7 @@ class CommonDomain::ReadModel::SqlReadModel
       @table_names  = []
       @block        = block
       @tables_with_blocks = {} #key: name, value: setup blcok
+      @datasets_registry = DatasetsRegistry.new connection
       yield(self) if block_given?
     end
     
@@ -64,6 +65,7 @@ class CommonDomain::ReadModel::SqlReadModel
     def table(key, name, &block)
       raise "Table name can not be nil for key: #{key}" if name.nil?
       @tables_with_blocks[name] = block
+      @datasets_registry.table(key, name)
       nil
     end
     
