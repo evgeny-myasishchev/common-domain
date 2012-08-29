@@ -1,6 +1,6 @@
 class CommonDomain::ReadModel::SqlReadModel
   class Schema
-    attr_reader :table_names, :options, :connection
+    attr_reader :options, :connection
     MetaStoreTableName = :'read-model-schema-infos'
     def initialize(connection, options, &block)
       @options = {
@@ -9,9 +9,15 @@ class CommonDomain::ReadModel::SqlReadModel
       }.merge! options
       raise ":identifier must be provided. Schema can not be initialized without an identifier." if @options[:identifier].nil?
       
-      @connection  = connection
-      @table_names = []
-      @block       = block
+      @connection   = connection
+      @table_names  = []
+      @block        = block
+      @tables_with_blocks = {} #key: name, value: setup blcok
+      yield(self) if block_given?
+    end
+    
+    def table_names
+      @tables_with_blocks.keys
     end
     
     def meta_store_initialized?
@@ -36,7 +42,12 @@ class CommonDomain::ReadModel::SqlReadModel
     
     def setup
       init_meta_store
-      @block.call(self)
+      @tables_with_blocks.each_pair do |table_name, block|
+        unless @connection.table_exists? table_name
+          Log.debug "Creating table: #{table_name}"
+          @connection.create_table(table_name, &block)
+        end
+      end
       query = meta_store.filter(identifier: @options[:identifier])
       if query.count == 1
         query.update(:'schema-version' => @options[:version])
@@ -52,11 +63,7 @@ class CommonDomain::ReadModel::SqlReadModel
 
     def table(key, name, &block)
       raise "Table name can not be nil for key: #{key}" if name.nil?
-      unless @connection.table_exists? name
-        Log.debug "Creating table: #{name}"
-        @connection.create_table(name, &block)
-      end
-      @table_names << name
+      @tables_with_blocks[name] = block
       nil
     end
     

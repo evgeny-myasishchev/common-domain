@@ -19,6 +19,13 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
       subject = described_class.new(connection, {identifier: 'some-identifier'})
       subject.options[:version].should eql 1
     end
+    
+    it "should call block passed to initializer" do
+      subject = nil
+      expect {|b| 
+        subject = described_class.new connection, {identifier: "schema-1"}, &b
+      }.to yield_with_args(subject)
+    end
   end
   
   describe "meta_store_initialized?" do
@@ -117,14 +124,6 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
       subject.setup
     end
     
-    it "should call block passed to initializer" do
-      subject = nil
-      expect {|b| 
-        subject = described_class.new connection, {identifier: "schema-1"}, &b
-        subject.setup
-      }.to yield_with_args(subject)
-    end
-    
     it "should create special table to record schema versions" do
       connection.should have_table info_table_name
       check_column(connection, info_table_name, :identifier) do |column|
@@ -206,7 +205,12 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
       subject.table_names.should include(:new_table_name2)
     end
     
-    it "should create new table" do
+    it "should not create new table immediatelly" do
+      connection.tables.should_not include :new_table_name
+    end
+    
+    it "should create new table on setup" do
+      subject.setup
       connection.tables.should include :new_table_name
       columns = connection.schema(:new_table_name)
       columns.should have(1).items
