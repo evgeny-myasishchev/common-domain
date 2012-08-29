@@ -58,7 +58,7 @@ class CommonDomain::ReadModel::SqlReadModel
     end
     
     def cleanup
-      table_names.each { |table_name| @connection.drop_table table_name }
+      table_names.each { |table_name| @connection.drop_table? table_name }
       meta_store.filter(:identifier => @options[:identifier]).delete
     end
 

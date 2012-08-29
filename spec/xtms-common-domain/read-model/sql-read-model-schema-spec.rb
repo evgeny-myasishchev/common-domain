@@ -187,6 +187,10 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
     it "should remove all info from info table" do
       connection[info_table_name].where(:identifier => "schema-cleanup-spec").should be_empty
     end
+    
+    it "should not fail if there are already no tables" do
+      lambda { subject.cleanup }.should_not raise_error
+    end
   end
   
   describe "table" do
