@@ -22,8 +22,10 @@ module CommonDomain
       Log.info "Initializing read models. Cleanup all option is: #{cleanup_all}"
       
       read_models.for_each do |read_model|
+        Log.info "Checking read model: #{read_model}"
         if cleanup_all || read_model.rebuild_required?
-          Log.info "Cleaning read model: #{read_model}"
+          Log.info "Read model needs rebuild."
+          Log.info "Cleaning read model..."
           read_model.cleanup!
           Log.info "Setup clean read model..."
           read_model.setup
@@ -44,7 +46,7 @@ module CommonDomain
         end
         Log.info "Read models initialized."
       else
-        Log.info "Looks like no read models has been initialized this time."
+        Log.info "Looks like no read models needs to be initialized this time."
       end
     end
     
