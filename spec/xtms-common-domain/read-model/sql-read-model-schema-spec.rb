@@ -15,6 +15,10 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
       lambda { described_class.new connection, {} }.should raise_error(RuntimeError)
     end
     
+    it "should raise error if version is zero" do
+      lambda { described_class.new connection, {identifier: "schema-1", version: 0} }.should raise_error(RuntimeError)
+    end
+    
     it "should have default version as one" do
       subject = described_class.new(connection, {identifier: 'some-identifier'})
       subject.options[:version].should eql 1

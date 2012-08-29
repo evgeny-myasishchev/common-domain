@@ -51,7 +51,7 @@ module CommonDomain::ReadModel
       # &block to be called with schema
       def setup_schema(options = {}, &block)
         define_method(:schema) do
-          options = { identifier: self.class.name, version: 0 }.merge! options
+          options = { identifier: self.class.name }.merge! options
           @schema ||= Schema.new(@connection, options) do |s|
             __setup_schema__(s)
           end

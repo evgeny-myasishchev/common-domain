@@ -8,6 +8,7 @@ class CommonDomain::ReadModel::SqlReadModel
         identifier: nil
       }.merge! options
       raise ":identifier must be provided. Schema can not be initialized without an identifier." if @options[:identifier].nil?
+      raise ":version must be no-zero value." if @options[:version] == 0
       
       @connection   = connection
       @table_names  = []
