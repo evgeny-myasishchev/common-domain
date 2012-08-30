@@ -10,11 +10,12 @@ class CommonDomain::ReadModel::SqlReadModel
       raise ":identifier must be provided. Schema can not be initialized without an identifier." if @options[:identifier].nil?
       raise ":version must be no-zero value." if @options[:version] == 0
       
-      @connection   = connection
-      @table_names  = []
-      @block        = block
+      @connection         = connection
+      @table_names        = []
+      @block              = block
       @tables_with_blocks = {} #key: name, value: setup blcok
-      @datasets_registry = DatasetsRegistry.new connection
+      @datasets_registry  = DatasetsRegistry.new connection
+      init_meta_store
       yield(self) if block_given?
     end
     
@@ -22,23 +23,16 @@ class CommonDomain::ReadModel::SqlReadModel
       @tables_with_blocks.keys
     end
     
-    def meta_store_initialized?
-      @connection.table_exists?(MetaStoreTableName)
-    end
-    
     def actual_schema_version
-      raise "Schema meta store has not been initialized yet. Can not obtain actual schema version." unless meta_store_initialized?
-      query = meta_store.filter(identifier: @options[:identifier])
+      query = meta_store.filter(identifier: @options[:identifier]).to_a
       query.count == 1 ? query.first[:'schema-version'] : 0
     end
     
     def setup_required?
-      return true unless meta_store_initialized?
       actual_schema_version == 0
     end
     
     def rebuild_required?
-      return true unless meta_store_initialized?
       actual_schema_version != @options[:version]
     end
     

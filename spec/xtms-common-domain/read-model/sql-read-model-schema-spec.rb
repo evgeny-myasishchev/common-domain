@@ -30,30 +30,27 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
         subject = described_class.new connection, {identifier: "schema-1"}, &b
       }.to yield_with_args(subject)
     end
-  end
-  
-  describe "meta_store_initialized?" do
-    before(:each) do
-      subject.setup
-    end
     
-    it "should return true if meta store table exists" do
-      subject.meta_store_initialized?.should be_true
-    end
-    
-    it "should return false if there is no meta store table" do
-      connection.drop_table info_table_name
-      subject.meta_store_initialized?.should be_false
+    it "should create special table to record schema versions" do
+      described_class.new connection, identifier: "schema-1"
+      connection.should have_table info_table_name
+      check_column(connection, info_table_name, :identifier) do |column|
+        column[:allow_null].should be_false
+        column[:primary_key].should be_true
+        column[:type].should be :string
+        column[:db_type].should eql "varchar(200)"
+      end
+      
+      check_column(connection, info_table_name, :'schema-version') do |column|
+        column[:allow_null].should be_false
+        column[:type].should be :integer
+      end
     end
   end
   
   describe "actual_schema_version" do
     before(:each) do
       subject.setup
-    end
-    it "should fail if meta store has not been initialized" do
-      subject.should_receive(:meta_store_initialized?) { false }
-      lambda { subject.actual_schema_version }.should raise_error(RuntimeError)
     end
     
     it "should return zero if there is no corresponding identifier in the meta store" do
@@ -70,11 +67,6 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
   describe "setup_required?" do
     before(:each) do
       subject.setup
-    end
-    
-    it "should return true if there is no schema info table" do
-      connection.drop_table info_table_name
-      subject.setup_required?.should be_true
     end
     
     it "should return true the schema has never been initialized" do
@@ -100,11 +92,6 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
       subject.setup
     end
     
-    it "should return true if there is no schema info table" do
-      connection.drop_table info_table_name
-      subject.rebuild_required?.should be_true
-    end
-    
     it "should return true the schema has never been initialized" do
       connection[info_table_name].delete
       subject.rebuild_required?.should be_true
@@ -126,21 +113,6 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
   describe "setup" do
     before(:each) do
       subject.setup
-    end
-    
-    it "should create special table to record schema versions" do
-      connection.should have_table info_table_name
-      check_column(connection, info_table_name, :identifier) do |column|
-        column[:allow_null].should be_false
-        column[:primary_key].should be_true
-        column[:type].should be :string
-        column[:db_type].should eql "varchar(200)"
-      end
-      
-      check_column(connection, info_table_name, :'schema-version') do |column|
-        column[:allow_null].should be_false
-        column[:type].should be :integer
-      end      
     end
     
     it "should insert new schema version for given identifier" do

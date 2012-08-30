@@ -38,16 +38,15 @@ describe CommonDomain::ReadModel::SqlReadModel do
   
   describe "setup" do
     before(:each) do
-      schema.stub(:meta_store_initialized?) { false }
       subject.stub(:schema) { schema }
     end
     it "should setup schema" do
+      schema.should_receive(:actual_schema_version) { 0 }
       schema.should_receive(:setup)
       subject.setup
     end
     
-    it "should fail if schema meta_store_initialized? and actual_schema_version is not zero" do
-      schema.should_receive(:meta_store_initialized?) { true }
+    it "should fail if actual_schema_version is not zero" do
       schema.should_receive(:actual_schema_version) { 10 }
       lambda { subject.setup }.should raise_error(ReadModel::SqlReadModel::InvalidStateError)
     end
