@@ -52,7 +52,7 @@ module CommonDomain::Infrastructure
       end
       
       def handle_message(message)
-        raise UnknownHandlerError.new "Handler for message '#{message.class}' not found." unless can_handle_message?(message)
+        raise UnknownHandlerError.new "Handler for message '#{message.class}' not found in '#{self}'." unless can_handle_message?(message)
         send(message_handler_name(message.class), message)
       end
     end
