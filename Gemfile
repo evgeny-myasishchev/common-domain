@@ -1,4 +1,4 @@
 source :rubygems
 gemspec
 
-gem 'infora-event-store', :path => File.expand_path("../../infora-event-store", __FILE__)
+gem 'infora-event-store', :git => 'git@git:infora-event-store.git'
