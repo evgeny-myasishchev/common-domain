@@ -1,2 +1,3 @@
 doc/log/*
 spec/log/*
+Gemfile.lock
