@@ -29,12 +29,9 @@ describe CommonDomain::DomainContext do
         },
         'event-store' => {
           event_store_spec: true
-        },
-        'fallback' => {
-          fallback_spec: true
         }
       }
-      subject.with_database_configs(specs, "fallback")
+      subject.with_database_configs(specs)
       subject.read_store_database_config.should eql specs['read-store']
       subject.event_store_database_config.should eql specs['event-store']
     end

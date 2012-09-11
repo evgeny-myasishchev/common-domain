@@ -24,8 +24,11 @@ module CommonDomain
     # If 'event-store' or 'read-store' specifications not found then fallback_config_name attempted
     #
     def with_database_configs(database_configuration, fallback_config_name = 'default')
-      default_db_config            = database_configuration[fallback_config_name].dup
-      default_db_config["adapter"] = "sqlite" if default_db_config["adapter"] == "sqlite3"
+      default_db_config = nil
+      if database_configuration.key?(fallback_config_name)
+        default_db_config            = database_configuration[fallback_config_name].dup
+        default_db_config["adapter"] = "sqlite" if default_db_config["adapter"] == "sqlite3"
+      end
       @event_store_database_config = database_configuration.key?("event-store") ? database_configuration['event-store'] : default_db_config
       @read_store_database_config  = database_configuration.key?("read-store") ? database_configuration["read-store"] : default_db_config
     end
