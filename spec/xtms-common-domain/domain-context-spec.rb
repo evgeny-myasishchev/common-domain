@@ -21,6 +21,59 @@ describe CommonDomain::DomainContext do
     end
   end
   
+  describe "with_database_configuration" do
+    it "should extract and use read-store and event-store connection specifications" do
+      specs = {
+        'read-store' => {
+          read_store_spec: true
+        },
+        'event-store' => {
+          event_store_spec: true
+        },
+        'fallback' => {
+          fallback_spec: true
+        }
+      }
+      subject.with_database_configs(specs, "fallback")
+      subject.read_store_database_config.should eql specs['read-store']
+      subject.event_store_database_config.should eql specs['event-store']
+    end
+    
+    it "should use fallback spec if specific not found" do
+      specs = {
+        'fallback' => {
+          fallback_spec: true
+        }
+      }
+      subject.with_database_configs(specs, 'fallback')
+      subject.read_store_database_config.should eql specs['fallback']
+      subject.event_store_database_config.should eql specs['fallback']
+    end
+    
+    it "should correct sqlite3 adapter name if using fallback config" do
+      specs = {
+        'fallback' => {
+          'adapter' => 'sqlite3',
+          fallback_spec: true
+        }
+      }
+      subject.with_database_configs(specs, 'fallback')
+      subject.read_store_database_config['adapter'].should eql 'sqlite'
+      subject.event_store_database_config['adapter'].should eql 'sqlite'
+    end
+    
+    it "should not modify instance of original fallback spec" do
+      specs = {
+        'fallback' => {
+          'adapter' => 'sqlite3',
+          fallback_spec: true
+        }
+      }
+      subject.with_database_configs(specs, 'fallback')
+      specs['fallback']['adapter'].should eql 'sqlite3'
+    end
+  end
+  
   describe "with_read_models_initialization" do
     it "should initialize_read_models but not clean all" do
       subject.should_receive(:initialize_read_models).with(:cleanup_all => false) { }

@@ -8,9 +8,25 @@ module CommonDomain
     attr_reader :repository
     attr_reader :event_bus
     attr_reader :read_models
+    attr_reader :event_store_database_config
+    attr_reader :read_store_database_config
     
     def initialize(&block)
       yield(self) if block_given?
+    end
+    
+    #
+    # database_configuration expected to have "event-store" and "read-store" connection specifications.
+    # For SQL databases connection specification should be Sequel friendly
+    # See here for details: http://sequel.rubyforge.org/rdoc/files/doc/opening_databases_rdoc.html
+    # 
+    # If 'event-store' or 'read-store' specifications not found then fallback_config_name attempted
+    #
+    def with_database_configs(database_configuration, fallback_config_name = 'default')
+      default_db_config            = database_configuration[fallback_config_name].dup
+      default_db_config["adapter"] = "sqlite" if default_db_config["adapter"] == "sqlite3"
+      @event_store_database_config = database_configuration.key?("event-store") ? database_configuration['event-store'] : default_db_config
+      @read_store_database_config  = database_configuration.key?("read-store") ? database_configuration["read-store"] : default_db_config
     end
     
     def initialize_read_models(options = {})
