@@ -8,6 +8,7 @@ module CommonDomain
     attr_reader :repository
     attr_reader :event_bus
     attr_reader :read_models
+    attr_reader :commands_dispatcher
     attr_reader :event_store_database_config
     attr_reader :read_store_database_config
     
@@ -107,6 +108,10 @@ module CommonDomain
         end
         aggregates_builder = Persistence::AggregatesBuilder.new
         @repository        = Persistence::EventStoreRepository.new(@event_store, aggregates_builder)
+      end
+      
+      def bootstrap_command_handlers(&block)
+        @commands_dispatcher = CommandDispatcher.new(&block)
       end
   end
 end
