@@ -29,6 +29,13 @@ module CommonDomain
       @read_store_database_config  = database_configuration.key?("read-store") ? database_configuration["read-store"] : default_db_config
     end
     
+    def with_event_store
+      # bootstrap_event_store do |with|
+      #   with.log4r_logging
+      # end
+      raise "Override me and do extra setup of the event store. At least logging should be initialized."
+    end
+    
     def initialize_read_models(options = {})
       options = {
         :cleanup_all => false
@@ -83,11 +90,15 @@ module CommonDomain
       end
     
       def bootstrap_event_store(&block)
+        Log.info "Initializing event store..."
+        Log.debug "Using connection specification: #{event_store_database_config}"
+
         raise "Event Bus should be initialized" if event_bus.nil?
         @event_store = EventStore.bootstrap do |with|
           # with.log4r_logging
-          # with.sql_persistence connection_specification
           yield(with)
+          #At this point SQL persistence only is supported.
+          with.sql_persistence event_store_database_config
           with.synchorous_dispatcher do |commit|
             commit.events.each { |event| 
               event_bus.publish(event.body) 
