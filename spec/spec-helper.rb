@@ -9,6 +9,7 @@ require 'rspec'
 require 'sequel'
 require 'event-store'
 require 'common-domain'
+require 'rspec/common-domain'
 require 'log4r'
 
 require 'log4r/yamlconfigurator'
