@@ -8,7 +8,7 @@ module CommonDomain
     attr_reader :repository
     attr_reader :event_bus
     attr_reader :read_models
-    attr_reader :commands_dispatcher
+    attr_reader :command_dispatcher
     attr_reader :event_store_database_config
     attr_reader :read_store_database_config
     
@@ -114,7 +114,7 @@ module CommonDomain
       end
       
       def bootstrap_command_handlers(&block)
-        @commands_dispatcher = CommandDispatcher.new(&block)
+        @command_dispatcher = CommandDispatcher.new(&block)
       end
   end
 end

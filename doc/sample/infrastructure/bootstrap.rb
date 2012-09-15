@@ -2,7 +2,7 @@ module Sample
   class Bootstrap < CommonDomain::Bootstrap
     include CommonDomain
     
-    attr_reader :commands_dispatcher
+    attr_reader :command_dispatcher
     
     def initialize(&block)
       yield(self)
@@ -16,7 +16,7 @@ module Sample
     end
     
     def with_command_handlers
-      @commands_dispatcher = CommandDispatcher.new do |dispatcher|
+      @command_dispatcher = CommandDispatcher.new do |dispatcher|
         dispatcher.register Sample::CommandHandlers::AccountHandlers.new(@repository)
       end
     end
