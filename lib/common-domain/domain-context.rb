@@ -6,13 +6,15 @@ module CommonDomain
     
     attr_reader :event_store
     attr_reader :repository
-    attr_reader :event_bus
+    attr_reader :application_event_bus
+    attr_reader :domain_events_bus
     attr_reader :read_models
     attr_reader :command_dispatcher
     attr_reader :event_store_database_config
     attr_reader :read_store_database_config
     
     def initialize(&block)
+      @application_event_bus = EventBus.new
       yield(self) if block_given?
     end
     
@@ -88,8 +90,8 @@ module CommonDomain
 
     protected
       def bootstrap_read_models(&block)
-        @event_bus   = CommonDomain::EventBus.new
-        @read_models = CommonDomain::ReadModel::Registry.new @event_bus
+        @domain_events_bus = CommonDomain::EventBus.new
+        @read_models       = CommonDomain::ReadModel::Registry.new @domain_events_bus
         yield(@read_models)
       end
     
@@ -97,7 +99,7 @@ module CommonDomain
         Log.info "Initializing event store..."
         Log.debug "Using connection specification: #{event_store_database_config}"
 
-        raise "Event Bus should be initialized" if event_bus.nil?
+        raise "Event Bus should be initialized" if domain_events_bus.nil?
         @event_store = EventStore.bootstrap do |with|
           # with.log4r_logging
           yield(with)
@@ -105,7 +107,7 @@ module CommonDomain
           with.sql_persistence event_store_database_config
           with.synchorous_dispatcher do |commit|
             commit.events.each { |event| 
-              event_bus.publish(event.body) 
+              domain_events_bus.publish(event.body) 
             }
           end
         end
