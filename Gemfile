@@ -1,4 +1,4 @@
 source :rubygems
 gemspec
 
-gem 'infora-event-store', :git => 'git@git:infora-event-store.git'
+gem 'infora-event-store', :git => 'ssh://git@gateway.infora-soft.com:2200/infora-event-store'
