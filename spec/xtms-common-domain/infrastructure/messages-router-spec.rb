@@ -94,5 +94,23 @@ describe CommonDomain::Infrastructure::MessagesRouter do
         subject.route(message_one, ensure_single_handler: true).should eql "handler result"
       end
     end
+
+    context "headers" do
+      it "should route the message with headers" do
+        headers = {header1: "header1", header2: "header2"}
+        message = mock(:message)
+
+        handler_one = mock(:handler_one, :can_handle_message? => true)
+        handler_one.should_receive(:handle_message).with(message, headers)
+
+        handler_two = mock(:handler_two, :can_handle_message? => true)
+        handler_two.should_receive(:handle_message).with(message, headers)
+
+        subject.register handler_one
+        subject.register handler_two
+
+        subject.route message, headers: headers
+      end
+    end
   end
 end

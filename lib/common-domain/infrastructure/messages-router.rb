@@ -25,7 +25,8 @@ module CommonDomain::Infrastructure
     def route(message, options = {})
       options = {
         :fail_if_no_handlers => false,
-        :ensure_single_handler => false
+        :ensure_single_handler => false,
+        :headers => nil
       }.merge!(options)
       ensure_single_handler = options[:ensure_single_handler]
       Log.debug "Routing message: #{message.class}"
@@ -35,9 +36,13 @@ module CommonDomain::Infrastructure
       raise NoHandlersFound.new(message) if handlers.length == 0 && options[:fail_if_no_handlers]
       
       handler_result = nil
+      headers = options[:headers]
+      handle_message = headers.nil? ? 
+        lambda { |handler| handler.handle_message(message) } : 
+        lambda { |handler| handler.handle_message(message, headers) }
       handlers.each { |handler|
         Log.debug " - to handler: #{handler}"
-        handler_result = handler.handle_message(message)
+        handler_result = handle_message.call(handler)
       }
       ensure_single_handler ? handler_result : nil
     end
