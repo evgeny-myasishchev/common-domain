@@ -13,7 +13,7 @@ module CommonDomain::Persistence
       aggregate
     end
     
-    def save(aggregate)
+    def save(aggregate, headers = {})
       Log.debug "Saving aggregate: #{aggregate.aggregate_id}"
       stream = @event_store.open_stream(aggregate.aggregate_id)
       uncommitted_events = aggregate.get_uncommitted_events
@@ -21,7 +21,7 @@ module CommonDomain::Persistence
       uncommitted_events.each { |event|  
         stream.add EventStore::EventMessage.new event
       }
-      stream.commit_changes
+      stream.commit_changes headers
       aggregate.clear_uncommitted_events
       Log.debug "Done..."
       aggregate

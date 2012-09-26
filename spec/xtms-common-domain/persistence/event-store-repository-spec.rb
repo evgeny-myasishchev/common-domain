@@ -39,14 +39,15 @@ describe CommonDomain::Persistence::EventStoreRepository do
     it "should commit all uncommitted events into the event store and clear uncommitted events then" do
       evt1 = mock(:event1)
       evt2 = mock(:event1)
+      headers = { header1: "header-1", header2: "header-2" }
       aggregate.should_receive(:get_uncommitted_events).and_return([evt1, evt2])
       event_store.should_receive(:open_stream).with("aggregate-1").and_return(event_stream)
       event_stream.should_receive(:add).with(EventStore::EventMessage.new evt1)
       event_stream.should_receive(:add).with(EventStore::EventMessage.new evt2)
-      event_stream.should_receive(:commit_changes)
+      event_stream.should_receive(:commit_changes).with(headers)
       aggregate.should_receive(:clear_uncommitted_events)
       
-      subject.save(aggregate).should eql aggregate
+      subject.save(aggregate, headers).should eql aggregate
     end
   end
 end
