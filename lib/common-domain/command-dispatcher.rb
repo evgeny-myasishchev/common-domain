@@ -15,8 +15,10 @@ module CommonDomain
       yield self if block_given?
     end
     
-    def dispatch(command)
-      route(command, ensure_single_handler: true, fail_if_no_handlers: true)
+    def dispatch(command, headers = nil)
+      options = {ensure_single_handler: true, fail_if_no_handlers: true}
+      options[:headers] = headers unless headers.nil?
+      route(command, options)
     end
   end
 end
