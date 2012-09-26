@@ -5,6 +5,7 @@ describe CommonDomain::Infrastructure::MessagesHandler do
   module Messages
     class MessageTwo; end
   end
+  class MessageThree; end  
   class UnhandledMessage; end
   
   let(:subject_class) {
@@ -31,7 +32,7 @@ describe CommonDomain::Infrastructure::MessagesHandler do
     before(:each) do
       subject_class.class_eval do
         attr_reader :message_one_processed, :message_two_processed
-        attr_reader :processed_message
+        attr_reader :processed_message, :headers
         on MessageOne do |message|
           @processed_message = message
           @message_one_processed = true
@@ -39,7 +40,11 @@ describe CommonDomain::Infrastructure::MessagesHandler do
         on Messages::MessageTwo do |message|
           @processed_message = message
           @message_two_processed = true
-        end        
+        end
+        on MessageThree do |message, headers|
+          @processed_message = message
+          @headers = headers
+        end       
       end
     end
     
@@ -73,6 +78,13 @@ describe CommonDomain::Infrastructure::MessagesHandler do
     
     it "should raise error if no handler found" do
       lambda { subject.handle_message UnhandledMessage.new }.should raise_error(CommonDomain::Infrastructure::MessagesHandler::UnknownHandlerError)
+    end
+
+    it "should invoke corresponding handler with headers" do
+      message = MessageThree.new
+      subject.handle_message message, {header1: "header-1", header2: "header-2"}
+      subject.processed_message.should eql message
+      subject.headers.should eql({header1: "header-1", header2: "header-2"})
     end
   end
   

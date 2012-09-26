@@ -13,6 +13,11 @@ module CommonDomain::Infrastructure
   #    on MessageOne do |message|
   #      # message handling logic
   #    end
+  #
+  #    #Optionally handle the message with headers.
+  #    on MessageThree do |message, headers|
+  #      # message handling logic
+  #    end
   # end
   
   # handler = YourMessagesHandlers.new
@@ -51,9 +56,10 @@ module CommonDomain::Infrastructure
         respond_to?(message_handler_name(message.class))
       end
       
-      def handle_message(message)
+      def handle_message(message, headers = {})
         raise UnknownHandlerError.new "Handler for message '#{message.class}' not found in '#{self}'." unless can_handle_message?(message)
-        send(message_handler_name(message.class), message)
+        hadnler_method =  method message_handler_name(message.class)
+        hadnler_method.arity == 1 ? hadnler_method.call(message) : hadnler_method.call(message, headers)
       end
     end
     
