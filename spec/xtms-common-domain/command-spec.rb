@@ -14,6 +14,12 @@ describe CommonDomain::Command do
     cmd.description.should eql "description-1"
   end
   
+  it "should have headers hash" do
+    cmd = Commands::SampleCommand.new
+    cmd.headers.should_not be_nil
+    cmd.headers.should be_instance_of(Hash)
+  end
+  
   describe "from_hash" do
     it "should use class_name param to get command class, instantiate it passing other hash keys as arguments" do
       target = described_class.from_hash(

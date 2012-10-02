@@ -6,11 +6,12 @@ module CommonDomain
   end
 
   class Command
-    attr_reader :aggregate_id
+    attr_reader :aggregate_id, :headers
 
     def initialize(aggregate_id = nil, attributes = {})
       @aggregate_id = aggregate_id
       attributes.each_key { |key| instance_variable_set("@#{key}", attributes[key]) }
+      @headers = {}
     end
 
     class << self
