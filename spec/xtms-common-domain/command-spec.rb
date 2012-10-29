@@ -19,6 +19,14 @@ describe CommonDomain::Command do
     cmd.headers.should_not be_nil
     cmd.headers.should be_instance_of(Hash)
   end
+
+  it "should initialize headers and attributes" do
+    cmd = Commands::SampleCommand.new "aggregate-1", attributes: { name: "name-1", description: "description-1" }, headers: {header1: 'header 1', header2: 'header 2'}
+    cmd.aggregate_id.should eql "aggregate-1"
+    cmd.name.should eql "name-1"
+    cmd.description.should eql "description-1"
+    cmd.headers.should eql(header1: 'header 1', header2: 'header 2')
+  end
   
   describe "from_hash" do
     it "should use class_name param to get command class, instantiate it passing other hash keys as arguments" do

@@ -8,10 +8,11 @@ module CommonDomain
   class Command
     attr_reader :aggregate_id, :headers
 
-    def initialize(aggregate_id = nil, attributes = {})
+    def initialize(aggregate_id = nil, options = {})
       @aggregate_id = aggregate_id
+      attributes = options.key?(:attributes) ? options[:attributes] : options
       attributes.each_key { |key| instance_variable_set("@#{key}", attributes[key]) }
-      @headers = {}
+      @headers = options.key?(:headers) ? options[:headers] : {}
     end
 
     class << self
