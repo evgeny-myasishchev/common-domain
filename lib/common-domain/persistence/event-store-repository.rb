@@ -1,6 +1,6 @@
 module CommonDomain::Persistence
   class EventStoreRepository < Repository
-    Log = CommonDomain::Logger.get("common-domain::persistence")
+    Log = CommonDomain::Logger.get("common-domain::persistence::event-store-repository")
     def initialize(event_store, builder)
       @event_store = event_store
       @builder     = builder
