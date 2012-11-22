@@ -7,6 +7,10 @@ module CommonDomain::Persistence
         raise "Not implemented"
       end
       
+      def add_new(aggregate)
+        raise "Not implemented"
+      end
+      
       def commit_changes(headers = {})
         raise "Not implemented"
       end

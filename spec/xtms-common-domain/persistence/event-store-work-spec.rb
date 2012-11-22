@@ -38,6 +38,39 @@ describe CommonDomain::Persistence::EventStoreRepository::EventStoreWork do
     end
   end
   
+  describe "add_new" do
+    let(:aggregate) { mock(:aggregate, aggregate_id: 'aggregate-77893') }
+    before(:each) do
+      event_store_work.stub(:commit_changes)
+    end
+    
+    it "should add an aggregate to internal structures so it's saved on commit_changes" do
+      subject.add_new aggregate
+      repository.should_receive(:save).with(aggregate)
+      subject.commit_changes
+    end
+    
+    it "should raise error if aggregate_id not assigned yet" do
+      aggregate.stub(:aggregate_id) { nil }
+      lambda { subject.add_new aggregate }.should raise_error("Can not add new aggregate because aggregate_id is not assigned yet.")
+      repository.should_not_receive(:save)
+      subject.commit_changes
+    end
+    
+    it "should raise error if aggregate_id already added" do
+      subject.add_new aggregate
+      lambda { subject.add_new aggregate }.should raise_error("Another aggregate with id 'aggregate-77893' already added.")
+      repository.should_receive(:save).once.with(aggregate)
+      subject.commit_changes
+    end
+    
+    it "should add an aggregate to the same structure so it's returned by geb_by_id" do
+      subject.add_new aggregate
+      repository.should_not_receive(:get_by_id)
+      subject.get_by_id(nil, 'aggregate-77893').should be aggregate
+    end
+  end
+  
   describe "commit_changes" do
     let(:aggregate_1) { mock(:aggregate_1) }
     let(:aggregate_2) { mock(:aggregate_2) }
