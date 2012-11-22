@@ -25,12 +25,9 @@ module CommonDomain::Persistence
     end
     
     def begin_work(headers = {}, &block)
-      Log.debug "Starting new work..."
       work = create_work
       yield(work)
-      Log.debug "Committing work changes..."
       work.commit_changes headers
-      Log.debug "Work changes commited."
       nil
     end
     

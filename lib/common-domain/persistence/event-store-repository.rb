@@ -4,7 +4,9 @@ module CommonDomain::Persistence
     
     class EventStoreWork < AbstractWork
       attr_reader :repository
+      Log = CommonDomain::Logger.get("common-domain::persistence::event-store-work")
       def initialize(event_store, builder)
+        Log.debug "Starting new work..."
         @aggregates = {}
         @work = event_store.begin_work
         @repository = EventStoreRepository.new @work, builder
@@ -24,8 +26,11 @@ module CommonDomain::Persistence
       end
       
       def commit_changes(headers = {})
+        Log.debug "Committing work changes..."
         @aggregates.values.each { |aggregate| @repository.save(aggregate) }
         @work.commit_changes headers
+        Log.debug "Work changes commited."
+        nil
       end
     end
     

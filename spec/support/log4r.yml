@@ -27,3 +27,11 @@ log4r_config:
       outputters:
       - log_file
       # - console #Uncomment this if console output is needed in tests.
+    
+    loggers:
+    - name      : event-store
+      trace     : 'true'
+      outputters:
+      - log_file
+      # - console #Uncomment this if console output is needed in tests.
+      
