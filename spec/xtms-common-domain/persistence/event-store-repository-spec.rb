@@ -54,7 +54,7 @@ describe CommonDomain::Persistence::EventStoreRepository do
   describe "create_work" do
     it "should create and return an instance of EventStoreWork" do
       work = mock(:work)
-      described_class::EventStoreWork.should_receive(:new).with(event_store, builder).and_return(work)
+      CommonDomain::Persistence::EventStoreWork.should_receive(:new).with(event_store, builder).and_return(work)
       subject.send(:create_work).should be work
     end
   end

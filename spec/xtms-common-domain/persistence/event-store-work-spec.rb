@@ -1,6 +1,6 @@
 require 'spec-helper'
 
-describe CommonDomain::Persistence::EventStoreRepository::EventStoreWork do
+describe CommonDomain::Persistence::EventStoreWork do
   let(:event_store_work) { mock(:event_store_work) }
   let(:event_store) { mock(:event_store, begin_work: event_store_work) }
   let(:repository) { mock(:event_store_repository) }
