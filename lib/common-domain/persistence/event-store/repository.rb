@@ -1,5 +1,5 @@
-module CommonDomain::Persistence
-  class EventStoreRepository < Repository
+module CommonDomain::Persistence::EventStore
+  class Repository < CommonDomain::Persistence::Repository
     Log = CommonDomain::Logger.get("common-domain::persistence::event-store-repository")
     
     def initialize(stream_opener, builder)
@@ -30,7 +30,7 @@ module CommonDomain::Persistence
     
     protected
       def create_work
-        EventStoreWork.new @stream_opener, @builder
+        Work.new @stream_opener, @builder
       end
   end
 end

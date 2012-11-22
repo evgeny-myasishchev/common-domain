@@ -16,9 +16,9 @@ describe "Integration - Common Domain - Event Store Work" do
     end
   }
   let(:aggregates_builder) { CommonDomain::Persistence::AggregatesBuilder.new }
-  let(:repository) { CommonDomain::Persistence::EventStoreRepository.new(event_store, aggregates_builder) }
+  let(:repository) { CommonDomain::Persistence::EventStore::Repository.new(event_store, aggregates_builder) }
   
-  subject { CommonDomain::Persistence::EventStoreWork.new event_store, aggregates_builder }
+  subject { CommonDomain::Persistence::EventStore::Work.new event_store, aggregates_builder }
   
   module Evt
     include CommonDomain::DomainEvent::DSL

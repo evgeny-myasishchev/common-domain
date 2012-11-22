@@ -1,12 +1,12 @@
-module CommonDomain::Persistence
-  class EventStoreWork < CommonDomain::Persistence::Repository::AbstractWork
+module CommonDomain::Persistence::EventStore
+  class Work < CommonDomain::Persistence::Repository::AbstractWork
     attr_reader :repository
     Log = CommonDomain::Logger.get("common-domain::persistence::event-store-work")
     def initialize(event_store, builder)
       Log.debug "Starting new work..."
       @aggregates = {}
       @work = event_store.begin_work
-      @repository = EventStoreRepository.new @work, builder
+      @repository = Repository.new @work, builder
     end
 
     def get_by_id(aggregate_class, id)

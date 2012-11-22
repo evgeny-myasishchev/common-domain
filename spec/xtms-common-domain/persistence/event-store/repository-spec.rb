@@ -1,6 +1,6 @@
 require 'spec-helper'
 
-describe CommonDomain::Persistence::EventStoreRepository do
+describe CommonDomain::Persistence::EventStore::Repository do
   let(:builder) { mock(:aggregate_builder) }
   let(:event_stream) { mock(:event_stream, :committed_events => []) }
   let(:event_store) { mock(:event_store, :open_stream => event_stream) }
@@ -52,9 +52,9 @@ describe CommonDomain::Persistence::EventStoreRepository do
   end
   
   describe "create_work" do
-    it "should create and return an instance of EventStoreWork" do
+    it "should create and return an instance of EventStore::Work" do
       work = mock(:work)
-      CommonDomain::Persistence::EventStoreWork.should_receive(:new).with(event_store, builder).and_return(work)
+      CommonDomain::Persistence::EventStore::Work.should_receive(:new).with(event_store, builder).and_return(work)
       subject.send(:create_work).should be work
     end
   end

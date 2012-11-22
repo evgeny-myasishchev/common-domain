@@ -15,8 +15,10 @@ module CommonDomain
   autoload :Logger, 'common-domain/logger'
   module Persistence
     autoload :AggregatesBuilder, 'common-domain/persistence/aggregates-builder'
-    autoload :EventStoreRepository, 'common-domain/persistence/event-store-repository'
-    autoload :EventStoreWork, 'common-domain/persistence/event-store-work'
+    module EventStore
+      autoload :Repository, 'common-domain/persistence/event-store/repository'
+      autoload :Work, 'common-domain/persistence/event-store/work'
+    end
     autoload :Repository, 'common-domain/persistence/repository'
   end
   module ReadModel

@@ -112,7 +112,7 @@ module CommonDomain
           end
         end
         aggregates_builder = Persistence::AggregatesBuilder.new
-        @repository        = Persistence::EventStoreRepository.new(@event_store, aggregates_builder)
+        @repository        = Persistence::EventStore::Repository.new(@event_store, aggregates_builder)
       end
       
       def bootstrap_command_handlers(&block)

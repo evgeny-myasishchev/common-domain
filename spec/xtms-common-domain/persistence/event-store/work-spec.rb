@@ -1,13 +1,13 @@
 require 'spec-helper'
 
-describe CommonDomain::Persistence::EventStoreWork do
+describe CommonDomain::Persistence::EventStore::Work do
   let(:event_store_work) { mock(:event_store_work) }
   let(:event_store) { mock(:event_store, begin_work: event_store_work) }
   let(:repository) { mock(:event_store_repository) }
   let(:builder) { mock(:builder) }
   
   before(:each) do
-    CommonDomain::Persistence::EventStoreRepository.stub(:new) { repository }
+    CommonDomain::Persistence::EventStore::Repository.stub(:new) { repository }
   end
   
   subject { described_class.new event_store, builder }
@@ -15,7 +15,7 @@ describe CommonDomain::Persistence::EventStoreWork do
   describe "initialize" do
     it "should use event_store to begin new event store work and create event store repository with it" do
       event_store.should_receive(:begin_work).and_return(event_store_work)
-      CommonDomain::Persistence::EventStoreRepository.should_receive(:new).
+      CommonDomain::Persistence::EventStore::Repository.should_receive(:new).
         with(event_store_work, builder).and_return(repository)
       subject = described_class.new event_store, builder
       subject.repository.should be repository
