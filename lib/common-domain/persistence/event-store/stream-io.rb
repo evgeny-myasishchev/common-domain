@@ -3,7 +3,7 @@ module CommonDomain::Persistence::EventStore
     Log = CommonDomain::Logger.get("common-domain::persistence::event-store::stream-io")
     
     def flush_changes aggregate, stream_opener, &block
-      Log.debug "Flushing aggregate: #{aggregate.aggregate_id}"
+      Log.debug "Flushing uncommitted events of aggregate '#{aggregate.aggregate_id}' into it's stream..."
       stream = stream_opener.open_stream(aggregate.aggregate_id)
       uncommitted_events = aggregate.get_uncommitted_events
       Log.debug "#{uncommitted_events.length} uncommitted events to flush..."
@@ -12,7 +12,7 @@ module CommonDomain::Persistence::EventStore
       }
       yield(stream) if block_given?
       aggregate.clear_uncommitted_events
-      Log.debug "Done..."
+      Log.debug "Aggregate flushed."
       aggregate
     end
   end

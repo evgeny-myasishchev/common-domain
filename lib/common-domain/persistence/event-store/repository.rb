@@ -17,9 +17,13 @@ module CommonDomain::Persistence::EventStore
     end
     
     def save(aggregate, headers = {})
+      Log.debug "Saving aggregate '#{aggregate.aggregate_id}'..."
       flush_changes aggregate, @stream_opener do |stream|
+        Log.debug "Committing changes..."
         stream.commit_changes headers
       end
+      Log.debug "Aggregate '#{aggregate.aggregate_id}' saved."
+      aggregate
     end
     
     protected
