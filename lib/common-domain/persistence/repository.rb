@@ -26,9 +26,9 @@ module CommonDomain::Persistence
     
     def begin_work(headers = {}, &block)
       work = create_work
-      yield(work)
+      result = yield(work)
       work.commit_changes headers
-      nil
+      result
     end
     
     protected

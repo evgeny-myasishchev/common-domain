@@ -25,5 +25,12 @@ describe CommonDomain::Persistence::Repository do
         w.should_receive(:commit_changes).with(headers)
       end
     end
+
+    it "should return object returned by the block" do
+      result = mock(:result)
+      subject.begin_work do |w|
+        result
+      end.should be result
+    end
   end
 end
