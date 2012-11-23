@@ -25,10 +25,10 @@ module CommonDomain::Persistence::EventStore
     end
 
     def commit_changes(headers = {})
-      Log.debug "Committing work changes..."
+      Log.debug "Committing work changes. Number of affected aggregates: #{@aggregates.length}."
       @aggregates.values.each { |aggregate| flush_changes(aggregate, @work) }
       @work.commit_changes headers
-      Log.debug "Work changes commited."
+      Log.debug "Work changes committed."
       nil
     end
   end
