@@ -31,7 +31,7 @@ module CommonDomain::Infrastructure
     end
     
     module Helpers
-      private
+      protected
         def message_handler_name(message_class)
           "on-#{message_class.name}-message".to_sym
         end
@@ -58,9 +58,13 @@ module CommonDomain::Infrastructure
       
       def handle_message(message, headers = {})
         raise UnknownHandlerError.new "Handler for message '#{message.class}' not found in '#{self}'." unless can_handle_message?(message)
-        hadnler_method =  method message_handler_name(message.class)
-        hadnler_method.arity == 1 ? hadnler_method.call(message) : hadnler_method.call(message, headers)
+        call_handler_method method(message_handler_name(message.class)), message, headers
       end
+      
+      protected
+        def call_handler_method(handler_method, message, headers = {})
+          handler_method.arity == 1 ? handler_method.call(message) : handler_method.call(message, headers)
+        end
     end
     
     def self.included(receiver)
