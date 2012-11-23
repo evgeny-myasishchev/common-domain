@@ -32,22 +32,28 @@ describe CommonDomain::Persistence::EventStore::Repository do
   end
   
   describe "save" do
-    before(:each) do
-      aggregate.stub(:get_uncommitted_events => [], :clear_uncommitted_events => nil)
+    let(:stream) { mock(:stream) }
+    it "should use stream-io to flush aggregate changes" do
+      subject.should be_a_kind_of(CommonDomain::Persistence::EventStore::StreamIO)
+      subject.should_receive(:flush_changes).with(aggregate, event_store).and_return(aggregate)
+      subject.save(aggregate).should be aggregate
     end
     
-    it "should commit all uncommitted events into the event store and clear uncommitted events then" do
-      evt1 = mock(:event1)
-      evt2 = mock(:event1)
-      headers = { header1: "header-1", header2: "header-2" }
-      aggregate.should_receive(:get_uncommitted_events).and_return([evt1, evt2])
-      event_store.should_receive(:open_stream).with("aggregate-1").and_return(event_stream)
-      event_stream.should_receive(:add).with(EventStore::EventMessage.new evt1)
-      event_stream.should_receive(:add).with(EventStore::EventMessage.new evt2)
-      event_stream.should_receive(:commit_changes).with(headers)
-      aggregate.should_receive(:clear_uncommitted_events)
-      
-      subject.save(aggregate, headers).should eql aggregate
+    it "should commit stream on yield" do
+      subject.should_receive(:flush_changes) do |aggregate, opener, &block|
+        stream.should_receive(:commit_changes)
+        block.call(stream)
+      end
+      subject.save(aggregate)
+    end
+    
+    it "should commit stream with headers" do
+      headers = {header: 'header-1'}
+      stream.should_receive(:commit_changes).with(headers)
+      subject.stub(:flush_changes) do |aggregate, opener, &block|
+        block.call(stream)
+      end
+      subject.save(aggregate, headers)
     end
   end
   
