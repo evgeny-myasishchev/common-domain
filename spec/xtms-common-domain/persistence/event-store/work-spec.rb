@@ -44,23 +44,23 @@ describe CommonDomain::Persistence::EventStore::Work do
       event_store_work.stub(:commit_changes)
     end
     
-    it "should add an aggregate to internal structures so it's saved on commit_changes" do
+    it "should add an aggregate to internal structures so it's flushed on commit_changes" do
       subject.add_new aggregate
-      repository.should_receive(:save).with(aggregate)
+      subject.should_receive(:flush_changes).with(aggregate, event_store_work)
       subject.commit_changes
     end
     
     it "should raise error if aggregate_id not assigned yet" do
       aggregate.stub(:aggregate_id) { nil }
       lambda { subject.add_new aggregate }.should raise_error("Can not add new aggregate because aggregate_id is not assigned yet.")
-      repository.should_not_receive(:save)
+      subject.should_not_receive(:flush_changes)
       subject.commit_changes
     end
     
     it "should raise error if aggregate_id already added" do
       subject.add_new aggregate
       lambda { subject.add_new aggregate }.should raise_error("Another aggregate with id 'aggregate-77893' already added.")
-      repository.should_receive(:save).once.with(aggregate)
+      subject.should_receive(:flush_changes).once.with(aggregate, event_store_work)
       subject.commit_changes
     end
     
@@ -79,14 +79,14 @@ describe CommonDomain::Persistence::EventStore::Work do
       repository.stub(:get_by_id).with(anything, 'aggregate-2').and_return(aggregate_2)
       subject.get_by_id(nil, 'aggregate-1')
       subject.get_by_id(nil, 'aggregate-2')
-      
-      repository.stub(:save)
+      subject.stub(:flush_changes)
       event_store_work.stub(:commit_changes)
     end
     
-    it "should use repository to commit changes of all retrieved aggregates and then commit the work of event store" do
-      repository.should_receive(:save).with(aggregate_1)
-      repository.should_receive(:save).with(aggregate_2)
+    it "should use stream-io to flush changes of all retrieved aggregates and then commit the work of event store" do
+      subject.should be_a_kind_of(CommonDomain::Persistence::EventStore::StreamIO)
+      subject.should_receive(:flush_changes).with(aggregate_1, event_store_work)
+      subject.should_receive(:flush_changes).with(aggregate_2, event_store_work)
       event_store_work.should_receive(:commit_changes)
       subject.commit_changes
     end

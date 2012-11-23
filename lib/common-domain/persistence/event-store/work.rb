@@ -1,10 +1,12 @@
 module CommonDomain::Persistence::EventStore
   class Work < CommonDomain::Persistence::Repository::AbstractWork
-    attr_reader :repository
+    include CommonDomain::Persistence::EventStore::StreamIO
     Log = CommonDomain::Logger.get("common-domain::persistence::event-store-work")
+    attr_reader :repository
     def initialize(event_store, builder)
       Log.debug "Starting new work..."
       @aggregates = {}
+      @stream_opener = event_store
       @work = event_store.begin_work
       @repository = Repository.new @work, builder
     end
@@ -24,7 +26,7 @@ module CommonDomain::Persistence::EventStore
 
     def commit_changes(headers = {})
       Log.debug "Committing work changes..."
-      @aggregates.values.each { |aggregate| @repository.save(aggregate) }
+      @aggregates.values.each { |aggregate| flush_changes(aggregate, @work) }
       @work.commit_changes headers
       Log.debug "Work changes commited."
       nil
