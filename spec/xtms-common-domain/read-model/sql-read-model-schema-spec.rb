@@ -28,7 +28,7 @@ describe CommonDomain::ReadModel::SqlReadModel::Schema do
       subject = nil
       expect {|b| 
         subject = described_class.new connection, {identifier: "schema-1"}, &b
-      }.to yield_with_args(subject)
+      }.to yield_with_args(lambda { |arg| arg.should be subject })
     end
     
     it "should create special table to record schema versions" do

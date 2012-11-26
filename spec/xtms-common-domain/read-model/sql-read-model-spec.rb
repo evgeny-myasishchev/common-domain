@@ -70,7 +70,7 @@ describe CommonDomain::ReadModel::SqlReadModel do
         described_class.setup_schema version: 100, &b
         subject = described_class.new connection, ensure_rebuilt: false
         schema = subject.schema
-      }.to yield_with_args(schema)
+      }.to yield_with_args(lambda { |arg| arg.should be schema })
     end
     
     it "should initialize the schema in scope of read model" do
