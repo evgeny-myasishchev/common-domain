@@ -4,11 +4,13 @@ describe CommonDomain::CommandHandler do
   module Messages
     class Dummy
     end
+    class Dummy1
+    end
   end
-  
+  let(:repository) { mock(:repository) }
   subject { Class.new(CommonDomain::CommandHandler) do
     
-  end.new}
+  end.new(repository)}
   
   it "should be a kind of a MessagesHandler" do
     CommonDomain::CommandHandler.new.should be_a_kind_of CommonDomain::Infrastructure::MessagesHandler
@@ -37,5 +39,29 @@ describe CommonDomain::CommandHandler do
     actual_headers.should be expected_headers
   end
   
-  it "should be possible to define message handlers that will be wrapped into begin_work"
+  it "should be possible to define message handlers that will be wrapped into begin_work" do
+    work = mock(:work)
+    msg1 = Messages::Dummy.new
+    msg2 = Messages::Dummy1.new
+    headers = { header: 'header-1'}
+    actual_args = {}
+    subject.class.class_eval do
+      on Messages::Dummy, begin_work: true do |work, message|
+        actual_args = {work: work, message: message}
+      end
+      
+      on Messages::Dummy1, begin_work: true do |work, message, headers|
+        actual_args = {work: work, message: message, headers: headers}
+      end
+    end
+    repository.should_receive(:begin_work).and_return(work)
+    subject.handle_message msg1
+    actual_args.should eql({work: work, message: msg1})
+    
+    repository.should_receive(:begin_work).and_return(work)
+    subject.handle_message msg2, headers
+    actual_args.should eql({work: work, message: msg2, headers: headers})
+  end
+  
+  it "should return message result for wrapped methods"
 end

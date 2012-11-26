@@ -58,11 +58,11 @@ module CommonDomain::Infrastructure
       
       def handle_message(message, headers = {})
         raise UnknownHandlerError.new "Handler for message '#{message.class}' not found in '#{self}'." unless can_handle_message?(message)
-        call_handler_method method(message_handler_name(message.class)), message, headers
+        _invoke_handler_method method(message_handler_name(message.class)), message, headers
       end
       
       protected
-        def call_handler_method(handler_method, message, headers = {})
+        def _invoke_handler_method(handler_method, message, headers = {})
           handler_method.arity == 1 ? handler_method.call(message) : handler_method.call(message, headers)
         end
     end
