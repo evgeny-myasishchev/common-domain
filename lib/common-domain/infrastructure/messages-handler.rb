@@ -33,7 +33,8 @@ module CommonDomain::Infrastructure
     module Helpers
       protected
         def message_handler_name(message_class)
-          "on-#{message_class.name}-message".to_sym
+          normalized_message_name = message_class.name.gsub('::', '_')
+          "on_#{normalized_message_name}_message".to_sym
         end
     end
     

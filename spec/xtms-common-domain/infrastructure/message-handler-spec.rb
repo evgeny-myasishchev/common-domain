@@ -17,8 +17,8 @@ describe CommonDomain::Infrastructure::MessagesHandler do
   
   describe "can_handle_message?" do
     it "should return true if handler method is defined" do
-      subject_class.send(:define_method, :'on-MessageOne-message') {}
-      subject_class.send(:define_method, :'on-Messages::MessageTwo-message') {}
+      subject_class.send(:define_method, :'on_MessageOne_message') {}
+      subject_class.send(:define_method, :'on_Messages_MessageTwo_message') {}
       subject.can_handle_message?(MessageOne.new).should be_true
       subject.can_handle_message?(Messages::MessageTwo.new).should be_true
     end
@@ -104,8 +104,15 @@ describe CommonDomain::Infrastructure::MessagesHandler do
           
         end
       end
-      subject.respond_to?(:'on-MessageOne-message').should be_true
-      subject.respond_to?(:'on-Messages::MessageTwo-message').should be_true
+      subject.respond_to?(:'on_MessageOne_message').should be_true
+      subject.respond_to?(:'on_Messages_MessageTwo_message').should be_true
+    end
+  end
+
+  describe "message_handler_name" do
+    it "should use underscores as namespaces delimiters" do
+      subject.send(:message_handler_name, MessageOne).should eql :on_MessageOne_message
+      subject.send(:message_handler_name, Messages::MessageTwo).should eql :on_Messages_MessageTwo_message
     end
   end
 end
