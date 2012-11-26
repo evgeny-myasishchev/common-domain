@@ -54,14 +54,26 @@ describe CommonDomain::CommandHandler do
         actual_args = {work: work, message: message, headers: headers}
       end
     end
-    repository.should_receive(:begin_work).and_return(work)
+    repository.should_receive(:begin_work).twice do |&block|
+      block.call(work)
+    end
+
     subject.handle_message msg1
     actual_args.should eql({work: work, message: msg1})
     
-    repository.should_receive(:begin_work).and_return(work)
     subject.handle_message msg2, headers
     actual_args.should eql({work: work, message: msg2, headers: headers})
   end
   
-  it "should return message result for wrapped methods"
+  it "should return message result for wrapped methods" do
+    subject.class.class_eval do
+      on Messages::Dummy, begin_work: true do |work, message|
+        return "Dummy result"
+      end
+    end
+    repository.should_receive(:begin_work) do |&block|
+      block.call(mock(:work))
+    end
+    subject.handle_message(Messages::Dummy.new).should eql "Dummy result"
+  end
 end

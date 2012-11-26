@@ -6,12 +6,33 @@ module CommonDomain
       @repository = repository
     end
     
+    # Defines command hanler. 
+    # Samples:
+    # # The most simplest way
+    # on EmployeeHired do |command|
+    # end
+    #
+    # # Handler with headers
+    # on EmployeeHired do |command, headers|
+    # end
+    #
+    # # Handler with headers wrapped into work
+    # on EmployeeHired begin_work: true do |command, headers|
+    # end
+    
     def self.on message_class, options = {}, &block
       super(message_class, &block)
       if options[:begin_work]
-        # TODO: replace original messages handler method
-        # In the method start work, begin_work and call original method with the work.
-        # Also message_handler_name should be corrected to return method name that is really valid method name
+        handler_method_name = message_handler_name message_class
+        handler_method = instance_method handler_method_name
+        define_method handler_method_name do |*args|          
+          bound_handler_method = handler_method.bind(self)
+          repository.begin_work do |work|
+            bound_handler_method.arity == 2 ? 
+              bound_handler_method.call(work, args[0]) :
+              bound_handler_method.call(work, args[0], args[1])
+          end
+        end
       end
     end
   end
