@@ -30,22 +30,19 @@ describe "work-matchers" do
     end
   end
   
-  describe "get_aggregate_by_id" do
+  describe "get_and_return_aggregate" do
     let(:work) { mock(:work) }
     let(:aggregate_class) { mock(:aggregate_class) }
+    let(:aggregate_instance) { mock(:aggregate_instance) }
     
     it "should fail if no aggregate_class or aggregate_id supplied" do
-      lambda { work.should get_aggregate_by_id }.should raise_error("aggregate_class should be supplied")
-      lambda { work.should get_aggregate_by_id(aggregate_class) }.should raise_error("aggregate_id should be supplied")
+      lambda { work.should get_and_return_aggregate }.should raise_error("aggregate_class should be supplied")
+      lambda { work.should get_and_return_aggregate(aggregate_class) }.should raise_error("aggregate_id should be supplied")
     end
     
-    it "should setup get_by_id with aggregate_class and aggregate_id and return setup object" do
-      message_expectation = work.should get_aggregate_by_id(aggregate_class, 'aggregate-100')
-      message_expectation.should be_instance_of(RSpec::Mocks::MessageExpectation)
-      message_expectation.matches?(:get_by_id, aggregate_class, 'aggregate-100').should be_true
-      
-      #The spec will fail without this because the created expectation never called, we're just checking it
-      message_expectation.never
+    it "should setup get_by_id with aggregate_class and aggregate_id and return aggregate_instance" do
+      work.should get_and_return_aggregate(aggregate_class, 'aggregate-100', aggregate_instance)
+      work.get_by_id(aggregate_class, 'aggregate-100').should be aggregate_instance
     end
   end
 end
