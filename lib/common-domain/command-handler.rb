@@ -27,7 +27,8 @@ module CommonDomain
         handler_method = instance_method handler_method_name
         define_method handler_method_name do |*args|          
           bound_handler_method = handler_method.bind(self)
-          repository.begin_work do |work|
+          message = args[0]
+          repository.begin_work message.headers do |work|
             bound_handler_method.arity == 2 ? 
               bound_handler_method.call(work, args[0]) :
               bound_handler_method.call(work, args[0], args[1])

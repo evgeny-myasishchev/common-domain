@@ -3,8 +3,10 @@ require 'spec-helper'
 describe CommonDomain::CommandHandler do
   module Messages
     class Dummy
+      attr_accessor :headers
     end
     class Dummy1
+      attr_accessor :headers
     end
   end
   let(:repository) { mock(:repository) }
@@ -65,6 +67,19 @@ describe CommonDomain::CommandHandler do
     actual_args.should eql({work: work, message: msg2, headers: headers})
   end
   
+  it "should begin_work with headers" do
+    subject.class.class_eval do
+      on Messages::Dummy, begin_work: true do |work, message|
+      end
+    end
+    message = Messages::Dummy.new
+    message.headers = {header: 'header-1'}
+    repository.should_receive(:begin_work).with(message.headers) do |&block|
+      block.call(mock(:work))
+    end
+    subject.handle_message(message)
+  end
+
   it "should return message result for wrapped methods" do
     subject.class.class_eval do
       on Messages::Dummy, begin_work: true do |work, message|
