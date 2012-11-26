@@ -17,9 +17,10 @@ describe "work-matchers" do
     end
     
     it "should setup :begin_work and yield passed block with mocked work when called" do
-      work = repository.should begin_work_with_headers Hash.new
+      headers = {header1: 'header-1', header2: 'header-2'}
+      work = repository.should begin_work_with_headers headers
       work.should be_instance_of RSpec::Mocks::Mock
-      expect { |block| repository.begin_work(Hash.new, &block) }.to yield_with_args(work)
+      expect { |block| repository.begin_work(headers, &block) }.to yield_with_args(work)
     end
     
     it "should make sure that supplied headers match" do
