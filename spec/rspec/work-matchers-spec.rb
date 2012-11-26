@@ -29,4 +29,23 @@ describe "work-matchers" do
       lambda { repository.begin_work({wrong: 'header-100'}) }.should raise_error(RSpec::Expectations::ExpectationNotMetError)
     end
   end
+  
+  describe "get_aggregate_by_id" do
+    let(:work) { mock(:work) }
+    let(:aggregate_class) { mock(:aggregate_class) }
+    
+    it "should fail if no aggregate_class or aggregate_id supplied" do
+      lambda { work.should get_aggregate_by_id }.should raise_error("aggregate_class should be supplied")
+      lambda { work.should get_aggregate_by_id(aggregate_class) }.should raise_error("aggregate_id should be supplied")
+    end
+    
+    it "should setup get_by_id with aggregate_class and aggregate_id and return setup object" do
+      message_expectation = work.should get_aggregate_by_id(aggregate_class, 'aggregate-100')
+      message_expectation.should be_instance_of(RSpec::Mocks::MessageExpectation)
+      message_expectation.matches?(:get_by_id, aggregate_class, 'aggregate-100').should be_true
+      
+      #The spec will fail without this because the created expectation never called, we're just checking it
+      message_expectation.never
+    end
+  end
 end
