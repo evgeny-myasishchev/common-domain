@@ -9,6 +9,7 @@ module CommonDomain::Persistence::EventStore
       @stream_opener = event_store
       @work = event_store.begin_work
       @repository = Repository.new @work, builder
+      super()
     end
 
     def get_by_id(aggregate_class, id)
@@ -29,6 +30,7 @@ module CommonDomain::Persistence::EventStore
       @aggregates.values.each { |aggregate| flush_changes(aggregate, @work) }
       @work.commit_changes headers
       Log.debug "Work changes committed."
+      notify_on_committed
       nil
     end
   end

@@ -3,6 +3,10 @@ module CommonDomain::Persistence
     Log = CommonDomain::Logger.get("common-domain::persistence::repository")
     
     class AbstractWork
+      def initialize
+        @on_committed = []
+      end
+      
       def get_by_id(aggregate_class, id)
         raise "Not implemented"
       end
@@ -14,6 +18,17 @@ module CommonDomain::Persistence
       def commit_changes(headers = {})
         raise "Not implemented"
       end
+      
+      # Register a callback that'll be called right after work changes are commited.
+      def on_committed(&block)
+        @on_committed << block
+      end
+      
+      protected
+        # Invokes all callbacks previously registered with on_committed method
+        def notify_on_committed
+          @on_committed.each { |block| block.call }
+        end
     end
     
     def get_by_id(aggregate_class, id)

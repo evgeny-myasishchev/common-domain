@@ -100,5 +100,10 @@ describe CommonDomain::Persistence::EventStore::Work do
     it "should return nil" do
       subject.commit_changes.should be_nil
     end
+    
+    it "should notify when committed" do
+      subject.should_receive(:notify_on_committed)
+      subject.commit_changes
+    end
   end
 end
