@@ -5,11 +5,18 @@ module CommonDomain
     def initialize(aggregate_id, attributes = {})
       @aggregate_id = aggregate_id
       @version      = 0
-      attributes.each_key { |key| instance_variable_set("@#{key}", attributes[key]) }
+      @attribute_names = attributes.keys
+      @attribute_names.each { |key| instance_variable_set("@#{key}", attributes[key]) }
+    end
+    
+    def attribute(name)
+      instance_variable_get "@#{name}"
     end
     
     def ==(other)
-      aggregate_id == other.aggregate_id && version == other.version
+      aggregate_id == other.aggregate_id && 
+      version == other.version &&
+      @attribute_names.all? { |key| self.attribute(key) == other.attribute(key) }
     end
     
     def eql?(other)
