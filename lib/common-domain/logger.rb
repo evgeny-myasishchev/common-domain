@@ -1,6 +1,41 @@
 module CommonDomain
   class Logger
     
+    #Lasy logger is used to delay real logger retrieval untill it's really needs to be used
+    #This helps to have configured logger even if libs that are using the logger are required before
+    #the logger is configured.
+    class LasyLogger
+      def initialize(name, factory)
+        @name = name
+        @factory = factory
+      end
+    
+      def debug(message)
+        logger.debug(message)
+      end
+    
+      def info(message)
+        logger.info(message)
+      end
+    
+      def warn(message)
+        logger.warn(message)
+      end
+    
+      def error(message)
+        logger.error(message)
+      end
+    
+      def fatal(message)
+        logger.fatal(message)
+      end
+      
+      private
+        def logger
+          @logger ||= @factory.get(@name)
+        end
+    end
+    
     #Uses default ruby logger and writes to STDOUT
     class DefaultFactory
       def get(name)
@@ -23,7 +58,7 @@ module CommonDomain
       attr_writer :factory
       
       def get(name)
-        factory.get(name)
+        LasyLogger.new name, factory
       end
       
       def factory
