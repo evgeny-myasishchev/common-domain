@@ -40,7 +40,7 @@ module CommonDomain
     
     protected
     
-      # This method should be used by subclasses to publish events which are results of aggregate stage change.
+      # This method should be used by subclasses to publish events which are results of aggregate state change.
       # Sample:
       #
       # class Account
