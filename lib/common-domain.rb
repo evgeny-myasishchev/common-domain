@@ -6,6 +6,7 @@ module CommonDomain
   autoload :Command, 'common-domain/command'
   autoload :DomainContext, 'common-domain/domain-context'
   autoload :DomainEvent, 'common-domain/domain-event'
+  autoload :Entity, 'common-domain/entity'
   autoload :EventBus, 'common-domain/event-bus'
   module Infrastructure
     autoload :AggregateId, 'common-domain/infrastructure/aggregate-id'

@@ -56,5 +56,10 @@ module CommonDomain
         @uncommitted_events << event
         self
       end
+      
+      # Instantiates the entity of specified class and returns it
+      def new_entity(entity_class)
+        entity_class.new(self)
+      end
   end
 end

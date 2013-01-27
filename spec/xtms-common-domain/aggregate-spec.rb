@@ -65,6 +65,15 @@ describe CommonDomain::Aggregate do
     end
   end
   
+  describe "new_entity" do
+    it "should create entity instance initialized with self" do
+      entity_class = mock(:entity_class)
+      entity = mock(:entity)
+      entity_class.should_receive(:new).with(subject).and_return(entity)
+      subject.send(:new_entity, entity_class).should be entity
+    end
+  end
+  
   describe "clear_uncommitted_events" do
     it "should empty uncommitted events" do
       account_opened  = mock(:account_opened, :version= => nil)
