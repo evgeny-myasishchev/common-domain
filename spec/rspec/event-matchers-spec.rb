@@ -18,7 +18,7 @@ describe "event-matchers" do
   
   describe "have_uncommitted_events" do
     it "should match if actual has uncommitted events" do
-      aggregate.raise_event Events::AggregateCreated.new "aggregate-id"
+      aggregate.raise_event Events::AggregateCreated.new "aggregate-id", 'name', 'descr'
       aggregate.should have_uncommitted_events
     end
     
@@ -33,8 +33,8 @@ describe "event-matchers" do
     end
     
     it "should provide failure message for should_not" do
-      aggregate.raise_event Events::AggregateCreated.new "aggregate-id"
-      aggregate.raise_event Events::AggregateCreated.new "aggregate-id"
+      aggregate.raise_event Events::AggregateCreated.new "aggregate-id", 'name', 'descr'
+      aggregate.raise_event Events::AggregateCreated.new "aggregate-id", 'name', 'descr'
       matcher = have_uncommitted_events
       matcher.matches? aggregate
       matcher.failure_message_for_should_not.should == %(expected that an aggregate "#{aggregate}" has no uncommitted events\ngot: 2)
@@ -58,7 +58,7 @@ describe "event-matchers" do
   
   describe "have_one_uncommitted_event" do
     it "should match if actual has one uncommitted event of specified kind" do
-      aggregate.raise_event Events::AggregateCreated.new "aggregate-1"
+      aggregate.raise_event Events::AggregateCreated.new "aggregate-1", 'name', 'descr'
       aggregate.should have_one_uncommitted_event Events::AggregateCreated, aggregate_id: "aggregate-1"
     end
     
@@ -72,8 +72,8 @@ describe "event-matchers" do
     end
     
     it "should not match if actual has more than one uncommitted event" do
-      aggregate.raise_event Events::AggregateCreated.new "aggregate-1"
-      aggregate.raise_event Events::AggregateCreated.new "aggregate-1"
+      aggregate.raise_event Events::AggregateCreated.new "aggregate-1", 'name', 'descr'
+      aggregate.raise_event Events::AggregateCreated.new "aggregate-1", 'name', 'descr'
       aggregate.should_not have_one_uncommitted_event
     end
     
@@ -84,15 +84,15 @@ describe "event-matchers" do
     
     describe "failure_message_for_should" do
       it "should be specific if number of uncommitted events is not one" do
-        aggregate.raise_event Events::AggregateCreated.new "aggregate-1"
-        aggregate.raise_event Events::AggregateCreated.new "aggregate-1"
+        aggregate.raise_event Events::AggregateCreated.new "aggregate-1", 'name', 'descr'
+        aggregate.raise_event Events::AggregateCreated.new "aggregate-1", 'name', 'descr'
         matcher = have_one_uncommitted_event
         matcher.matches? aggregate
         matcher.failure_message_for_should.should eql %(expected: aggregate "#{aggregate}" has 1 uncommitted event\ngot: 2)
       end
       
       it "should be specific if event type is different" do
-        aggregate.raise_event Events::AggregateCreated.new "aggregate-1"
+        aggregate.raise_event Events::AggregateCreated.new "aggregate-1", 'name', 'descr'
         matcher = have_one_uncommitted_event Events::AggregateRemoved
         matcher.matches? aggregate
         matcher.failure_message_for_should.should eql %(expected that the event to be an instance of Events::AggregateRemoved but got Events::AggregateCreated)
