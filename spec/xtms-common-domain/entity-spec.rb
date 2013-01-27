@@ -1,11 +1,22 @@
 require 'spec-helper'
 
 describe CommonDomain::Entity do
-  let(:aggregate) { mock(:aggregate) }
+  let(:aggregate) { mock(:aggregate, aggregate_id: 'aggregate-220') }
   subject { described_class.new aggregate }
   
   it "should be a messages handler" do
     subject.should be_a CommonDomain::Infrastructure::MessagesHandler
+  end
+  
+  it "should have entity_id attribute initialized" do
+    subject.entity_id.should be_nil
+  end
+  
+  describe "initializer" do
+    it "should assign aggregate and aggregate_id" do
+      subject.aggregate.should be aggregate
+      subject.aggregate_id.should eql 'aggregate-220'
+    end
   end
   
   describe "raise_event" do
