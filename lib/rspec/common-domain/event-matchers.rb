@@ -49,7 +49,23 @@ end
 
 
 RSpec::Matchers.define :raise_event do |event|
-  match do |aggregate|
+  match_for_should do |aggregate|
     aggregate.should_receive(:raise_event).with(event)
+  end
+  
+  match_for_should_not do |aggregate|
+    event.nil? ? aggregate.should_not_receive(:raise_event) : 
+      aggregate.should_not_receive(:raise_event).with(event)
+  end
+end
+
+RSpec::Matchers.define :apply_event do |event|
+  match_for_should do |aggregate|
+    aggregate.should_receive(:apply_event).with(event)
+  end
+  
+  match_for_should_not do |aggregate|
+    event.nil? ? aggregate.should_not_receive(:apply_event) : 
+      aggregate.should_not_receive(:apply_event).with(event)
   end
 end

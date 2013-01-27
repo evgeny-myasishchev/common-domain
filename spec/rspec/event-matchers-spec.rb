@@ -54,6 +54,50 @@ describe "event-matchers" do
       }.should raise_error(RSpec::Mocks::MockExpectationError)
       aggregate.rspec_reset
     end
+    
+    it "should setup a negative matcher for should_not" do
+      aggregate.should_not raise_event Events::AggregateCreated.new("aggregate-1", 'Name 1', 'Description 1')
+      lambda { 
+        aggregate.send(:raise_event, Events::AggregateCreated.new("aggregate-1", 'Name 1', 'Description 1'))
+      }.should raise_error(RSpec::Mocks::MockExpectationError)
+    end
+    
+    it "should setup a negative matcher without any arg if no event supplied" do
+      aggregate.should_not raise_event
+      lambda { 
+        aggregate.send(:raise_event, Events::AggregateCreated.new("aggregate-1", 'Name 1', 'Description 1'))
+      }.should raise_error(RSpec::Mocks::MockExpectationError)
+    end
+  end
+  
+  
+  describe "apply_event" do
+    it "should setup a apply_event expectation" do
+      aggregate.should apply_event Events::AggregateCreated.new("aggregate-1", 'Name 1', 'Description 1')
+      aggregate.send(:apply_event, Events::AggregateCreated.new("aggregate-1", 'Name 1', 'Description 1'))
+    end
+    
+    it "should fail if the events does not match" do
+      aggregate.should apply_event Events::AggregateCreated.new("aggregate-1", 'Name 1', 'Description 1')
+      lambda {
+        aggregate.send(:apply_event, Events::AggregateCreated.new("aggregate-2", 'Name 2', 'Description 2'))
+      }.should raise_error(RSpec::Mocks::MockExpectationError)
+      aggregate.rspec_reset
+    end
+    
+    it "should setup a negative matcher for should_not" do
+      aggregate.should_not apply_event Events::AggregateCreated.new("aggregate-1", 'Name 1', 'Description 1')
+      lambda { 
+        aggregate.send(:apply_event, Events::AggregateCreated.new("aggregate-1", 'Name 1', 'Description 1'))
+      }.should raise_error(RSpec::Mocks::MockExpectationError)
+    end
+    
+    it "should setup a negative matcher without any arg if no event supplied" do
+      aggregate.should_not apply_event
+      lambda { 
+        aggregate.send(:apply_event, Events::AggregateCreated.new("aggregate-1", 'Name 1', 'Description 1'))
+      }.should raise_error(RSpec::Mocks::MockExpectationError)
+    end
   end
   
   describe "have_one_uncommitted_event" do
