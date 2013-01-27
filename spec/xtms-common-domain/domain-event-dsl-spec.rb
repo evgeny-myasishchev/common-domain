@@ -39,6 +39,11 @@ describe CommonDomain::DomainEvent::DSL do
       instance = subject::AccountRemoved.new "aggregate-100"
       instance.aggregate_id.should eql "aggregate-100"
     end
+    
+    it "should fail to initialize if number of attributes is different than declared" do
+      lambda { subject::AccountCreated.new "aggregate-100" }.should raise_error("Expected 3 arguments, got 1")
+      lambda { subject::AccountCreated.new "aggregate-100", 'hello' }.should raise_error("Expected 3 arguments, got 2")
+    end
   end
   
   describe "events_group" do
