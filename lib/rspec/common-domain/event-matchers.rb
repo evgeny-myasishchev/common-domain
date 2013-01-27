@@ -46,3 +46,10 @@ RSpec::Matchers.define :have_uncommitted_events do
     %(expected that an aggregate "#{actual}" has no uncommitted events\ngot: #{actual.get_uncommitted_events.length})
   end
 end
+
+
+RSpec::Matchers.define :raise_event do |event|
+  match do |aggregate|
+    aggregate.should_receive(:raise_event).with(event)
+  end
+end

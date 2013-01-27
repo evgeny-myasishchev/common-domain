@@ -41,6 +41,21 @@ describe "event-matchers" do
     end
   end
   
+  describe "raise_event" do
+    it "should setup a raise_event expectation" do
+      aggregate.should raise_event Events::AggregateCreated.new("aggregate-1", 'Name 1', 'Description 1')
+      aggregate.send(:raise_event, Events::AggregateCreated.new("aggregate-1", 'Name 1', 'Description 1'))
+    end
+    
+    it "should fail if the events does not match" do
+      aggregate.should raise_event Events::AggregateCreated.new("aggregate-1", 'Name 1', 'Description 1')
+      lambda {
+        aggregate.send(:raise_event, Events::AggregateCreated.new("aggregate-2", 'Name 2', 'Description 2'))
+      }.should raise_error(RSpec::Mocks::MockExpectationError)
+      aggregate.rspec_reset
+    end
+  end
+  
   describe "have_one_uncommitted_event" do
     it "should match if actual has one uncommitted event of specified kind" do
       aggregate.raise_event Events::AggregateCreated.new "aggregate-1"
