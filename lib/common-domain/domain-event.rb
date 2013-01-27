@@ -51,7 +51,7 @@ module CommonDomain
             attr_reader *args
             define_method :initialize do |aggregate_id, *values|
               attributes = {}
-              raise "Expected #{args.length + 1} arguments, got #{values.length + 1}" unless args.length == values.length
+              raise "Failed to instantiate the event. Expected #{args.length + 1} arguments, got #{values.length + 1}" unless args.length == values.length
               args.each_index { |index|
                 attributes[args[index]] = values[index]
               }

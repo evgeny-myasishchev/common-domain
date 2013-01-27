@@ -41,8 +41,8 @@ describe CommonDomain::DomainEvent::DSL do
     end
     
     it "should fail to initialize if number of attributes is different than declared" do
-      lambda { subject::AccountCreated.new "aggregate-100" }.should raise_error("Expected 3 arguments, got 1")
-      lambda { subject::AccountCreated.new "aggregate-100", 'hello' }.should raise_error("Expected 3 arguments, got 2")
+      lambda { subject::AccountCreated.new "aggregate-100" }.should raise_error("Failed to instantiate the event. Expected 3 arguments, got 1")
+      lambda { subject::AccountCreated.new "aggregate-100", 'hello' }.should raise_error("Failed to instantiate the event. Expected 3 arguments, got 2")
     end
   end
   
