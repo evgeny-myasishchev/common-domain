@@ -41,6 +41,13 @@ module CommonDomain::Infrastructure
     module ClassMethods
       include Helpers
       protected
+        def on_any *message_classes, &block
+          if message_classes.length == 1 && message_classes[0].is_a?(Enumerable)
+            message_classes = message_classes[0]
+          end
+          message_classes.each { |message_class| on message_class, &block  }
+        end
+          
         def on message_class, &block
           handler_method = message_handler_name(message_class)
           if instance_methods.include?(handler_method)

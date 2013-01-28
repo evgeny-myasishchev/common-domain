@@ -108,6 +108,21 @@ describe CommonDomain::Infrastructure::MessagesHandler do
       subject.respond_to?(:'on_Messages_MessageTwo_message').should be_true
     end
   end
+  
+  describe "on_any" do
+    let(:block) { lambda { |event|  }}
+    it "should perform on for each message class" do
+      subject_class.should_receive(:on).with(MessageOne, &block)
+      subject_class.should_receive(:on).with(Messages::MessageTwo, &block)
+      subject_class.send(:on_any, MessageOne, Messages::MessageTwo, &block)
+    end
+    
+    it "should perform on for each message class if messages are passed as a single arg array" do
+      subject_class.should_receive(:on).with(MessageOne, &block)
+      subject_class.should_receive(:on).with(Messages::MessageTwo, &block)
+      subject_class.send(:on_any, [MessageOne, Messages::MessageTwo], &block)
+    end
+  end
 
   describe "message_handler_name" do
     it "should use underscores as namespaces delimiters" do
