@@ -72,6 +72,13 @@ describe CommonDomain::Aggregate do
       entity_class.should_receive(:new).with(subject).and_return(entity)
       subject.send(:new_entity, entity_class).should be entity
     end
+    
+    it "should also pass all arguments when creating the entity" do
+      entity_class = mock(:entity_class)
+      entity = mock(:entity)
+      entity_class.should_receive(:new).with(subject, 'arg-1', 'arg-2').and_return(entity)
+      subject.send(:new_entity, entity_class, 'arg-1', 'arg-2').should be entity
+    end
   end
   
   describe "clear_uncommitted_events" do

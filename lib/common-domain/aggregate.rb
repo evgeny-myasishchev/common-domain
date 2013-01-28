@@ -58,8 +58,8 @@ module CommonDomain
       end
       
       # Instantiates the entity of specified class and returns it
-      def new_entity(entity_class)
-        entity_class.new(self)
+      def new_entity(entity_class, *args)
+        entity_class.new(self, *args)
       end
   end
 end
