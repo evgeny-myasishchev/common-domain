@@ -15,7 +15,7 @@ module CommonDomain
     
     protected
       def raise_event(event)
-        aggregate.raise_event(event)
+        aggregate.send(:raise_event, event)
       end
   end
 end
