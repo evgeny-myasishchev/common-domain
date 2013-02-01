@@ -2,7 +2,7 @@ require 'spec-helper'
 
 describe CommonDomain::Persistence::EventStore::Repository do
   let(:builder) { mock(:aggregate_builder) }
-  let(:event_stream) { mock(:event_stream, :committed_events => []) }
+  let(:event_stream) { mock(:event_stream, new_stream?: false, :committed_events => []) }
   let(:event_store) { mock(:event_store, :open_stream => event_stream) }
   let(:aggregate) { mock("aggregate", :aggregate_id => "aggregate-1") }
   
@@ -28,6 +28,12 @@ describe CommonDomain::Persistence::EventStore::Repository do
       aggregate.should_receive(:apply_event).with(event1.body)
       aggregate.should_receive(:apply_event).with(event2.body)
       subject.get_by_id(aggregate_class, "aggregate-1").should eql aggregate
+    end
+    
+    it "should raise aggregate not found error if trying to get not existing aggregate" do
+      event_stream.should_receive(:new_stream?).and_return(true)
+      event_store.should_receive(:open_stream).with('aggregate-1').and_return(event_stream)
+      lambda { subject.get_by_id(aggregate_class, "aggregate-1") }.should raise_error(CommonDomain::Persistence::AggregateNotFoundError)
     end
   end
   

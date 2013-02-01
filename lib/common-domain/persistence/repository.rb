@@ -7,6 +7,7 @@ module CommonDomain::Persistence
         @on_committed = []
       end
       
+      # Returns the aggregate. Raises AggregateNotFoundError for not existing aggregates.
       def get_by_id(aggregate_class, id)
         raise "Not implemented"
       end

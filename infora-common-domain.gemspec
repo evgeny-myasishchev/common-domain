@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'infora-common-domain'
-  s.version     = '0.0.1a'
+  s.version     = '0.0.2a'
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Evgeny Myasishchev', 'Vladimir Ikryanov']
   s.email       = ['info@infora.com.ua']
@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.files       = Dir["lib/**/*"]
   s.test_files  = Dir['spec/**/*']
   
-  s.add_dependency 'infora-event-store'
+  s.add_dependency 'infora-event-store', '>= 0.0.2a'
   
   s.add_development_dependency 'log4r'
   s.add_development_dependency 'rspec'

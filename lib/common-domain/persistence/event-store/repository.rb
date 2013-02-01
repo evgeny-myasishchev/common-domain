@@ -6,12 +6,13 @@ module CommonDomain::Persistence::EventStore
     
     def initialize(stream_opener, builder)
       @stream_opener = stream_opener
-      @builder     = builder
+      @builder = builder
     end
     
     def get_by_id(aggregate_class, aggregate_id)
+      stream = @stream_opener.open_stream(aggregate_id)
+      raise CommonDomain::Persistence::AggregateNotFoundError.new(aggregate_class, aggregate_id) if stream.new_stream?
       aggregate = @builder.build(aggregate_class, aggregate_id)
-      stream    = @stream_opener.open_stream(aggregate_id)
       stream.committed_events.each { |event| aggregate.apply_event(event.body) }
       aggregate
     end
