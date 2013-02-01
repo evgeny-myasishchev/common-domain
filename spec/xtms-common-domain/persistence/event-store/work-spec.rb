@@ -22,6 +22,27 @@ describe CommonDomain::Persistence::EventStore::Work do
     end
   end
   
+  describe "exists?" do
+    before(:each) do
+      repository.stub(:exists?) { false }
+    end
+    
+    it "should return true the aggregate exists in the repository" do
+      repository.should_receive(:exists?).with('aggregate-392').and_return(true)
+      subject.exists?('aggregate-392').should be_true
+    end
+    
+    it "should return true if the aggregate added as a new" do
+      aggregate = mock(:aggregate, aggregate_id: 'aggregate-392')
+      subject.add_new aggregate
+      subject.exists?('aggregate-392').should be_true
+    end
+    
+    it "should return false if the aggregate does not eixst" do
+      subject.exists?('aggregate-392').should be_false
+    end
+  end
+  
   describe "get_by_id" do
     let(:aggregate) { mock(:aggregate) }
     let(:aggregate_class) { mock(:aggregate_class) }

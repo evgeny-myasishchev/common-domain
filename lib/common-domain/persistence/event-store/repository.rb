@@ -9,6 +9,10 @@ module CommonDomain::Persistence::EventStore
       @builder = builder
     end
     
+    def exists?(aggregate_id)
+      @event_store.stream_exists?(aggregate_id)
+    end
+    
     def get_by_id(aggregate_class, aggregate_id)
       stream = @event_store.open_stream(aggregate_id)
       raise CommonDomain::Persistence::AggregateNotFoundError.new(aggregate_class, aggregate_id) if stream.new_stream?

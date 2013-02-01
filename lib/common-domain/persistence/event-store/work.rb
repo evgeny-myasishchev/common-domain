@@ -11,6 +11,11 @@ module CommonDomain::Persistence::EventStore
       @repository = Repository.new @work, builder
       super()
     end
+    
+    def exists?(id)
+      return true if @aggregates.key?(id)
+      return @repository.exists?(id)
+    end
 
     def get_by_id(aggregate_class, id)
       # We don't maintain identify map using aggregate_class + id because id is normally a guid which is unlikelly to duplicate

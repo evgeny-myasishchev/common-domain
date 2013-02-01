@@ -53,4 +53,14 @@ describe "Integration - Common Domain - Event Store Repository" do
     
     dispatched_events.should have(2).items
   end
+  
+  it "should check if aggregate exists" do
+    subject.exists?('employee-1').should be_false
+    
+    emp = Domain::Aggregates::Employee.new
+    emp.register 'employee-1'
+    subject.save emp
+    
+    subject.exists?('employee-1').should be_true
+  end
 end

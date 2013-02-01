@@ -63,4 +63,23 @@ describe "Integration - Common Domain - Event Store Work" do
     emp2_stream.committed_events.should have(1).items
     emp2_stream.committed_events[0].body.should be_instance_of Domain::Events::EmployeeRegistered
   end
+  
+  describe "exists?" do
+    it "should return if newly added aggregate exists" do
+      subject.exists?('employee-1').should be_false
+    
+      emp = Domain::Aggregates::Employee.new
+      emp.register 'employee-1'
+      subject.add_new emp
+    
+      subject.exists?('employee-1').should be_true
+    end
+    
+    it "should check if already persisted aggregate exists" do
+      emp = Domain::Aggregates::Employee.new
+      emp.register 'employee-1'
+      repository.save emp
+      subject.exists?('employee-1').should be_true
+    end
+  end
 end

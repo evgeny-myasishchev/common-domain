@@ -8,6 +8,13 @@ describe CommonDomain::Persistence::EventStore::Repository do
   
   subject { described_class.new event_store, builder }
   
+  describe "exists?" do
+    it "should return true if stream exists" do
+      event_store.should_receive(:stream_exists?).with('aggregate-320').and_return(true)
+      subject.exists?('aggregate-320').should be_true
+    end
+  end
+  
   describe "get_by_id" do
     let(:aggregate_class) { mock("aggregate-class") }
     
