@@ -45,6 +45,7 @@ module RSpec::Matchers::CommonDomainMatchers
 
     match do |repo_or_work|    
       repo_or_work.should_receive(:get_by_id).with(aggregate_class, aggregate_id).and_return(aggregate)
+      true
     end
   end
 end
