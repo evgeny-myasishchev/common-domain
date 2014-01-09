@@ -9,7 +9,7 @@ describe CommonDomain::CommandHandler do
       attr_accessor :headers
     end
   end
-  let(:repository) { mock(:repository) }
+  let(:repository) { double(:repository) }
   subject { Class.new(CommonDomain::CommandHandler) do
     
   end.new(repository)}
@@ -42,7 +42,7 @@ describe CommonDomain::CommandHandler do
   end
   
   it "should be possible to define message handlers that will be wrapped into begin_work" do
-    work = mock(:work)
+    work = double(:work)
     msg1 = Messages::Dummy.new
     msg2 = Messages::Dummy1.new
     headers = { header: 'header-1'}
@@ -75,7 +75,7 @@ describe CommonDomain::CommandHandler do
     message = Messages::Dummy.new
     message.headers = {header: 'header-1'}
     repository.should_receive(:begin_work).with(message.headers) do |&block|
-      block.call(mock(:work))
+      block.call(double(:work))
     end
     subject.handle_message(message)
   end
@@ -87,7 +87,7 @@ describe CommonDomain::CommandHandler do
       end
     end
     repository.should_receive(:begin_work) do |&block|
-      block.call(mock(:work))
+      block.call(double(:work))
     end
     subject.handle_message(Messages::Dummy.new).should eql "Dummy result"
   end

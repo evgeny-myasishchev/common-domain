@@ -4,7 +4,7 @@ describe CommonDomain::Infrastructure::MessagesRouter do
   subject { Class.new { include CommonDomain::Infrastructure::MessagesRouter }.new }
   
   describe "handlers?" do
-    let(:handler) { mock(:handler) }
+    let(:handler) { double(:handler) }
     
     it "shold return true if there is at least one handler registered" do
       subject.register(handler)
@@ -18,20 +18,20 @@ describe CommonDomain::Infrastructure::MessagesRouter do
   
   describe "route" do
     it "should do nothing if no handlers registered" do
-      subject.route(mock(:message))
+      subject.route(double(:message))
     end
     
     it "should route the message to each handler that can handle it" do
-      message_one = mock(:message_one)
-      message_two = mock(:message_two)
+      message_one = double(:message_one)
+      message_two = double(:message_two)
       
-      handler_one = mock(:handler_one)
+      handler_one = double(:handler_one)
       handler_one.should_receive(:can_handle_message?).with(message_one).and_return(true)
       handler_one.should_receive(:handle_message).with(message_one)
       handler_one.should_receive(:can_handle_message?).with(message_two).and_return(true)
       handler_one.should_receive(:handle_message).with(message_two)
       
-      handler_two = mock(:handler_one_two)
+      handler_two = double(:handler_one_two)
       handler_two.should_receive(:can_handle_message?).with(message_one).and_return(true)
       handler_two.should_receive(:handle_message).with(message_one)
       handler_two.should_receive(:can_handle_message?).with(message_two).and_return(true)
@@ -45,10 +45,10 @@ describe CommonDomain::Infrastructure::MessagesRouter do
     end
     
     it "should not route message to handlers that can not handle it" do
-      message_one = mock(:message_one)
-      message_two = mock(:message_two)
+      message_one = double(:message_one)
+      message_two = double(:message_two)
       
-      handler_one = mock(:handler_one)
+      handler_one = double(:handler_one)
       handler_one.should_receive(:can_handle_message?).with(message_one).and_return(false)
       handler_one.should_receive(:can_handle_message?).with(message_two).and_return(false)
       
@@ -59,27 +59,27 @@ describe CommonDomain::Infrastructure::MessagesRouter do
     end
     
     it "should return nil" do
-      message_one = mock(:message_one)
-      handler_one = mock(:handler_one, :can_handle_message? => true, :handle_message => "handler result")
+      message_one = double(:message_one)
+      handler_one = double(:handler_one, :can_handle_message? => true, :handle_message => "handler result")
       subject.register handler_one
       subject.route(message_one).should be_nil
     end
     
     it "should do nothing if there are no handlers for the msssage found" do
-      subject.route(mock(:message))
+      subject.route(double(:message))
     end
     
     context "fail_if_no_handlers" do
       it "should fail if there are no handlers for the msssage found" do
-        lambda { subject.route(mock(:message), fail_if_no_handlers: true) }.should raise_error(CommonDomain::Infrastructure::MessagesRouter::NoHandlersFound)
+        lambda { subject.route(double(:message), fail_if_no_handlers: true) }.should raise_error(CommonDomain::Infrastructure::MessagesRouter::NoHandlersFound)
       end
     end
     
     context "ensure_single_handler" do
       it "should fail to route to several handlers" do
-        message_one = mock(:message_one)
-        handler_one = mock(:handler_one, :can_handle_message? => true)
-        handler_two = mock(:handler_two, :can_handle_message? => true)
+        message_one = double(:message_one)
+        handler_one = double(:handler_one, :can_handle_message? => true)
+        handler_two = double(:handler_two, :can_handle_message? => true)
 
         subject.register handler_one
         subject.register handler_two
@@ -88,8 +88,8 @@ describe CommonDomain::Infrastructure::MessagesRouter do
       end
       
       it "should return handler result" do
-        message_one = mock(:message_one)
-        handler_one = mock(:handler_one, :can_handle_message? => true, :handle_message => "handler result")
+        message_one = double(:message_one)
+        handler_one = double(:handler_one, :can_handle_message? => true, :handle_message => "handler result")
         subject.register handler_one
         subject.route(message_one, ensure_single_handler: true).should eql "handler result"
       end
@@ -98,12 +98,12 @@ describe CommonDomain::Infrastructure::MessagesRouter do
     context "headers" do
       it "should route the message with headers" do
         headers = {header1: "header1", header2: "header2"}
-        message = mock(:message)
+        message = double(:message)
 
-        handler_one = mock(:handler_one, :can_handle_message? => true)
+        handler_one = double(:handler_one, :can_handle_message? => true)
         handler_one.should_receive(:handle_message).with(message, headers)
 
-        handler_two = mock(:handler_two, :can_handle_message? => true)
+        handler_two = double(:handler_two, :can_handle_message? => true)
         handler_two.should_receive(:handle_message).with(message, headers)
 
         subject.register handler_one

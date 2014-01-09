@@ -1,8 +1,8 @@
 require 'spec-helper'
 
 describe CommonDomain::ReadModel::Registry do
-  let(:event_bus) { mock(:event_bus, :register => nil) }
-  let(:read_model) { mock(:read_model) }
+  let(:event_bus) { double(:event_bus, :register => nil) }
+  let(:read_model) { double(:read_model) }
   let(:subject) { described_class.new event_bus }
   
   describe "register" do
@@ -32,9 +32,9 @@ describe CommonDomain::ReadModel::Registry do
   
   describe "for_each" do
     it "should iterate through each registered read model and yield it" do
-      rm1 = mock(:rm1)
-      rm2 = mock(:rm2)
-      rm3 = mock(:rm3)
+      rm1 = double(:rm1)
+      rm2 = double(:rm2)
+      rm3 = double(:rm3)
       subject.register :rm1, rm1
       subject.register :rm2, rm2
       subject.register :rm3, rm3

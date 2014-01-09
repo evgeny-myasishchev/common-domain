@@ -1,10 +1,10 @@
 require 'spec-helper'
 
 describe CommonDomain::Persistence::EventStore::Work do
-  let(:event_store_work) { mock(:event_store_work) }
-  let(:event_store) { mock(:event_store, begin_work: event_store_work) }
-  let(:repository) { mock(:event_store_repository) }
-  let(:builder) { mock(:builder) }
+  let(:event_store_work) { double(:event_store_work) }
+  let(:event_store) { double(:event_store, begin_work: event_store_work) }
+  let(:repository) { double(:event_store_repository) }
+  let(:builder) { double(:builder) }
   
   before(:each) do
     CommonDomain::Persistence::EventStore::Repository.stub(:new) { repository }
@@ -33,7 +33,7 @@ describe CommonDomain::Persistence::EventStore::Work do
     end
     
     it "should return true if the aggregate added as a new" do
-      aggregate = mock(:aggregate, aggregate_id: 'aggregate-392')
+      aggregate = double(:aggregate, aggregate_id: 'aggregate-392')
       subject.add_new aggregate
       subject.exists?('aggregate-392').should be_true
     end
@@ -44,8 +44,8 @@ describe CommonDomain::Persistence::EventStore::Work do
   end
   
   describe "get_by_id" do
-    let(:aggregate) { mock(:aggregate) }
-    let(:aggregate_class) { mock(:aggregate_class) }
+    let(:aggregate) { double(:aggregate) }
+    let(:aggregate_class) { double(:aggregate_class) }
     
     it "should use repository to get the aggregate" do
       repository.should_receive(:get_by_id).with(aggregate_class, 'aggregate-8820').and_return(aggregate)
@@ -60,7 +60,7 @@ describe CommonDomain::Persistence::EventStore::Work do
   end
   
   describe "add_new" do
-    let(:aggregate) { mock(:aggregate, aggregate_id: 'aggregate-77893') }
+    let(:aggregate) { double(:aggregate, aggregate_id: 'aggregate-77893') }
     before(:each) do
       event_store_work.stub(:commit_changes)
     end
@@ -93,8 +93,8 @@ describe CommonDomain::Persistence::EventStore::Work do
   end
   
   describe "commit_changes" do
-    let(:aggregate_1) { mock(:aggregate_1) }
-    let(:aggregate_2) { mock(:aggregate_2) }
+    let(:aggregate_1) { double(:aggregate_1) }
+    let(:aggregate_2) { double(:aggregate_2) }
     before(:each) do
       repository.stub(:get_by_id).with(anything, 'aggregate-1').and_return(aggregate_1)
       repository.stub(:get_by_id).with(anything, 'aggregate-2').and_return(aggregate_2)

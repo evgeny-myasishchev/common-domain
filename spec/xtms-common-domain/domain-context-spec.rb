@@ -9,9 +9,9 @@ describe CommonDomain::DomainContext do
     end
   }
   subject { described_class.new }
-  let(:rm1) { mock(:read_model_one, :setup => nil) }
-  let(:rm2) { mock(:read_model_two, :setup => nil) }
-  let(:rm3) { mock(:read_model_three, :setup => nil) }
+  let(:rm1) { double(:read_model_one, :setup => nil) }
+  let(:rm2) { double(:read_model_two, :setup => nil) }
+  let(:rm3) { double(:read_model_three, :setup => nil) }
   
   def register_rmx
     subject.with_read_models do |read_models|
@@ -79,12 +79,12 @@ describe CommonDomain::DomainContext do
   end
   
   describe "initialize_read_models" do
-    let(:persistence_engine) { mock(:persistence_engine) }
-    let(:event_store) { mock(:event_store, :persistence_engine => persistence_engine)}
-    let(:event11) { mock(:event11) }
-    let(:event12) { mock(:event12) }
-    let(:event21) { mock(:event21) }
-    let(:event22) { mock(:event22) }
+    let(:persistence_engine) { double(:persistence_engine) }
+    let(:event_store) { double(:event_store, :persistence_engine => persistence_engine)}
+    let(:event11) { double(:event11) }
+    let(:event12) { double(:event12) }
+    let(:event21) { double(:event21) }
+    let(:event22) { double(:event22) }
     let(:all_events) { [event11, event12, event21, event22]}
     
     before(:each) do
@@ -94,14 +94,14 @@ describe CommonDomain::DomainContext do
 
       subject.stub(:event_store) { event_store }
       persistence_engine.should_receive(:for_each_commit) do |&block|
-        block.call mock(:commit1, :events => [mock(:event, :body => event11), mock(:event, :body => event12)])
-        block.call mock(:commit2, :events => [mock(:event, :body => event21), mock(:event, :body => event22)])
+        block.call double(:commit1, :events => [double(:event, :body => event11), double(:event, :body => event12)])
+        block.call double(:commit2, :events => [double(:event, :body => event21), double(:event, :body => event22)])
       end
       register_rmx
     end
     
     it "should not publish events if read models needs rebuild" do
-      persistence_engine.rspec_reset
+      reset persistence_engine
       persistence_engine.should_not_receive(:for_each_commit)
       subject.initialize_read_models cleanup_all: false
     end
@@ -180,7 +180,7 @@ describe CommonDomain::DomainContext do
   
   describe "with_dispatch_undispatched_commits" do
     it "should dispatch_undispatched" do
-      event_store = mock(:event_store)
+      event_store = double(:event_store)
       subject.stub(:event_store) {event_store}
       event_store.should_receive(:dispatch_undispatched)
       subject.with_dispatch_undispatched_commits

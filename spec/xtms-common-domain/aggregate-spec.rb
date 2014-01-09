@@ -4,8 +4,8 @@ describe CommonDomain::Aggregate do
   subject { described_class.new "account-1" }
   describe "apply_event" do
     it "should process events" do
-      event1 = mock(:event1, :version => 1)
-      event2 = mock(:event2, :version => 2)
+      event1 = double(:event1, :version => 1)
+      event2 = double(:event2, :version => 2)
       
       subject.should_receive(:handle_message).with(event1)
       subject.should_receive(:handle_message).with(event2)
@@ -15,8 +15,8 @@ describe CommonDomain::Aggregate do
     end
     
     it "should set aggregate version to event version" do
-      event1 = mock(:event1, :version => 1)
-      event2 = mock(:event2, :version => 2)
+      event1 = double(:event1, :version => 1)
+      event2 = double(:event2, :version => 2)
       
       subject.stub(:handle_message)
       
@@ -28,13 +28,13 @@ describe CommonDomain::Aggregate do
     
     it "should return self" do
       subject.stub(:handle_message)
-      subject.apply_event(mock(:event1, :version => 1)).should be subject
+      subject.apply_event(double(:event1, :version => 1)).should be subject
     end
   end
   
   describe "raise_event" do
     it "should set event version to aggregate version + 1" do
-      account_opened  = mock(:account_opened)
+      account_opened  = double(:account_opened)
       subject.stub(:apply_event)
       subject.stub(:version) { 10 }
       account_opened.should_receive(:version=).with(11)
@@ -42,19 +42,19 @@ describe CommonDomain::Aggregate do
     end
     
     it "should apply event" do
-      account_opened  = mock(:account_opened, :version= => nil)
+      account_opened  = double(:account_opened, :version= => nil)
       subject.should_receive(:apply_event).with(account_opened)
       subject.send(:raise_event, account_opened)
     end
     
     it "should return self" do
       subject.stub(:apply_event)
-      subject.send(:raise_event, mock(:account_opened, :version= => nil)).should be subject
+      subject.send(:raise_event, double(:account_opened, :version= => nil)).should be subject
     end
     
     it "should add an event to uncommitted events" do
-      account_opened  = mock(:account_opened, :version= => nil)
-      account_renamed = mock(:account_renamed, :version= => nil)
+      account_opened  = double(:account_opened, :version= => nil)
+      account_renamed = double(:account_renamed, :version= => nil)
       subject.stub(:apply_event)
       subject.send(:raise_event, account_opened)
       subject.send(:raise_event, account_renamed)
@@ -67,15 +67,15 @@ describe CommonDomain::Aggregate do
   
   describe "new_entity" do
     it "should create entity instance initialized with self" do
-      entity_class = mock(:entity_class)
-      entity = mock(:entity)
+      entity_class = double(:entity_class)
+      entity = double(:entity)
       entity_class.should_receive(:new).with(subject).and_return(entity)
       subject.send(:new_entity, entity_class).should be entity
     end
     
     it "should also pass all arguments when creating the entity" do
-      entity_class = mock(:entity_class)
-      entity = mock(:entity)
+      entity_class = double(:entity_class)
+      entity = double(:entity)
       entity_class.should_receive(:new).with(subject, 'arg-1', 'arg-2').and_return(entity)
       subject.send(:new_entity, entity_class, 'arg-1', 'arg-2').should be entity
     end
@@ -83,8 +83,8 @@ describe CommonDomain::Aggregate do
   
   describe "clear_uncommitted_events" do
     it "should empty uncommitted events" do
-      account_opened  = mock(:account_opened, :version= => nil)
-      account_renamed = mock(:account_renamed, :version= => nil)
+      account_opened  = double(:account_opened, :version= => nil)
+      account_renamed = double(:account_renamed, :version= => nil)
       subject.stub(:apply_event)
       subject.send(:raise_event, account_opened)
       subject.send(:raise_event, account_renamed)

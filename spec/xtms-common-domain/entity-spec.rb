@@ -1,7 +1,7 @@
 require 'spec-helper'
 
 describe CommonDomain::Entity do
-  let(:aggregate) { mock(:aggregate, aggregate_id: 'aggregate-220') }
+  let(:aggregate) { double(:aggregate, aggregate_id: 'aggregate-220') }
   subject { described_class.new aggregate }
   
   it "should be a messages handler" do
@@ -21,7 +21,7 @@ describe CommonDomain::Entity do
   
   describe "raise_event" do
     it "should delegate the event to the aggregate" do
-      event = mock(:event)
+      event = double(:event)
       aggregate.should_receive(:raise_event).with(event)
       subject.send(:raise_event, event)
     end
@@ -29,7 +29,7 @@ describe CommonDomain::Entity do
   
   describe "apply_event" do
     it "should just handle_message" do
-      event = mock(:event)
+      event = double(:event)
       subject.should_receive(:handle_message).with(event)
       subject.apply_event event
     end

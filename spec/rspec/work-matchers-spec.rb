@@ -43,9 +43,9 @@ describe "work-matchers" do
   end
   
   describe "get_and_return_aggregate" do
-    let(:work) { mock(:work) }
-    let(:aggregate_class) { mock(:aggregate_class) }
-    let(:aggregate_instance) { mock(:aggregate_instance) }
+    let(:work) { double(:work) }
+    let(:aggregate_class) { double(:aggregate_class) }
+    let(:aggregate_instance) { double(:aggregate_instance) }
     
     it "should fail if no aggregate_class or aggregate_id supplied" do
       lambda { work.should get_and_return_aggregate }.should raise_error("aggregate_class should be supplied")
@@ -59,7 +59,7 @@ describe "work-matchers" do
   end
   
   describe "register_on_committed" do
-    let(:work) { mock(:work) }
+    let(:work) { double(:work) }
     it "should setup on_committed expectation and return a callback to trigger committed callback" do
       callback = work.should register_on_committed
       expect { |block|

@@ -2,7 +2,7 @@ require 'spec-helper'
 
 describe CommonDomain::Persistence::Repository do
   describe "begin_work" do
-    let(:work) { mock(:work, commit_changes: nil) }
+    let(:work) { double(:work, commit_changes: nil) }
     before(:each) do
       subject.should_receive(:create_work).and_return(work)
     end
@@ -27,7 +27,7 @@ describe CommonDomain::Persistence::Repository do
     end
 
     it "should return object returned by the block" do
-      result = mock(:result)
+      result = double(:result)
       subject.begin_work do |w|
         result
       end.should be result

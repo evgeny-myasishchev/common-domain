@@ -1,10 +1,10 @@
 require 'spec-helper'
 
 describe CommonDomain::Persistence::EventStore::Repository do
-  let(:builder) { mock(:aggregate_builder) }
-  let(:event_stream) { mock(:event_stream, new_stream?: false, :committed_events => []) }
-  let(:event_store) { mock(:event_store, :open_stream => event_stream) }
-  let(:aggregate) { mock("aggregate", :aggregate_id => "aggregate-1") }
+  let(:builder) { double(:aggregate_builder) }
+  let(:event_stream) { double(:event_stream, new_stream?: false, :committed_events => []) }
+  let(:event_store) { double(:event_store, :open_stream => event_stream) }
+  let(:aggregate) { double("aggregate", :aggregate_id => "aggregate-1") }
   
   subject { described_class.new event_store, builder }
   
@@ -16,7 +16,7 @@ describe CommonDomain::Persistence::EventStore::Repository do
   end
   
   describe "get_by_id" do
-    let(:aggregate_class) { mock("aggregate-class") }
+    let(:aggregate_class) { double("aggregate-class") }
     
     before(:each) do
       builder.stub(:build) { aggregate }
@@ -28,8 +28,8 @@ describe CommonDomain::Persistence::EventStore::Repository do
     end
     
     it "should use event store to obtain event stream and apply all events from it" do
-      event1 = mock(:event1, :body => mock(:body1))
-      event2 = mock(:event1, :body => mock(:body2))
+      event1 = double(:event1, :body => double(:body1))
+      event2 = double(:event1, :body => double(:body2))
       event_store.should_receive(:open_stream).with('aggregate-1').and_return(event_stream)
       event_stream.should_receive(:committed_events).and_return [event1, event2]
       aggregate.should_receive(:apply_event).with(event1.body)
@@ -45,7 +45,7 @@ describe CommonDomain::Persistence::EventStore::Repository do
   end
   
   describe "save" do
-    let(:stream) { mock(:stream) }
+    let(:stream) { double(:stream) }
     it "should use stream-io to flush aggregate changes" do
       subject.should be_a_kind_of(CommonDomain::Persistence::EventStore::StreamIO)
       subject.should_receive(:flush_changes).with(aggregate, event_store).and_return(aggregate)
@@ -72,7 +72,7 @@ describe CommonDomain::Persistence::EventStore::Repository do
   
   describe "create_work" do
     it "should create and return an instance of EventStore::Work" do
-      work = mock(:work)
+      work = double(:work)
       CommonDomain::Persistence::EventStore::Work.should_receive(:new).with(event_store, builder).and_return(work)
       subject.send(:create_work).should be work
     end

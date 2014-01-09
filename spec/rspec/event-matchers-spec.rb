@@ -52,7 +52,7 @@ describe "event-matchers" do
       lambda {
         aggregate.send(:raise_event, Events::AggregateCreated.new("aggregate-2", 'Name 2', 'Description 2'))
       }.should raise_error(RSpec::Mocks::MockExpectationError)
-      aggregate.rspec_reset
+      reset aggregate
     end
     
     it "should setup a negative matcher for should_not" do
@@ -82,7 +82,7 @@ describe "event-matchers" do
       lambda {
         aggregate.send(:apply_event, Events::AggregateCreated.new("aggregate-2", 'Name 2', 'Description 2'))
       }.should raise_error(RSpec::Mocks::MockExpectationError)
-      aggregate.rspec_reset
+      reset aggregate
     end
     
     it "should setup a negative matcher for should_not" do

@@ -5,7 +5,7 @@ describe CommonDomain::ReadModel::SqlReadModel do
   module ReadModel
     include CommonDomain::ReadModel
   end
-  let(:schema) { mock(:schema) }
+  let(:schema) { double(:schema) }
   let(:described_class) { 
     klass = Class.new(ReadModel::SqlReadModel)
     klass.stub(:name) { "CommonDomain::ReadModel::SqlReadModel::SpecReadModel" }
@@ -19,7 +19,7 @@ describe CommonDomain::ReadModel::SqlReadModel do
   subject { described_class.new connection, ensure_rebuilt: false }
   
   describe "initialize" do
-    let(:registry) { mock(:registry) }
+    let(:registry) { double(:registry) }
     
     before(:each) do
       ReadModel::SqlReadModel::DatasetsRegistry.should_receive(:new).with(connection).and_return(registry)
@@ -54,7 +54,7 @@ describe CommonDomain::ReadModel::SqlReadModel do
   
   describe "cleanup!" do
     before(:each) do
-      subject.should_receive(:schema) { schema }.any_number_of_times
+      subject.stub(:schema) { schema }
     end
     
     it "cleanup schema" do
@@ -90,7 +90,7 @@ describe CommonDomain::ReadModel::SqlReadModel do
   
   describe "prepare_statements" do
     it "should create instance method with passed block" do
-      registry = mock(:registry)
+      registry = double(:registry)
       ReadModel::SqlReadModel::DatasetsRegistry.stub(:new) { registry }
       expect { |b| 
         described_class.prepare_statements(&b)
