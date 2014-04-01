@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name        = 'infora-common-domain'
+  s.name        = 'common-domain'
   s.version     = '0.0.3a'
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Evgeny Myasishchev']
