@@ -1,0 +1,6 @@
+== CommonDomain
+Various concerns to build domain model and related infrastructure around it. Inspired by https://github.com/joliver/CommonDomain.
+
+=== Installation (Gemfile)
+
+  gem 'common-domain', github: 'evgeny-myasishchev/common-domain'
