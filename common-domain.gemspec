@@ -2,11 +2,11 @@ Gem::Specification.new do |s|
   s.name        = 'infora-common-domain'
   s.version     = '0.0.3a'
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ['Evgeny Myasishchev', 'Vladimir Ikryanov']
-  s.email       = ['info@infora.com.ua']
-  s.summary     = "Common DDD building blocks."
-  s.description = "Common DDD building blocks. Inspired by https://github.com/joliver/CommonDomain."
-  s.homepage    = 'http://infora.com.ua'
+  s.authors     = ['Evgeny Myasishchev']
+  s.email       = ['evgeny.myasishchev@gmail.com']
+  s.summary     = "DDD building blocks."
+  s.description = "Various concerns to build domain model and related infrastructure around it. Inspired by https://github.com/joliver/CommonDomain."
+  s.homepage    = 'https://github.com/evgeny-myasishchev/common-domain'
   s.files       = Dir["lib/**/*"]
   s.test_files  = Dir['spec/**/*']
   
