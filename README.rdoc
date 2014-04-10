@@ -1,4 +1,4 @@
-== CommonDomain
+== CommonDomain {<img src="https://travis-ci.org/evgeny-myasishchev/common-domain.svg?branch=master" alt="Build Status" />}[https://travis-ci.org/evgeny-myasishchev/common-domain] {<img src="https://codeclimate.com/github/evgeny-myasishchev/common-domain.png" />}[https://codeclimate.com/github/evgeny-myasishchev/common-domain] {<img src="https://codeclimate.com/github/evgeny-myasishchev/common-domain/coverage.png" />}[https://codeclimate.com/github/evgeny-myasishchev/common-domain]
 Various concerns to build domain model and related infrastructure around it. Inspired by https://github.com/joliver/CommonDomain.
 
 === Installation (Gemfile)
