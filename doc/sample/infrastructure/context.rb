@@ -1,5 +1,5 @@
 module Sample
-  class Bootstrap < CommonDomain::Bootstrap
+  class Context < CommonDomain::DomainContext
     include CommonDomain
     
     attr_reader :command_dispatcher
@@ -9,6 +9,7 @@ module Sample
     end
     
     def with_event_store
+      puts "With the event store..."
       bootstrap_event_store do |with|
         with.log4r_logging
         with.in_memory_persistence

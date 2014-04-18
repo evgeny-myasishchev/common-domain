@@ -103,8 +103,10 @@ module CommonDomain
         @event_store = EventStore.bootstrap do |with|
           # with.log4r_logging
           yield(with)
-          #At this point SQL persistence only is supported.
-          with.sql_persistence event_store_database_config
+          unless with.has_persistence_engine?
+            #Using SQL persistance as a standard persistance if no other is configured
+            with.sql_persistence event_store_database_config
+          end
           with.synchorous_dispatcher do |commit|
             commit.events.each { |event| 
               domain_events_bus.publish(event.body) 
