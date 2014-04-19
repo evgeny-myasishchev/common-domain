@@ -1,6 +1,8 @@
+require File.expand_path(File.join('..', 'lib', 'common-domain', 'version'), __FILE__)
+
 Gem::Specification.new do |s|
   s.name        = 'common-domain'
-  s.version     = '0.0.3a'
+  s.version     = CommonDomain.version
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Evgeny Myasishchev']
   s.email       = ['evgeny.myasishchev@gmail.com']
