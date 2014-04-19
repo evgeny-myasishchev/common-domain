@@ -18,6 +18,10 @@ module CommonDomain
       yield(self) if block_given?
     end
     
+    def with_events_bus(bus = nil)
+      @domain_events_bus = bus || CommonDomain::EventBus.new
+    end
+    
     #
     # database_configuration expected to have "event-store" and "read-store" connection specifications.
     # For SQL databases connection specification should be Sequel friendly
@@ -90,7 +94,7 @@ module CommonDomain
 
     protected
       def bootstrap_projections(&block)
-        @domain_events_bus = CommonDomain::EventBus.new
+        ensure_events_bus!
         @projections       = CommonDomain::Projections::Registry.new @domain_events_bus
         yield(@projections)
       end
@@ -99,7 +103,7 @@ module CommonDomain
         Log.info "Initializing event store..."
         Log.debug "Using connection specification: #{event_store_database_config}"
 
-        raise "Event Bus should be initialized" if domain_events_bus.nil?
+        ensure_events_bus!
         @event_store = EventStore.bootstrap do |with|
           # with.log4r_logging
           yield(with)
@@ -119,6 +123,10 @@ module CommonDomain
       
       def bootstrap_command_handlers(&block)
         @command_dispatcher = CommandDispatcher.new(&block)
+      end
+      
+      def ensure_events_bus!
+        raise "Events Bus should be initialized" if domain_events_bus.nil?
       end
   end
 end
