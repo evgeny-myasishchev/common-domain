@@ -9,7 +9,6 @@ module Sample
     end
     
     def with_event_store
-      puts "With the event store..."
       bootstrap_event_store do |with|
         with.log4r_logging
         with.in_memory_persistence
