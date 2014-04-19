@@ -1,9 +1,3 @@
-RSpec::Matchers.define :have_table do |table_name|
-  match do |connection|
-    connection.tables.include? table_name
-  end
-end
-
 module SchemaHelper
   def check_column(connection, table_name, column_name, &block)
     columns = connection.schema(table_name)
