@@ -1,5 +1,5 @@
-module Sample::ReadModels
-  class AccountsReadModel
+module Sample::Projections
+  class AccountsProjection
     include Sample::Events::AccountEvents
     include CommonDomain::Infrastructure::MessagesHandler
     

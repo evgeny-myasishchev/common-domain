@@ -23,7 +23,7 @@ module Sample
     
     def with_projections
       bootstrap_projections do |projections|
-        projections.register :accounts, Sample::ReadModels::AccountsReadModel.new
+        projections.register :accounts, Sample::Projections::AccountsProjection.new
       end
     end
   end
