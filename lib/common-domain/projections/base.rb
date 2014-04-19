@@ -1,4 +1,4 @@
-module CommonDomain::ReadModel
+module CommonDomain::Projections
   class Base
     include CommonDomain::Infrastructure::MessagesHandler
     
@@ -7,19 +7,19 @@ module CommonDomain::ReadModel
       raise "Not implemented"
     end
     
-    #Remove everything related to the read model including schema.
+    #Remove everything related to the projection including schema.
     def cleanup!
       raise "Not implemented"
     end
     
-    #Returns true if the read model requires rebuild.
+    #Returns true if the projection requires rebuild.
     #It maybe because of underlying persistence details has changed.
     def rebuild_required?
       raise "Not implemented"
     end
     
-    #Returns true if read model requires setup. 
-    #That is if the read model has never been setup before.
+    #Returns true if projection requires setup. 
+    #That is if the projection has never been setup before.
     def setup_required?
       raise "Not implemented"
     end

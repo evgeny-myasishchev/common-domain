@@ -1,6 +1,6 @@
 require 'spec-helper'
 
-describe CommonDomain::ReadModel::SqlReadModel::Schema do
+describe CommonDomain::Projections::SqlProjection::Schema do
   include SqlConnectionHelper
   include SchemaHelper
   let(:connection) { sqlite_memory_connection }

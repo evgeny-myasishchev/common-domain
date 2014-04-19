@@ -1,20 +1,20 @@
 require 'spec-helper'
 
-describe CommonDomain::ReadModel::SqlReadModel do
+describe CommonDomain::Projections::SqlProjection do
   include SqlConnectionHelper
   module ReadModel
-    include CommonDomain::ReadModel
+    include CommonDomain::Projections
   end
   let(:schema) { double(:schema) }
   let(:described_class) { 
-    klass = Class.new(ReadModel::SqlReadModel)
-    klass.stub(:name) { "CommonDomain::ReadModel::SqlReadModel::SpecReadModel" }
+    klass = Class.new(ReadModel::SqlProjection)
+    klass.stub(:name) { "CommonDomain::Projections::SqlProjection::SpecReadModel" }
     klass.setup_schema(:version => 1) {|schema|}
     klass
   }
   
   let(:connection) {
-    sqlite_memory_connection "common-domain::sql-read-model-spec::orm"
+    sqlite_memory_connection "common-domain::sql-projection-spec::orm"
   }
   subject { described_class.new connection, ensure_rebuilt: false }
   
@@ -22,7 +22,7 @@ describe CommonDomain::ReadModel::SqlReadModel do
     let(:registry) { double(:registry) }
     
     before(:each) do
-      ReadModel::SqlReadModel::DatasetsRegistry.should_receive(:new).with(connection).and_return(registry)
+      ReadModel::SqlProjection::DatasetsRegistry.should_receive(:new).with(connection).and_return(registry)
     end
     
     it "should prepare_statements" do
@@ -48,7 +48,7 @@ describe CommonDomain::ReadModel::SqlReadModel do
     
     it "should fail if actual_schema_version is not zero" do
       schema.should_receive(:actual_schema_version) { 10 }
-      lambda { subject.setup }.should raise_error(ReadModel::SqlReadModel::InvalidStateError)
+      lambda { subject.setup }.should raise_error(ReadModel::SqlProjection::InvalidStateError)
     end
   end
   
@@ -73,7 +73,7 @@ describe CommonDomain::ReadModel::SqlReadModel do
       }.to yield_with_args(lambda { |arg| arg.should be schema })
     end
     
-    it "should initialize the schema in scope of read model" do
+    it "should initialize the schema in scope of projection" do
       scope = nil
       described_class.setup_schema version: 100 do |s|
         scope = self
@@ -82,16 +82,16 @@ describe CommonDomain::ReadModel::SqlReadModel do
       scope.should eql subject
     end
     
-    it "should assign identifier as read model full name" do
+    it "should assign identifier as projection full name" do
       described_class.setup_schema { |schema| }
-      subject.schema.options[:identifier].should eql "CommonDomain::ReadModel::SqlReadModel::SpecReadModel"
+      subject.schema.options[:identifier].should eql "CommonDomain::Projections::SqlProjection::SpecReadModel"
     end
   end
   
   describe "prepare_statements" do
     it "should create instance method with passed block" do
       registry = double(:registry)
-      ReadModel::SqlReadModel::DatasetsRegistry.stub(:new) { registry }
+      ReadModel::SqlProjection::DatasetsRegistry.stub(:new) { registry }
       expect { |b| 
         described_class.prepare_statements(&b)
         described_class.new connection

@@ -25,12 +25,12 @@ module Sample
   require 'sample/domain/account'
   require 'sample/commands/account-commands'
   require 'sample/command-handlers/account-handlers'
-  require 'sample/read-models/accounts-read-model'
+  require 'sample/projections/accounts-projection'
   require 'sample/infrastructure/context'
 end
 
 app = Sample::Context.new do |bootstrap|
-  bootstrap.with_read_models
+  bootstrap.with_projections
   bootstrap.with_event_store
   bootstrap.with_command_handlers
 end
@@ -41,7 +41,7 @@ app.command_dispatcher.dispatch Sample::Commands::AccountCommands::OpenAccountCo
 
 Log.info "== Showing created accounts =="
 Log.info "number;name;is active?"
-accounts_list = app.read_models.accounts.get_accounts_list
+accounts_list = app.projections.accounts.get_accounts_list
 accounts_list.each { |account| 
   Log.info "#{account[:number]};#{account[:name]};#{account[:is_active]}"
 }
@@ -57,7 +57,7 @@ app.command_dispatcher.dispatch Sample::Commands::AccountCommands::CloseAccountC
 
 Log.info "== Showing changed accounts =="
 Log.info "number;name;is active?"
-accounts_list = app.read_models.accounts.get_accounts_list
+accounts_list = app.projections.accounts.get_accounts_list
 accounts_list.each { |account| 
   Log.info "#{account[:number]};#{account[:name]};#{account[:is_active]}"
 }

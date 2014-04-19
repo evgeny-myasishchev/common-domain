@@ -1,4 +1,4 @@
-class CommonDomain::ReadModel::SqlReadModel
+class CommonDomain::Projections::SqlProjection
   class DatasetsRegistry
     attr_reader :connection
     def initialize(connection)

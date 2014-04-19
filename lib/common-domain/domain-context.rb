@@ -8,7 +8,7 @@ module CommonDomain
     attr_reader :repository
     attr_reader :application_event_bus
     attr_reader :domain_events_bus
-    attr_reader :read_models
+    attr_reader :projections
     attr_reader :command_dispatcher
     attr_reader :event_store_database_config
     attr_reader :read_store_database_config
@@ -42,25 +42,25 @@ module CommonDomain
       raise "Override me and do extra setup of the event store. At least logging should be initialized."
     end
     
-    def initialize_read_models(options = {})
+    def initialize_projections(options = {})
       options = {
         :cleanup_all => false
       }.merge! options
       bus         = EventBus.new
       cleanup_all = options[:cleanup_all]
-      Log.info "Initializing read models. Cleanup all option is: #{cleanup_all}"
+      Log.info "Initializing projections. Cleanup all option is: #{cleanup_all}"
       
-      read_models.for_each do |read_model|
-        Log.info "Checking read model: #{read_model}"
+      projections.for_each do |read_model|
+        Log.info "Checking projection: #{read_model}"
         if cleanup_all || read_model.rebuild_required?
           Log.info "Read model needs rebuild."
-          Log.info "Cleaning read model..."
+          Log.info "Cleaning projection..."
           read_model.cleanup!
-          Log.info "Setup clean read model..."
+          Log.info "Setup clean projection..."
           read_model.setup
           bus.register read_model
         elsif read_model.setup_required?
-          Log.info "Doing setup of new read model: #{read_model}"
+          Log.info "Doing setup of new projection: #{read_model}"
           read_model.setup
           bus.register read_model
         end
@@ -73,15 +73,15 @@ module CommonDomain
             bus.publish(event.body) 
           }
         end
-        Log.info "Read models initialized."
+        Log.info "Projections initialized."
       else
-        Log.info "Looks like no read models needs to be initialized this time."
+        Log.info "Looks like no projections needs to be initialized this time."
       end
     end
     
-    # Rebuilds required read models.
-    def with_read_models_initialization
-      initialize_read_models :cleanup_all => false
+    # Rebuilds required projections.
+    def with_projections_initialization
+      initialize_projections :cleanup_all => false
     end
     
     def with_dispatch_undispatched_commits
@@ -89,10 +89,10 @@ module CommonDomain
     end
 
     protected
-      def bootstrap_read_models(&block)
+      def bootstrap_projections(&block)
         @domain_events_bus = CommonDomain::EventBus.new
-        @read_models       = CommonDomain::ReadModel::Registry.new @domain_events_bus
-        yield(@read_models)
+        @projections       = CommonDomain::Projections::Registry.new @domain_events_bus
+        yield(@projections)
       end
     
       def bootstrap_event_store(&block)

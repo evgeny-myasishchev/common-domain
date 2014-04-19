@@ -1,9 +1,9 @@
-module CommonDomain::ReadModel
-  class SqlReadModel < Base
-    autoload :DatasetsRegistry, 'common-domain/read-model/sql-read-model/datasets-registry'
-    autoload :Schema, 'common-domain/read-model/sql-read-model/schema'
+module CommonDomain::Projections
+  class SqlProjection < Base
+    autoload :DatasetsRegistry, 'common-domain/projections/sql-projection/datasets-registry'
+    autoload :Schema, 'common-domain/projections/sql-projection/schema'
     
-    Log = CommonDomain::Logger.get "common-domain::read-model::sql-read-model"
+    Log = CommonDomain::Logger.get "common-domain::read-model::sql-projection"
     
     class InvalidStateError < ::StandardError
     end
@@ -20,7 +20,7 @@ module CommonDomain::ReadModel
     
     def setup
       if schema.actual_schema_version != 0
-        raise InvalidStateError.new "Looks like schema has already been initialized. Please rebuild your read model instead."
+        raise InvalidStateError.new "Looks like schema has already been initialized. Please rebuild your projection instead."
       end
       schema.setup
     end

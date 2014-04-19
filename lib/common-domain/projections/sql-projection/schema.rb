@@ -1,4 +1,4 @@
-class CommonDomain::ReadModel::SqlReadModel
+class CommonDomain::Projections::SqlProjection
   class Schema
     attr_reader :options, :datasets_registry
     MetaStoreTableName = :'read-model-schema-infos'

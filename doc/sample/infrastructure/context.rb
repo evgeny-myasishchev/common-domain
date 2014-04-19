@@ -21,9 +21,9 @@ module Sample
       end
     end
     
-    def with_read_models
-      bootstrap_read_models do |read_models|
-        read_models.register :accounts, Sample::ReadModels::AccountsReadModel.new
+    def with_projections
+      bootstrap_projections do |projections|
+        projections.register :accounts, Sample::ReadModels::AccountsReadModel.new
       end
     end
   end

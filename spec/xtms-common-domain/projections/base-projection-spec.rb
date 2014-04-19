@@ -1,6 +1,6 @@
 require 'spec-helper'
 
-describe CommonDomain::ReadModel::Base do
+describe CommonDomain::Projections::Base do
   it "should be a MessagesHandler" do
     subject.should be_a(CommonDomain::Infrastructure::MessagesHandler)
   end

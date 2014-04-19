@@ -1,6 +1,6 @@
 require 'spec-helper'
 
-describe CommonDomain::ReadModel::SqlReadModel::DatasetsRegistry do
+describe CommonDomain::Projections::SqlProjection::DatasetsRegistry do
   include SqlConnectionHelper
   let(:connection) { sqlite_memory_connection }
   subject { described_class.new connection }

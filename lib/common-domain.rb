@@ -15,9 +15,9 @@ module CommonDomain
   end
   autoload :Logger, 'common-domain/logger'
   autoload :Persistence, 'common-domain/persistence'
-  module ReadModel
-    autoload :Base, 'common-domain/read-model/base'
-    autoload :Registry, 'common-domain/read-model/registry'
-    autoload :SqlReadModel, 'common-domain/read-model/sql-read-model'
+  module Projections
+    autoload :Base, 'common-domain/projections/base'
+    autoload :Registry, 'common-domain/projections/registry'
+    autoload :SqlProjection, 'common-domain/projections/sql-projection'
   end
 end
