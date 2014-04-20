@@ -17,7 +17,15 @@ describe "sql-projections-matcher" do
     end
     
     it "should yield the block with the corresponding table" do
-      expect { |block| connection.should have_table(:departments, &block) }.to yield_with_args(connection[:departments])
+      expect { |block| 
+        connection.should have_table(:departments) {|table| block.to_proc.call(table)}
+      }.to yield_with_args(connection[:departments])
+      
+      expect { |block| 
+        connection.should have_table(:departments) do |table|
+          block.to_proc.call(table)
+        end
+      }.to yield_with_args(connection[:departments])
     end
     
     it "should fail if table does not exists" do

@@ -1,13 +1,17 @@
 class HaveTableMatcher
+  
+  # block here is passed if {|table| } syntax is used
   def initialize(table_name, &block)
     @table_name = table_name
     @block = block
   end
 
-  def matches?(actual)
+  # block here is passed if do |table| end syntax is used
+  def matches?(actual, &block)
     @actual = actual
     result = @actual.table_exists?(@table_name)
-    @block.call(@actual[@table_name]) if result && @block
+    the_block = block || @block
+    the_block.call(@actual[@table_name]) if result && the_block
     result
   end
 
