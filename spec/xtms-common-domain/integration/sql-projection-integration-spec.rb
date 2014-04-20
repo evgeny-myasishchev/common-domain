@@ -4,20 +4,32 @@ describe "Integration - CommonDomain::Projections::SqlProjection" do
   include SqlConnectionHelper
   let(:connection) { sqlite_memory_connection }
   
+  module Events
+    include CommonDomain::DomainEvent::DSL
+    event :EmployeeCreated, :name
+    event :EmployeeRenamed, :name
+    event :EmployeeRemoved
+  end
+  
   class EmployeesProjection < CommonDomain::Projections::SqlProjection
+    on Events::EmployeeCreated do |event|
+      tables.employees.insert id: event.aggregate_id, name: event.name
+    end
+      
+    on Events::EmployeeRenamed do |event|
+      tables.employees.where(id: event.aggregate_id).update(name: event.name)
+    end
+    
+    on Events::EmployeeRemoved do |event|
+      tables.employees.where(id: event.aggregate_id).delete
+    end
+    
     setup_schema do |schema|
       schema.table :employees, :employees_projection do
         String :id, :primary_key=>true, :size => 50, :null=>false
         String :name, :size => 50, :null=>false
       end
     end
-  end
-  
-  module Events
-    include CommonDomain::DomainEvent::DSL
-    event :EmployeeCreated, :name
-    event :EmployeeRenamed, :name
-    event :EmployeeRemoved
   end
   
   class IntegrationContext < CommonDomain::DomainContext
@@ -49,5 +61,20 @@ describe "Integration - CommonDomain::Projections::SqlProjection" do
       table.should have_column(:id, primary_key: true, allow_null: false)
       table.should have_column(:name, allow_null: false)
     end
+  end
+  
+  it "should route domain messages to the projection" do
+    stream = @app.event_store.open_stream('stream-1')
+    stream.add EventStore::EventMessage.new Events::EmployeeCreated.new('stream-1', 'Initial name')
+    stream.commit_changes
+    connection[:employees_projection][id: 'stream-1'].should eql id: 'stream-1', name: 'Initial name'
+    
+    stream.add EventStore::EventMessage.new Events::EmployeeRenamed.new('stream-1', 'New name')
+    stream.commit_changes
+    connection[:employees_projection][id: 'stream-1'].should eql id: 'stream-1', name: 'New name'
+    
+    stream.add EventStore::EventMessage.new Events::EmployeeRemoved.new('stream-1')
+    stream.commit_changes
+    connection[:employees_projection][id: 'stream-1'].should be_nil
   end
 end
