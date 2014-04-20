@@ -45,6 +45,9 @@ describe "Integration - CommonDomain::Projections::SqlProjection" do
   end
   
   it "should setup schema of the projection" do
-    
+    connection.should have_table(:employees_projection) do |table|
+      table.should have_column(:id, primary_key: true, allow_null: false)
+      table.should have_column(:name, allow_null: false)
+    end
   end
 end
