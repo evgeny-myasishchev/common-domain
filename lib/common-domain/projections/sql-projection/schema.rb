@@ -1,7 +1,7 @@
 class CommonDomain::Projections::SqlProjection
   class Schema
     attr_reader :options, :datasets_registry
-    MetaStoreTableName = :'read-model-schema-infos'
+    MetaStoreTableName = :'projections-schema-infos'
     def initialize(connection, options, &block)
       @options = {
         version: 1,
