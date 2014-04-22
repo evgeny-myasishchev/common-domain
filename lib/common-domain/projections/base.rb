@@ -2,18 +2,18 @@ module CommonDomain::Projections
   class Base
     include CommonDomain::Infrastructure::MessagesHandler
     
-    #Setup persistence schema
+    #Setup persistence schema if needed
     def setup
       raise "Not implemented"
     end
     
-    #Remove everything related to the projection including schema.
+    #Remove everything related to the projection including schema (optional).
     def cleanup!
       raise "Not implemented"
     end
     
     #Returns true if the projection requires rebuild.
-    #It maybe because of underlying persistence details has changed.
+    #It maybe because of the underlying persistence details has changed.
     def rebuild_required?
       raise "Not implemented"
     end
