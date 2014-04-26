@@ -2,7 +2,9 @@ require 'spec-helper'
 
 describe "Integration - Common Domain - Event Store Repository" do
   include IntegrationSpecsAncillary
-  Domain = IntegrationSpecsAncillary::Domain
+  class Domain
+    include IntegrationSpecsAncillary::Domain
+  end
   subject { CommonDomain::Persistence::EventStore::Repository.new(event_store, aggregates_builder) }
   
   it "should save new aggregates" do

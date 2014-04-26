@@ -2,7 +2,9 @@ require 'spec-helper'
 
 describe "Integration - Common Domain - Event Store Work" do
   include IntegrationSpecsAncillary
-  Domain = IntegrationSpecsAncillary::Domain
+  class Domain
+    include IntegrationSpecsAncillary::Domain
+  end
   
   let(:repository) { CommonDomain::Persistence::EventStore::Repository.new(event_store, aggregates_builder) }
   subject { CommonDomain::Persistence::EventStore::Work.new event_store, aggregates_builder }
