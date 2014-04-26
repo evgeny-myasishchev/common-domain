@@ -1,5 +1,5 @@
 module CommonDomain::Projections
-  class SqlProjection < Base
+  class Sql < Base
     autoload :DatasetsRegistry, 'common-domain/projections/sql-projection/datasets-registry'
     autoload :Schema, 'common-domain/projections/sql-projection/schema'
     
