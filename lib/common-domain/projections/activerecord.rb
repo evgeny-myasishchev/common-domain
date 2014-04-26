@@ -1,28 +1,15 @@
 module CommonDomain::Projections
   module ActiveRecord
-    class Projection
-      def initialize(model)
-        
+    class Projection < CommonDomain::Projections::Base
+      attr_reader :model_class
+      def initialize(model_class)
+        @model_class = model_class
       end
     end
     
     module ClassMethods
-      def setup
-        # Schema is initialized with rake task.
-      end
-    
-      def cleanup!
-        # TODO: Implement
-      end
-    
-      def rebuild_required?
-        # TODO: Implement
-        false
-      end
-    
-      def setup_required?
-        # TODO: Implement
-        false
+      def create_projection
+        Projection.new self
       end
     end
     
@@ -31,8 +18,7 @@ module CommonDomain::Projections
     end
     
     def self.included(receiver)
-      receiver.extend         ClassMethods
-      receiver.extend         CommonDomain::Infrastructure::MessagesHandler
+      receiver.extend ClassMethods
       receiver.send :include, InstanceMethods
     end
   end
