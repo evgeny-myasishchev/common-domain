@@ -16,8 +16,9 @@ module CommonDomain
   autoload :Logger, 'common-domain/logger'
   autoload :Persistence, 'common-domain/persistence'
   module Projections
+    autoload :ActiveRecord, 'common-domain/projections/activerecord'
     autoload :Base, 'common-domain/projections/base'
     autoload :Registry, 'common-domain/projections/registry'
-    autoload :SqlProjection, 'common-domain/projections/sql-projection'
+    autoload :Sql, 'common-domain/projections/sql'
   end
 end
