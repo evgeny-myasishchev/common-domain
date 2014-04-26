@@ -1,13 +1,11 @@
 module CommonDomain::Projections
-  class Base
-    include CommonDomain::Infrastructure::MessagesHandler
-    
-    #Setup persistence schema if needed
+  module Base
+    #Setup persistence related stuff (like schema or any other means)
     def setup
       raise "Not implemented"
     end
     
-    #Remove everything related to the projection including schema (optional).
+    #Remove everything related to the projection (like data and possible schema).
     def cleanup!
       raise "Not implemented"
     end
@@ -24,9 +22,8 @@ module CommonDomain::Projections
       raise "Not implemented"
     end
     
-    # Factory method. Used to build the projection. Simplifies the registration.
-    def self.create_projection(*args)
-      new(*args)
+    def self.included(receiver)
+      receiver.send :include, CommonDomain::Infrastructure::MessagesHandler
     end
   end
 end
