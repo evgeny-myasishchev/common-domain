@@ -8,7 +8,11 @@ describe CommonDomain::DomainContext do
       end
     end
   }
-  subject { described_class.new }
+  subject { 
+    c = described_class.new 
+    c.with_event_bus
+    c
+  }
   let(:rm1) { double(:read_model_one, :setup => nil) }
   let(:rm2) { double(:read_model_two, :setup => nil) }
   let(:rm3) { double(:read_model_three, :setup => nil) }

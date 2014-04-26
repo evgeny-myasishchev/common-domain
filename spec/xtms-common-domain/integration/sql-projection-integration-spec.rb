@@ -4,14 +4,14 @@ describe "Integration - CommonDomain::Projections::SqlProjection" do
   include SqlConnectionHelper
   let(:connection) { sqlite_memory_connection }
   
-  module Events
+  class Events
     include CommonDomain::DomainEvent::DSL
     event :EmployeeCreated, :name
     event :EmployeeRenamed, :name
     event :EmployeeRemoved
   end
   
-  class EmployeesProjection < CommonDomain::Projections::SqlProjection
+  class EmployeesProjection < CommonDomain::Projections::Sql
     on Events::EmployeeCreated do |event|
       tables.employees.insert id: event.aggregate_id, name: event.name
     end
@@ -49,7 +49,7 @@ describe "Integration - CommonDomain::Projections::SqlProjection" do
   
   before(:each) do
     @app = IntegrationContext.new do |bootstrap|
-      bootstrap.with_events_bus
+      bootstrap.with_event_bus
       bootstrap.with_event_store
       bootstrap.with_projections(connection)
       bootstrap.with_projections_initialization

@@ -7,7 +7,7 @@ module CommonDomain
     attr_reader :event_store
     attr_reader :repository
     attr_reader :application_event_bus
-    attr_reader :domain_events_bus
+    attr_reader :domain_event_bus
     attr_reader :projections
     attr_reader :command_dispatcher
     attr_reader :event_store_database_config
@@ -18,8 +18,8 @@ module CommonDomain
       yield(self) if block_given?
     end
     
-    def with_events_bus(bus = nil)
-      @domain_events_bus = bus || CommonDomain::EventBus.new
+    def with_event_bus(bus = nil)
+      @domain_event_bus = bus || CommonDomain::EventBus.new
     end
     
     #
@@ -95,7 +95,7 @@ module CommonDomain
     protected
       def bootstrap_projections(&block)
         ensure_events_bus!
-        @projections       = CommonDomain::Projections::Registry.new @domain_events_bus
+        @projections       = CommonDomain::Projections::Registry.new @domain_event_bus
         yield(@projections)
       end
     
@@ -113,7 +113,7 @@ module CommonDomain
           end
           with.synchorous_dispatcher do |commit|
             commit.events.each { |event| 
-              domain_events_bus.publish(event.body) 
+              domain_event_bus.publish(event.body) 
             }
           end
         end
@@ -126,7 +126,7 @@ module CommonDomain
       end
       
       def ensure_events_bus!
-        raise "Events Bus should be initialized" if domain_events_bus.nil?
+        raise "Events Bus should be initialized" if domain_event_bus.nil?
       end
   end
 end

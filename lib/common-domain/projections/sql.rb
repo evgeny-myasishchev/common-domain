@@ -1,7 +1,7 @@
 module CommonDomain::Projections
   class Sql < Base
-    autoload :DatasetsRegistry, 'common-domain/projections/sql-projection/datasets-registry'
-    autoload :Schema, 'common-domain/projections/sql-projection/schema'
+    autoload :DatasetsRegistry, 'common-domain/projections/sql/datasets-registry'
+    autoload :Schema, 'common-domain/projections/sql/schema'
     
     Log = CommonDomain::Logger.get "common-domain::read-model::sql-projection"
     
@@ -52,7 +52,7 @@ module CommonDomain::Projections
       def setup_schema(options = {}, &block)
         define_method(:schema) do
           options = { identifier: self.class.name }.merge! options
-          @schema ||= Schema.new(@connection, options) do |s|
+          @schema ||= CommonDomain::Projections::Sql::Schema.new(@connection, options) do |s|
             __setup_schema__(s)
           end
         end

@@ -1,14 +1,14 @@
 require 'spec-helper'
 
-describe CommonDomain::Projections::SqlProjection do
+describe CommonDomain::Projections::Sql do
   include SqlConnectionHelper
-  module ReadModel
+  module Projection
     include CommonDomain::Projections
   end
   let(:schema) { double(:schema) }
   let(:described_class) { 
-    klass = Class.new(ReadModel::SqlProjection)
-    klass.stub(:name) { "CommonDomain::Projections::SqlProjection::SpecReadModel" }
+    klass = Class.new(Projection::Sql)
+    klass.stub(:name) { "CommonDomain::Projections::SqlProjection::SpecProjection" }
     klass.setup_schema(:version => 1) {|schema|}
     klass
   }
@@ -22,7 +22,7 @@ describe CommonDomain::Projections::SqlProjection do
     let(:registry) { double(:registry) }
     
     before(:each) do
-      ReadModel::SqlProjection::DatasetsRegistry.should_receive(:new).with(connection).and_return(registry)
+      Projection::Sql::DatasetsRegistry.should_receive(:new).with(connection).and_return(registry)
     end
     
     it "should prepare_statements" do
@@ -48,7 +48,7 @@ describe CommonDomain::Projections::SqlProjection do
     
     it "should fail if actual_schema_version is not zero" do
       schema.should_receive(:actual_schema_version) { 10 }
-      lambda { subject.setup }.should raise_error(ReadModel::SqlProjection::InvalidStateError)
+      lambda { subject.setup }.should raise_error(Projection::Sql::InvalidStateError)
     end
   end
   
@@ -84,14 +84,14 @@ describe CommonDomain::Projections::SqlProjection do
     
     it "should assign identifier as projection full name" do
       described_class.setup_schema { |schema| }
-      subject.schema.options[:identifier].should eql "CommonDomain::Projections::SqlProjection::SpecReadModel"
+      subject.schema.options[:identifier].should eql "CommonDomain::Projections::SqlProjection::SpecProjection"
     end
   end
   
   describe "prepare_statements" do
     it "should create instance method with passed block" do
       registry = double(:registry)
-      ReadModel::SqlProjection::DatasetsRegistry.stub(:new) { registry }
+      Projection::Sql::DatasetsRegistry.stub(:new) { registry }
       expect { |b| 
         described_class.prepare_statements(&b)
         described_class.new connection
