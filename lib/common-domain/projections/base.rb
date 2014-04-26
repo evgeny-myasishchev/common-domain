@@ -23,5 +23,10 @@ module CommonDomain::Projections
     def setup_required?
       raise "Not implemented"
     end
+    
+    # Factory method. Used to build the projection. Simplifies the registration.
+    def self.create_projection(*args)
+      new(*args)
+    end
   end
 end
