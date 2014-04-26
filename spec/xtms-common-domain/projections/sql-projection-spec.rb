@@ -8,7 +8,7 @@ describe CommonDomain::Projections::Sql do
   let(:schema) { double(:schema) }
   let(:described_class) { 
     klass = Class.new(Projection::Sql)
-    klass.stub(:name) { "CommonDomain::Projections::SqlProjection::SpecProjection" }
+    klass.stub(:name) { "CommonDomain::Projections::Sql::SpecProjection" }
     klass.setup_schema(:version => 1) {|schema|}
     klass
   }
@@ -84,7 +84,7 @@ describe CommonDomain::Projections::Sql do
     
     it "should assign identifier as projection full name" do
       described_class.setup_schema { |schema| }
-      subject.schema.options[:identifier].should eql "CommonDomain::Projections::SqlProjection::SpecProjection"
+      subject.schema.options[:identifier].should eql "CommonDomain::Projections::Sql::SpecProjection"
     end
   end
   
