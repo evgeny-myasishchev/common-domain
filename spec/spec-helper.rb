@@ -39,6 +39,12 @@ RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
   config.filter_run :focus
   
+  config.before(:all) do
+    @tmp_root = Pathname.new(File.expand_path(File.join('..', 'tmp'), __FILE__))
+    @tmp_root.rmdir if @tmp_root.exist?
+    @tmp_root.mkdir
+  end
+  
   module VerifyAndResetHelpers
     def verify(object)
       RSpec::Mocks.proxy_for(object).verify
