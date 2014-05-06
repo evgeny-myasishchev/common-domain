@@ -7,7 +7,7 @@ module CommonDomain::Projections
     class ProjectionsMeta < ::ActiveRecord::Base
       class << self
         def ensure_schema!
-          unless table_exists?
+          unless connection.table_exists? table_name
             connection.create_table(table_name) do |t|
               t.column :projection_id, :string, null: false
               t.column :version, :integer, null: false
@@ -16,11 +16,14 @@ module CommonDomain::Projections
         end
         
         def setup_required?(projection_id)
-          
+          exists? projection_id: projection_id
         end
         
         def rebuild_required?(projection_id, version)
-          
+          meta = find_by projection_id: projection_id
+          return true if version > meta.version
+          return false if version == meta.version
+          raise "Downgrade is not supported for projection #{projection_id}. Last known version is #{meta.version}. Requested projection version was #{version}."
         end
       end
     end
