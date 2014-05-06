@@ -41,7 +41,7 @@ RSpec.configure do |config|
   
   config.before(:all) do
     @tmp_root = Pathname.new(File.expand_path(File.join('..', 'tmp'), __FILE__))
-    @tmp_root.rmdir if @tmp_root.exist?
+    @tmp_root.rmtree if @tmp_root.exist?
     @tmp_root.mkdir
   end
   
