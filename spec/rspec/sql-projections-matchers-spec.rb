@@ -15,6 +15,12 @@ describe "sql-projections-matcher" do
     it "should pass if table exists" do
       connection.should have_table :departments
     end
+      
+    it "should work if table name is string" do
+      connection.should have_table 'departments' do |table|
+        table.opts[:from].should eql [:departments]
+      end
+    end
     
     it "should yield the block with the corresponding table" do
       expect { |block| 

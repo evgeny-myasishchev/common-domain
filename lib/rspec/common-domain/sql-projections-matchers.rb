@@ -2,7 +2,7 @@ class HaveTableMatcher
   
   # block here is passed if {|table| } syntax is used
   def initialize(table_name, &block)
-    @table_name = table_name
+    @table_name = table_name.to_sym
     @block = block
   end
 
@@ -24,6 +24,11 @@ class HaveTableMatcher
   end
 end
 
+# Have table matcher
+# connection.should have_table(:empllyees) do |table|
+#   table.should have_column(:id, primary_key: true, allow_null: false)
+#   table.should have_column(:name, allow_null: false)
+# end
 def have_table(table_name, &block)
   HaveTableMatcher.new table_name, &block
 end
