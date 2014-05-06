@@ -6,7 +6,12 @@ module CommonDomain::Projections
     # like version
     class ProjectionsMeta < ::ActiveRecord::Base
       def self.ensure_schema!
-        
+        unless table_exists?
+          connection.create_table(table_name) do |t|
+            t.column :projection_id, :string, null: false
+            t.column :version, :integer, null: false
+          end
+        end
       end
     end
     
