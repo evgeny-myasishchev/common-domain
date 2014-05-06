@@ -16,6 +16,7 @@ require 'event-store'
 require 'common-domain'
 require 'rspec/common-domain'
 require 'log4r'
+require 'active_record'
 
 require 'log4r/yamlconfigurator'
 require 'log4r/outputter/rollingfileoutputter'
@@ -25,6 +26,7 @@ file_outputter["filename"] = File.join(File.dirname(__FILE__), file_outputter["f
 Log4r::YamlConfigurator.decode_yaml(log4r_config['log4r_config'])
 
 CommonDomain::Logger.factory = CommonDomain::Logger::Log4rFactory.new
+ActiveRecord::Base.logger = CommonDomain::Logger.factory.get('spec::ar')
 
 Dir[File.expand_path("../support/*.rb", __FILE__)].each { |helper| require helper }
 

@@ -33,3 +33,9 @@ log4r_config:
       outputters:
       - log_file
       # - console #Uncomment this if console output is needed in tests.
+      
+    - name      : spec
+      trace     : 'true'
+      outputters:
+      - log_file
+      # - console #Uncomment this if console output is needed in tests.
