@@ -5,12 +5,22 @@ module CommonDomain::Projections
     # The model is used to hold various projection related meta information
     # like version
     class ProjectionsMeta < ::ActiveRecord::Base
-      def self.ensure_schema!
-        unless table_exists?
-          connection.create_table(table_name) do |t|
-            t.column :projection_id, :string, null: false
-            t.column :version, :integer, null: false
+      class << self
+        def ensure_schema!
+          unless table_exists?
+            connection.create_table(table_name) do |t|
+              t.column :projection_id, :string, null: false
+              t.column :version, :integer, null: false
+            end
           end
+        end
+        
+        def setup_required?(projection_id)
+          
+        end
+        
+        def rebuild_required?(projection_id, version)
+          
         end
       end
     end
