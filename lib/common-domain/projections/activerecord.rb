@@ -47,6 +47,12 @@ module CommonDomain::Projections
           identifier: self.table_name
         }
       end
+      
+      def setup
+        ProjectionsMeta.ensure_schema!
+        raise "Projection '#{config[:identifier]}' has already been initialized." if ProjectionsMeta.exists?(projection_id: config[:identifier])
+        ProjectionsMeta.create! projection_id: config[:identifier], version: config[:version]
+      end
     end
     
     def self.included(receiver)

@@ -34,4 +34,35 @@ describe CommonDomain::Projections::ActiveRecord do
       end
     end
   end
+  
+  describe "setup" do
+    let(:meta_class) { CommonDomain::Projections::ActiveRecord::ProjectionsMeta }
+    
+    before(:each) do
+      subject.projection version: 110, identifier: "projection-110"
+      subject.setup
+    end
+    
+    after(:each) do
+      meta_class.where(projection_id: 'projection-110').delete_all
+    end
+    
+    it "should setup schema of the meta " do
+      class ProjectionConfigSetupSpec1 < ActiveRecord::Base
+        include CommonDomain::Projections::ActiveRecord
+      end
+      meta_class.should_receive(:ensure_schema!).and_call_original
+      ProjectionConfigSetupSpec1.setup
+    end
+    
+    it "should raise error if initialized before" do
+      lambda { subject.setup }.should raise_error("Projection 'projection-110' has already been initialized.")
+    end
+    
+    it "should record corresponding record" do
+      meta = meta_class.find_by projection_id: 'projection-110'
+      meta.should_not be_nil
+      meta.version.should eql 110
+    end
+  end
 end
