@@ -60,6 +60,14 @@ module CommonDomain::Projections
           ProjectionsMeta.where(projection_id: config[:identifier]).delete_all
         end
       end
+      
+      def rebuild_required?
+        ProjectionsMeta.rebuild_required?(config[:identifier], config[:version])
+      end
+      
+      def setup_required?
+        ProjectionsMeta.setup_required?(config[:identifier])
+      end
     end
     
     def self.included(receiver)

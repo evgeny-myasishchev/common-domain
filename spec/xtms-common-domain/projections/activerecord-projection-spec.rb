@@ -97,4 +97,26 @@ describe CommonDomain::Projections::ActiveRecord do
       meta_class.find_by(projection_id: 'projection-120').should be_nil
     end
   end
+  
+  describe "rebuild_required?" do
+    before(:each) do
+      subject.projection version: 130, identifier: "projection-130"
+    end
+    
+    it "should use meta model to define that" do
+      meta_class.should_receive(:rebuild_required?).with('projection-130', 130).and_return(true)
+      subject.rebuild_required?.should be_true
+    end
+  end
+  
+  describe "setup_required?" do
+    before(:each) do
+      subject.projection version: 130, identifier: "projection-130"
+    end
+    
+    it "should use meta model to define that" do
+      meta_class.should_receive(:setup_required?).with('projection-130').and_return(true)
+      subject.setup_required?.should be_true
+    end
+  end
 end
