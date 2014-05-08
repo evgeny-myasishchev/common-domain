@@ -53,6 +53,13 @@ module CommonDomain::Projections
         raise "Projection '#{config[:identifier]}' has already been initialized." if ProjectionsMeta.exists?(projection_id: config[:identifier])
         ProjectionsMeta.create! projection_id: config[:identifier], version: config[:version]
       end
+      
+      def cleanup!
+        transaction do
+          delete_all
+          ProjectionsMeta.where(projection_id: config[:identifier]).delete_all
+        end
+      end
     end
     
     def self.included(receiver)

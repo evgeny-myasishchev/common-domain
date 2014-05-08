@@ -9,6 +9,7 @@ describe CommonDomain::Projections::ActiveRecord do
   end
   
   subject { TheProjection }
+  let(:meta_class) { CommonDomain::Projections::ActiveRecord::ProjectionsMeta }
   
   it "should be a base projection" do
     TheProjection.should be_a CommonDomain::Projections::Base
@@ -36,8 +37,6 @@ describe CommonDomain::Projections::ActiveRecord do
   end
   
   describe "setup" do
-    let(:meta_class) { CommonDomain::Projections::ActiveRecord::ProjectionsMeta }
-    
     before(:each) do
       subject.projection version: 110, identifier: "projection-110"
       subject.setup
@@ -63,6 +62,39 @@ describe CommonDomain::Projections::ActiveRecord do
       meta = meta_class.find_by projection_id: 'projection-110'
       meta.should_not be_nil
       meta.version.should eql 110
+    end
+  end
+  
+  describe "cleanup!" do
+    class ActiveRecordProjectionCleanupSpec < ActiveRecord::Base
+      include CommonDomain::Projections::ActiveRecord
+      def self.ensure_schema!
+        unless connection.table_exists? table_name
+          connection.create_table(table_name) do |t|
+            t.column :name, :string
+          end
+        end
+      end
+    end
+    subject { ActiveRecordProjectionCleanupSpec }
+    let(:model_class) { ActiveRecordProjectionCleanupSpec }
+    
+    before(:each) do
+      subject.projection version: 120, identifier: "projection-120"
+      subject.setup
+      model_class.ensure_schema!
+      model_class.create! name: 'Name 1'
+      model_class.create! name: 'Name 2'
+      model_class.create! name: 'Name 3'
+      subject.cleanup!
+    end
+    
+    it "should delete all data" do
+      model_class.count.should eql 0
+    end
+    
+    it "should delete corresponding meta record" do
+      meta_class.find_by(projection_id: 'projection-120').should be_nil
     end
   end
 end
