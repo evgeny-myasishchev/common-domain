@@ -71,7 +71,11 @@ module CommonDomain::Projections
     end
     
     def self.included(receiver)
-      receiver.extend CommonDomain::Projections::Base
+      raise "The module #{self} can not be included. It must be extended. The receiver was: #{receiver}."
+    end
+    
+    def self.extended(receiver)
+      receiver.send :include, CommonDomain::Projections::Base
       receiver.extend ClassMethods
     end
   end

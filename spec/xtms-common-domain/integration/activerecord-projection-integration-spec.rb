@@ -13,7 +13,7 @@ describe "Integration - CommonDomain::Projections::ActiveRecordProjection" do
   end
   
   class EmployeesProjection < ActiveRecord::Base
-    include CommonDomain::Projections::ActiveRecord
+    extend CommonDomain::Projections::ActiveRecord
     
     on Events::EmployeeCreated do |event|
       create! employee_id: event.aggregate_id, name: event.name
@@ -45,7 +45,7 @@ describe "Integration - CommonDomain::Projections::ActiveRecordProjection" do
       end
     end
     
-    def with_projections(connection)
+    def with_projections
       bootstrap_projections do |projections|
         projections.register :employees, EmployeesProjection
       end
@@ -57,7 +57,7 @@ describe "Integration - CommonDomain::Projections::ActiveRecordProjection" do
     @app = IntegrationContext.new do |bootstrap|
       bootstrap.with_event_bus
       bootstrap.with_event_store
-      bootstrap.with_projections(connection)
+      bootstrap.with_projections
       bootstrap.with_projections_initialization
     end
   end

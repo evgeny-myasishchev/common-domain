@@ -5,19 +5,19 @@ describe CommonDomain::Projections::ActiveRecord do
   use_sqlite_activerecord_connection 'ar-projections-spec.sqlite'
   
   class TheProjection < ActiveRecord::Base
-    include CommonDomain::Projections::ActiveRecord
+    extend CommonDomain::Projections::ActiveRecord
   end
   
   subject { TheProjection }
   let(:meta_class) { CommonDomain::Projections::ActiveRecord::ProjectionsMeta }
   
   it "should be a base projection" do
-    TheProjection.should be_a CommonDomain::Projections::Base
+    TheProjection.should include CommonDomain::Projections::Base
   end
   
   describe "projection config" do
     class ProjectionConfigSpec < ActiveRecord::Base
-      include CommonDomain::Projections::ActiveRecord
+      extend CommonDomain::Projections::ActiveRecord
     end
     subject { ProjectionConfigSpec }
     
@@ -48,7 +48,7 @@ describe CommonDomain::Projections::ActiveRecord do
     
     it "should setup schema of the meta " do
       class ProjectionConfigSetupSpec1 < ActiveRecord::Base
-        include CommonDomain::Projections::ActiveRecord
+        extend CommonDomain::Projections::ActiveRecord
       end
       meta_class.should_receive(:ensure_schema!).and_call_original
       ProjectionConfigSetupSpec1.setup
@@ -67,7 +67,7 @@ describe CommonDomain::Projections::ActiveRecord do
   
   describe "cleanup!" do
     class ActiveRecordProjectionCleanupSpec < ActiveRecord::Base
-      include CommonDomain::Projections::ActiveRecord
+      extend CommonDomain::Projections::ActiveRecord
       def self.ensure_schema!
         unless connection.table_exists? table_name
           connection.create_table(table_name) do |t|
