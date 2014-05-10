@@ -16,10 +16,12 @@ module CommonDomain::Projections
         end
         
         def setup_required?(projection_id)
+          return true unless table_exists?
           exists? projection_id: projection_id
         end
         
         def rebuild_required?(projection_id, version)
+          return false unless table_exists?
           meta = find_by projection_id: projection_id
           return true if version > meta.version
           return false if version == meta.version

@@ -100,6 +100,7 @@ describe CommonDomain::Projections::ActiveRecord do
   
   describe "rebuild_required?" do
     before(:each) do
+      meta_class.stub(:table_exists?) { true }
       subject.projection version: 130, identifier: "projection-130"
     end
     
@@ -107,15 +108,26 @@ describe CommonDomain::Projections::ActiveRecord do
       meta_class.should_receive(:rebuild_required?).with('projection-130', 130).and_return(true)
       subject.rebuild_required?.should be_true
     end
+        
+    it "should be false if meta model table does not exist" do
+      meta_class.should_receive(:table_exists?) { false }
+      subject.rebuild_required?.should be_false
+    end
   end
   
   describe "setup_required?" do
     before(:each) do
       subject.projection version: 130, identifier: "projection-130"
+      meta_class.stub(:table_exists?) { true }
     end
     
     it "should use meta model to define that" do
       meta_class.should_receive(:setup_required?).with('projection-130').and_return(true)
+      subject.setup_required?.should be_true
+    end
+    
+    it "should be true if meta model table does not exist" do
+      meta_class.should_receive(:table_exists?) { false }
       subject.setup_required?.should be_true
     end
   end
