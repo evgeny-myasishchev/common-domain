@@ -1,4 +1,34 @@
 module CommonDomain::Projections
+  
+  # Contains basic stuff required to create a projection based on the ActiveRecord model.
+  # Sample:
+  # class Employee < ActiveRecord::Base
+  #   include CommonDomain::Projections::ActiveRecord
+  # 
+  #   projection do
+  #     on Events::EmployeeCreated do |event|
+  #       Employee.create! employee_id: event.aggregate_id, name: event.name
+  #     end
+  #   
+  #     on Events::EmployeeRenamed do |event|
+  #       rec = Employee.find_by(employee_id: event.aggregate_id)
+  #       rec.name = event.name
+  #       rec.save!
+  #     end
+  #   
+  #     on Events::EmployeeRemoved do |event|
+  #       Employee.where(employee_id: event.aggregate_id).delete_all
+  #     end
+  #   end
+  # end
+  #
+  # To register the projection:
+  # def with_projections
+  #   bootstrap_projections do |projections|
+  #     projections.register :employee, Employee.create_projection
+  #   end
+  # end
+  # 
   module ActiveRecord
     require 'active_record'
     
