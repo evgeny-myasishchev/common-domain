@@ -11,23 +11,27 @@ describe CommonDomain::Projections::ActiveRecord do
   subject { TheProjection }
   let(:meta_class) { CommonDomain::Projections::ActiveRecord::ProjectionsMeta }
   
-  describe "projection config" do
+  describe "create_projection" do
     class ProjectionConfigSpec < ActiveRecord::Base
       include CommonDomain::Projections::ActiveRecord
     end
-    subject { ProjectionConfigSpec }
+    subject { ProjectionConfigSpec.create_projection }
+    
+    it "should create and configure instance of the projection class" do
+      subject.should be_a CommonDomain::Projections::ActiveRecord::Projection
+    end
     
     it "should have default config" do
-      subject.create_projection.config.should eql version: 0, identifier: 'projection_config_specs'
+      subject.config.should eql version: 0, identifier: 'projection_config_specs'
     end
     
     describe "configured" do
       before(:each) do
-        subject.projection version: 100, identifier: 'some-identifier-100'
+        ProjectionConfigSpec.projection version: 100, identifier: 'some-identifier-100'
       end
       
       it "should assign specific values" do
-        subject.create_projection.config.should eql version: 100, identifier: 'some-identifier-100'
+        subject.config.should eql version: 100, identifier: 'some-identifier-100'
       end
     end
   end
@@ -133,17 +137,40 @@ describe CommonDomain::Projections::ActiveRecord do
     module Events
       include CommonDomain::DomainEvent::DSL
       event :EmployeeCreated
+      event :EmployeeChanged
       event :EmployeeRemoved
     end
     class EventsHandlingSpec < ActiveRecord::Base
       include CommonDomain::Projections::ActiveRecord
       projection do
+        def handled_events
+          @handled_events ||= []
+        end
+        
         on Events::EmployeeCreated do |event|
+          handled_events << event
         end
         
         on Events::EmployeeRemoved do |event|
+          handled_events << event
         end
       end
+    end
+    
+    subject { EventsHandlingSpec.create_projection }
+    
+    it "should handle events" do
+      e1 = Events::EmployeeCreated.new('e-1')
+      e2 = Events::EmployeeChanged.new('e-2')
+      e3 = Events::EmployeeRemoved.new('e-3')
+      subject.can_handle_message?(e1).should be_true
+      subject.can_handle_message?(e2).should be_false
+      subject.can_handle_message?(e3).should be_true
+      subject.handle_message(e1)
+      subject.handle_message(e3)
+      subject.handled_events.should have(2).items
+      subject.handled_events.should include(e1)
+      subject.handled_events.should include(e3)
     end
   end
 end
