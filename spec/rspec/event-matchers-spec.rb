@@ -1,7 +1,7 @@
 require 'spec-helper'
 
 describe "event-matchers" do
-  class Events
+  module Events
     include CommonDomain::DomainEvent::DSL
     event :AggregateCreated, :name, :description
     event :AggregateRemoved

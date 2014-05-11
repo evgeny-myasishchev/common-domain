@@ -159,7 +159,7 @@ describe CommonDomain::Projections::ActiveRecord do
   end
   
   describe "events_handling" do
-    module Events
+    module ArProjectionSpecEvents
       include CommonDomain::DomainEvent::DSL
       event :EmployeeCreated
       event :EmployeeChanged
@@ -172,11 +172,11 @@ describe CommonDomain::Projections::ActiveRecord do
           @handled_events ||= []
         end
         
-        on Events::EmployeeCreated do |event|
+        on ArProjectionSpecEvents::EmployeeCreated do |event|
           handled_events << event
         end
         
-        on Events::EmployeeRemoved do |event|
+        on ArProjectionSpecEvents::EmployeeRemoved do |event|
           handled_events << event
         end
       end
@@ -185,9 +185,9 @@ describe CommonDomain::Projections::ActiveRecord do
     subject { EventsHandlingSpec.create_projection }
     
     it "should handle events" do
-      e1 = Events::EmployeeCreated.new('e-1')
-      e2 = Events::EmployeeChanged.new('e-2')
-      e3 = Events::EmployeeRemoved.new('e-3')
+      e1 = ArProjectionSpecEvents::EmployeeCreated.new('e-1')
+      e2 = ArProjectionSpecEvents::EmployeeChanged.new('e-2')
+      e3 = ArProjectionSpecEvents::EmployeeRemoved.new('e-3')
       subject.can_handle_message?(e1).should be_true
       subject.can_handle_message?(e2).should be_false
       subject.can_handle_message?(e3).should be_true
