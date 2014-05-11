@@ -30,24 +30,14 @@ module CommonDomain::Projections
       end
     end
     
-    module ClassMethods
-      def config
-        @config ||= default_config
-      end
+    class Projection
+      include Base
       
-      # Configure the projection. Available options:
-      # - version <number> - The version of the projection. Should be incremented if projection the projection needs rebubild.
-      #   The rebuild is usually required if schema has changed.
-      # - identifier <value> - The identifier or the projection. Usually assigned automatically based on the AR model table name
-      def projection(config = {})
-        @config = default_config.merge config
-      end
+      attr_reader :config, :model
       
-      def default_config
-        {
-          version: 0,
-          identifier: self.table_name
-        }
+      def configure(model, config)
+        @model = model
+        @config = config
       end
       
       def setup
@@ -57,8 +47,8 @@ module CommonDomain::Projections
       end
       
       def cleanup!
-        transaction do
-          delete_all
+        model.transaction do
+          model.delete_all
           ProjectionsMeta.where(projection_id: config[:identifier]).delete_all
         end
       end
@@ -72,12 +62,39 @@ module CommonDomain::Projections
       end
     end
     
-    def self.included(receiver)
-      raise "The module #{self} can not be included. It must be extended. The receiver was: #{receiver}."
+    module ClassMethods
+      def projection_class
+        @projection_class ||= Class.new(Projection)
+      end
+      
+      def projection_config
+        @projection_config ||= default_projection_config
+      end
+      
+      # Configure the projection. Available options:
+      # - version <number> - The version of the projection. Should be incremented if projection the projection needs rebubild.
+      #   The rebuild is usually required if schema has changed.
+      # - identifier <value> - The identifier or the projection. Usually assigned automatically based on the AR model table name
+      def projection(projection_config = {}, &block)
+        @projection_config = default_projection_config.merge projection_config
+        projection_class.class_eval &block if block_given?
+      end
+      
+      def default_projection_config
+        {
+          version: 0,
+          identifier: self.table_name
+        }
+      end
+      
+      def create_projection
+        projection = projection_class.new
+        projection.configure self, projection_config
+        projection
+      end
     end
     
-    def self.extended(receiver)
-      receiver.send :include, CommonDomain::Projections::Base
+    def self.included(receiver)
       receiver.extend ClassMethods
     end
   end

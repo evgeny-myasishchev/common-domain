@@ -47,7 +47,7 @@ describe "Integration - CommonDomain::Projections::ActiveRecordProjection" do
     
     def with_projections
       bootstrap_projections do |projections|
-        projections.register :employees, EmployeesProjection
+        projections.register :employees, EmployeesProjection.create_projection
       end
     end
   end

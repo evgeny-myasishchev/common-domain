@@ -5,24 +5,20 @@ describe CommonDomain::Projections::ActiveRecord do
   use_sqlite_activerecord_connection 'ar-projections-spec.sqlite'
   
   class TheProjection < ActiveRecord::Base
-    extend CommonDomain::Projections::ActiveRecord
+    include CommonDomain::Projections::ActiveRecord
   end
   
   subject { TheProjection }
   let(:meta_class) { CommonDomain::Projections::ActiveRecord::ProjectionsMeta }
   
-  it "should be a base projection" do
-    TheProjection.should include CommonDomain::Projections::Base
-  end
-  
   describe "projection config" do
     class ProjectionConfigSpec < ActiveRecord::Base
-      extend CommonDomain::Projections::ActiveRecord
+      include CommonDomain::Projections::ActiveRecord
     end
     subject { ProjectionConfigSpec }
     
     it "should have default config" do
-      subject.config.should eql version: 0, identifier: 'projection_config_specs'
+      subject.create_projection.config.should eql version: 0, identifier: 'projection_config_specs'
     end
     
     describe "configured" do
@@ -31,7 +27,7 @@ describe CommonDomain::Projections::ActiveRecord do
       end
       
       it "should assign specific values" do
-        subject.config.should eql version: 100, identifier: 'some-identifier-100'
+        subject.create_projection.config.should eql version: 100, identifier: 'some-identifier-100'
       end
     end
   end
@@ -39,7 +35,7 @@ describe CommonDomain::Projections::ActiveRecord do
   describe "setup" do
     before(:each) do
       subject.projection version: 110, identifier: "projection-110"
-      subject.setup
+      subject.create_projection.setup
     end
     
     after(:each) do
@@ -48,14 +44,14 @@ describe CommonDomain::Projections::ActiveRecord do
     
     it "should setup schema of the meta " do
       class ProjectionConfigSetupSpec1 < ActiveRecord::Base
-        extend CommonDomain::Projections::ActiveRecord
+        include CommonDomain::Projections::ActiveRecord
       end
       meta_class.should_receive(:ensure_schema!).and_call_original
-      ProjectionConfigSetupSpec1.setup
+      ProjectionConfigSetupSpec1.create_projection.setup
     end
     
     it "should raise error if initialized before" do
-      lambda { subject.setup }.should raise_error("Projection 'projection-110' has already been initialized.")
+      lambda { subject.create_projection.setup }.should raise_error("Projection 'projection-110' has already been initialized.")
     end
     
     it "should record corresponding record" do
@@ -67,7 +63,7 @@ describe CommonDomain::Projections::ActiveRecord do
   
   describe "cleanup!" do
     class ActiveRecordProjectionCleanupSpec < ActiveRecord::Base
-      extend CommonDomain::Projections::ActiveRecord
+      include CommonDomain::Projections::ActiveRecord
       def self.ensure_schema!
         unless connection.table_exists? table_name
           connection.create_table(table_name) do |t|
@@ -81,12 +77,13 @@ describe CommonDomain::Projections::ActiveRecord do
     
     before(:each) do
       subject.projection version: 120, identifier: "projection-120"
-      subject.setup
+      projection = subject.create_projection
+      projection.setup
       model_class.ensure_schema!
       model_class.create! name: 'Name 1'
       model_class.create! name: 'Name 2'
       model_class.create! name: 'Name 3'
-      subject.cleanup!
+      projection.cleanup!
     end
     
     it "should delete all data" do
@@ -106,12 +103,12 @@ describe CommonDomain::Projections::ActiveRecord do
     
     it "should use meta model to define that" do
       meta_class.should_receive(:rebuild_required?).with('projection-130', 130).and_return(true)
-      subject.rebuild_required?.should be_true
+      subject.create_projection.rebuild_required?.should be_true
     end
         
     it "should be false if meta model table does not exist" do
       meta_class.should_receive(:table_exists?) { false }
-      subject.rebuild_required?.should be_false
+      subject.create_projection.rebuild_required?.should be_false
     end
   end
   
@@ -123,12 +120,30 @@ describe CommonDomain::Projections::ActiveRecord do
     
     it "should use meta model to define that" do
       meta_class.should_receive(:setup_required?).with('projection-130').and_return(true)
-      subject.setup_required?.should be_true
+      subject.create_projection.setup_required?.should be_true
     end
     
     it "should be true if meta model table does not exist" do
       meta_class.should_receive(:table_exists?) { false }
-      subject.setup_required?.should be_true
+      subject.create_projection.setup_required?.should be_true
+    end
+  end
+  
+  describe "events_handling" do
+    module Events
+      include CommonDomain::DomainEvent::DSL
+      event :EmployeeCreated
+      event :EmployeeRemoved
+    end
+    class EventsHandlingSpec < ActiveRecord::Base
+      include CommonDomain::Projections::ActiveRecord
+      projection do
+        on Events::EmployeeCreated do |event|
+        end
+        
+        on Events::EmployeeRemoved do |event|
+        end
+      end
     end
   end
 end
