@@ -21,6 +21,31 @@ describe CommonDomain::Projections::ActiveRecord do
       subject.should be_a CommonDomain::Projections::ActiveRecord::Projection
     end
     
+    it "should invoke the projection block in context of projection class" do
+      ProjectionConfigSpec.projection do
+        def self.get_the_self
+          self
+        end
+        
+        def get_the_self
+          self
+        end
+      end
+      subject.class.get_the_self.should eql subject.class
+      subject.get_the_self.should eql subject
+    end
+    
+    it "should supply create_projection args to the projection configuration block" do
+      ProjectionConfigSpec.projection do |*args|
+        @method_args = args
+        def self.the_args
+          @method_args
+        end
+      end
+      projection = ProjectionConfigSpec.create_projection 100, "arg-2", "arg-3"
+      projection.class.the_args.should eql [100, 'arg-2', 'arg-3']
+    end
+    
     it "should have default config" do
       subject.config.should eql version: 0, identifier: 'projection_config_specs'
     end

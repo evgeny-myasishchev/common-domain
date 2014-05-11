@@ -35,7 +35,7 @@ module CommonDomain::Projections
       
       attr_reader :config, :model
       
-      def configure(model, config)
+      def initialize(model, config)
         @model = model
         @config = config
       end
@@ -63,10 +63,6 @@ module CommonDomain::Projections
     end
     
     module ClassMethods
-      def projection_class
-        @projection_class ||= Class.new(Projection)
-      end
-      
       def projection_config
         @projection_config ||= default_projection_config
       end
@@ -77,7 +73,7 @@ module CommonDomain::Projections
       # - identifier <value> - The identifier or the projection. Usually assigned automatically based on the AR model table name
       def projection(projection_config = {}, &block)
         @projection_config = default_projection_config.merge projection_config
-        projection_class.class_eval &block if block_given?
+        @projection_init_block = block
       end
       
       def default_projection_config
@@ -87,10 +83,10 @@ module CommonDomain::Projections
         }
       end
       
-      def create_projection
-        projection = projection_class.new
-        projection.configure self, projection_config
-        projection
+      def create_projection(*args)
+        projection_class = Class.new(Projection)
+        projection_class.class_exec(*args, &@projection_init_block) if @projection_init_block
+        projection_class.new self, projection_config
       end
     end
     
