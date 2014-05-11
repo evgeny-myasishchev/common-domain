@@ -13,18 +13,22 @@ describe "Integration - CommonDomain::Projections::ActiveRecordProjection" do
   end
   
   class EmployeesProjection < ActiveRecord::Base
-    extend CommonDomain::Projections::ActiveRecord
+    include CommonDomain::Projections::ActiveRecord
     
-    on Events::EmployeeCreated do |event|
-      create! employee_id: event.aggregate_id, name: event.name
-    end
+    projection do
+      on Events::EmployeeCreated do |event|
+        EmployeesProjection.create! employee_id: event.aggregate_id, name: event.name
+      end
       
-    on Events::EmployeeRenamed do |event|
-      where(employee_id: event.aggregate_id).update(name: event.name)
-    end
-    
-    on Events::EmployeeRemoved do |event|
-      where(employee_id: event.aggregate_id).delete_all
+      on Events::EmployeeRenamed do |event|
+        rec = EmployeesProjection.find_by(employee_id: event.aggregate_id)
+        rec.name = event.name
+        rec.save!
+      end
+      
+      on Events::EmployeeRemoved do |event|
+        EmployeesProjection.where(employee_id: event.aggregate_id).delete_all
+      end
     end
     
     def self.ensure_schema!
@@ -66,14 +70,14 @@ describe "Integration - CommonDomain::Projections::ActiveRecordProjection" do
     stream = @app.event_store.open_stream('stream-1')
     stream.add EventStore::EventMessage.new Events::EmployeeCreated.new('stream-1', 'Initial name')
     stream.commit_changes
-    sequel_connection[:employees_projection][employee_id: 'stream-1'].should eql id: 'stream-1', name: 'Initial name'
+    sequel_connection[:employees_projections][employee_id: 'stream-1'].should eql id: 1, employee_id: 'stream-1', name: 'Initial name'
     
     stream.add EventStore::EventMessage.new Events::EmployeeRenamed.new('stream-1', 'New name')
     stream.commit_changes
-    sequel_connection[:employees_projection][employee_id: 'stream-1'].should eql id: 'stream-1', name: 'New name'
+    sequel_connection[:employees_projections][employee_id: 'stream-1'].should eql id: 1, employee_id: 'stream-1', name: 'New name'
     
     stream.add EventStore::EventMessage.new Events::EmployeeRemoved.new('stream-1')
     stream.commit_changes
-    sequel_connection[:employees_projection][employee_id: 'stream-1'].should be_nil
+    sequel_connection[:employees_projections][employee_id: 'stream-1'].should be_nil
   end
 end
