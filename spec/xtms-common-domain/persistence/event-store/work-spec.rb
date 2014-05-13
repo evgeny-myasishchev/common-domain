@@ -90,6 +90,10 @@ describe CommonDomain::Persistence::EventStore::Work do
       repository.should_not_receive(:get_by_id)
       subject.get_by_id(nil, 'aggregate-77893').should be aggregate
     end
+    
+    it "should return the aggregate" do
+      subject.add_new(aggregate).should be aggregate
+    end
   end
   
   describe "commit_changes" do
