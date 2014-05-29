@@ -18,6 +18,12 @@ describe CommonDomain::DomainEvent do
       event.attribute(:name).should eql 'name-1'
       event.attribute(:description).should eql 'description-1'
     end
+    
+    it "should return a value for the attribute if it was specified as a string key" do
+      event = SampleEvent.new "aggregate-1", "name" => "name-1", "description" => "description-1"
+      event.attribute(:name).should eql 'name-1'
+      event.attribute(:description).should eql 'description-1'
+    end
   end
   
   describe "equality" do
