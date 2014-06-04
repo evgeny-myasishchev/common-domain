@@ -30,6 +30,7 @@ module Sample
 end
 
 app = Sample::Context.new do |bootstrap|
+  bootstrap.with_event_bus
   bootstrap.with_projections
   bootstrap.with_event_store
   bootstrap.with_command_handlers
