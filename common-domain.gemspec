@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'event-store', '>= 0.0.4a'
   
   s.add_development_dependency 'log4r'
-  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'rspec', '< 2.99'
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'activerecord'
 end
