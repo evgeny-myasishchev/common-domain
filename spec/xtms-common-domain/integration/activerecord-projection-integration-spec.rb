@@ -71,15 +71,15 @@ module ActiveRecordProjectionIntegrationSpec
       stream = @app.event_store.open_stream('stream-1')
       stream.add EventStore::EventMessage.new Events::EmployeeCreated.new('stream-1', 'Initial name')
       stream.commit_changes
-      sequel_connection[:employees_projections][employee_id: 'stream-1'].should eql id: 1, employee_id: 'stream-1', name: 'Initial name'
+      expect(sequel_connection[:employees_projections][employee_id: 'stream-1']).to eql id: 1, employee_id: 'stream-1', name: 'Initial name'
     
       stream.add EventStore::EventMessage.new Events::EmployeeRenamed.new('stream-1', 'New name')
       stream.commit_changes
-      sequel_connection[:employees_projections][employee_id: 'stream-1'].should eql id: 1, employee_id: 'stream-1', name: 'New name'
+      expect(sequel_connection[:employees_projections][employee_id: 'stream-1']).to eql id: 1, employee_id: 'stream-1', name: 'New name'
     
       stream.add EventStore::EventMessage.new Events::EmployeeRemoved.new('stream-1')
       stream.commit_changes
-      sequel_connection[:employees_projections][employee_id: 'stream-1'].should be_nil
+      expect(sequel_connection[:employees_projections][employee_id: 'stream-1']).to be_nil
     end
   end
 end

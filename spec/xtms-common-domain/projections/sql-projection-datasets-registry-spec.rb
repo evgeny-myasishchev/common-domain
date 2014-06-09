@@ -11,14 +11,14 @@ describe CommonDomain::Projections::Sql::DatasetsRegistry do
     end
     
     it "should not respond to unknown accessors" do
-      subject.should_not respond_to(:unknown_table)
-      lambda { subject.unknown_table }.should raise_error(NoMethodError)      
+      expect(subject).not_to respond_to(:unknown_table)
+      expect(lambda { subject.unknown_table }).to raise_error(NoMethodError)      
     end
     
     it "should have dataset accessor" do
-      subject.should respond_to(:table1)
-      subject.table1.should be_instance_of(Sequel::SQLite::Dataset)
-      subject.table1.first_source.should eql :new_table_name
+      expect(subject).to respond_to(:table1)
+      expect(subject.table1).to be_instance_of(Sequel::SQLite::Dataset)
+      expect(subject.table1.first_source).to eql :new_table_name
     end
   end
 end

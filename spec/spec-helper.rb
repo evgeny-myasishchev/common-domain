@@ -37,7 +37,6 @@ Dir[File.expand_path("../support/*.rb", __FILE__)].each { |helper| require helpe
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
-  config.treat_symbols_as_metadata_keys_with_true_values = true
   config.run_all_when_everything_filtered = true
   config.filter_run :focus
   
@@ -49,11 +48,11 @@ RSpec.configure do |config|
   
   module VerifyAndResetHelpers
     def verify(object)
-      RSpec::Mocks.proxy_for(object).verify
+      RSpec::Mocks.space.proxy_for(object).verify
     end
 
     def reset(object)
-      RSpec::Mocks.proxy_for(object).reset
+      RSpec::Mocks.space.proxy_for(object).reset
     end
   end
   

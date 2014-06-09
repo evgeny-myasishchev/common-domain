@@ -36,8 +36,8 @@ describe CommonDomain::DomainContext do
         }
       }
       subject.with_database_configs(specs)
-      subject.read_store_database_config.should eql specs['read-store']
-      subject.event_store_database_config.should eql specs['event-store']
+      expect(subject.read_store_database_config).to eql specs['read-store']
+      expect(subject.event_store_database_config).to eql specs['event-store']
     end
     
     it "should use fallback spec if specific not found" do
@@ -47,8 +47,8 @@ describe CommonDomain::DomainContext do
         }
       }
       subject.with_database_configs(specs, 'fallback')
-      subject.read_store_database_config.should eql specs['fallback']
-      subject.event_store_database_config.should eql specs['fallback']
+      expect(subject.read_store_database_config).to eql specs['fallback']
+      expect(subject.event_store_database_config).to eql specs['fallback']
     end
     
     it "should correct sqlite3 adapter name if using fallback config" do
@@ -59,8 +59,8 @@ describe CommonDomain::DomainContext do
         }
       }
       subject.with_database_configs(specs, 'fallback')
-      subject.read_store_database_config['adapter'].should eql 'sqlite'
-      subject.event_store_database_config['adapter'].should eql 'sqlite'
+      expect(subject.read_store_database_config['adapter']).to eql 'sqlite'
+      expect(subject.event_store_database_config['adapter']).to eql 'sqlite'
     end
     
     it "should not modify instance of original fallback spec" do
@@ -71,13 +71,13 @@ describe CommonDomain::DomainContext do
         }
       }
       subject.with_database_configs(specs, 'fallback')
-      specs['fallback']['adapter'].should eql 'sqlite3'
+      expect(specs['fallback']['adapter']).to eql 'sqlite3'
     end
   end
   
   describe "with_projections_initialization" do
     it "should initialize_projections but not clean all" do
-      subject.should_receive(:initialize_projections).with(:cleanup_all => false) { }
+      expect(subject).to receive(:initialize_projections).with(:cleanup_all => false) { }
       subject.with_projections_initialization
     end
   end
@@ -92,12 +92,12 @@ describe CommonDomain::DomainContext do
     let(:all_events) { [event11, event12, event21, event22]}
     
     before(:each) do
-      rm1.stub(:setup => nil, :cleanup! => nil, :rebuild_required? => false, :setup_required? => false, :can_handle_message? => false)
-      rm2.stub(:setup => nil, :cleanup! => nil, :rebuild_required? => false, :setup_required? => false, :can_handle_message? => false)
-      rm3.stub(:setup => nil, :cleanup! => nil, :rebuild_required? => false, :setup_required? => false, :can_handle_message? => false)
+      allow(rm1).to receive(:setup => nil, :cleanup! => nil, :rebuild_required? => false, :setup_required? => false, :can_handle_message? => false)
+      allow(rm2).to receive(:setup => nil, :cleanup! => nil, :rebuild_required? => false, :setup_required? => false, :can_handle_message? => false)
+      allow(rm3).to receive(:setup => nil, :cleanup! => nil, :rebuild_required? => false, :setup_required? => false, :can_handle_message? => false)
 
-      subject.stub(:event_store) { event_store }
-      persistence_engine.should_receive(:for_each_commit) do |&block|
+      allow(subject).to receive(:event_store) { event_store }
+      expect(persistence_engine).to receive(:for_each_commit) do |&block|
         block.call double(:commit1, :events => [double(:event, :body => event11), double(:event, :body => event12)])
         block.call double(:commit2, :events => [double(:event, :body => event21), double(:event, :body => event22)])
       end
@@ -106,51 +106,51 @@ describe CommonDomain::DomainContext do
     
     it "should not publish events if projections needs rebuild" do
       reset persistence_engine
-      persistence_engine.should_not_receive(:for_each_commit)
+      expect(persistence_engine).not_to receive(:for_each_commit)
       subject.initialize_projections cleanup_all: false
     end
     
     context ":cleanup_all => false" do
       it "should cleanup and setup projections that needs rebuild" do
-        rm1.should_receive(:rebuild_required?) { true }
-        rm3.should_receive(:rebuild_required?) { true }
-        rm1.should_receive(:cleanup!)
-        rm3.should_receive(:cleanup!)
-        rm1.should_receive(:setup)
-        rm3.should_receive(:setup)
+        expect(rm1).to receive(:rebuild_required?) { true }
+        expect(rm3).to receive(:rebuild_required?) { true }
+        expect(rm1).to receive(:cleanup!)
+        expect(rm3).to receive(:cleanup!)
+        expect(rm1).to receive(:setup)
+        expect(rm3).to receive(:setup)
         subject.initialize_projections cleanup_all: false
       end
       
       it "should dispatch events to all projections that has been rebuilt" do
-        rm1.should_receive(:rebuild_required?) { true }
-        rm3.should_receive(:rebuild_required?) { true }
+        expect(rm1).to receive(:rebuild_required?) { true }
+        expect(rm3).to receive(:rebuild_required?) { true }
         all_events.each { |e| 
-          rm1.should_receive(:can_handle_message?).with(e).and_return(true)
-          rm1.should_receive(:handle_message).with(e).and_return(true)
-          rm3.should_receive(:can_handle_message?).with(e).and_return(true)
-          rm3.should_receive(:handle_message).with(e).and_return(true)
+          expect(rm1).to receive(:can_handle_message?).with(e).and_return(true)
+          expect(rm1).to receive(:handle_message).with(e).and_return(true)
+          expect(rm3).to receive(:can_handle_message?).with(e).and_return(true)
+          expect(rm3).to receive(:handle_message).with(e).and_return(true)
         }
         
         subject.initialize_projections cleanup_all: false
       end
       
       it "should setup all projections that needs setup" do
-        rm1.should_receive(:setup_required?) { true }
-        rm3.should_receive(:setup_required?) { true }
-        rm1.should_receive(:setup)
-        rm3.should_receive(:setup)
+        expect(rm1).to receive(:setup_required?) { true }
+        expect(rm3).to receive(:setup_required?) { true }
+        expect(rm1).to receive(:setup)
+        expect(rm3).to receive(:setup)
         subject.initialize_projections cleanup_all: false
       end
       
       it "should dispatch events to all projections that has been setup" do
-        rm1.should_receive(:setup_required?) { true }
-        rm3.should_receive(:setup_required?) { true }
+        expect(rm1).to receive(:setup_required?) { true }
+        expect(rm3).to receive(:setup_required?) { true }
 
         all_events.each { |e| 
-          rm1.should_receive(:can_handle_message?).with(e).and_return(true)
-          rm1.should_receive(:handle_message).with(e).and_return(true)
-          rm3.should_receive(:can_handle_message?).with(e).and_return(true)
-          rm3.should_receive(:handle_message).with(e).and_return(true)
+          expect(rm1).to receive(:can_handle_message?).with(e).and_return(true)
+          expect(rm1).to receive(:handle_message).with(e).and_return(true)
+          expect(rm3).to receive(:can_handle_message?).with(e).and_return(true)
+          expect(rm3).to receive(:handle_message).with(e).and_return(true)
         }
         
         subject.initialize_projections cleanup_all: false
@@ -159,23 +159,23 @@ describe CommonDomain::DomainContext do
     
     context ":cleanup_all => true" do
       it "should cleanup and setup all projections" do
-        rm1.should_receive(:cleanup!)
-        rm2.should_receive(:cleanup!)
-        rm3.should_receive(:cleanup!)
-        rm1.should_receive(:setup)
-        rm2.should_receive(:setup)
-        rm3.should_receive(:setup)
+        expect(rm1).to receive(:cleanup!)
+        expect(rm2).to receive(:cleanup!)
+        expect(rm3).to receive(:cleanup!)
+        expect(rm1).to receive(:setup)
+        expect(rm2).to receive(:setup)
+        expect(rm3).to receive(:setup)
         subject.initialize_projections cleanup_all: true
       end
       
       it "should dispatch events to all projections" do
         all_events.each { |e| 
-          rm1.should_receive(:can_handle_message?).with(e).and_return(true)
-          rm1.should_receive(:handle_message).with(e).and_return(true)
-          rm2.should_receive(:can_handle_message?).with(e).and_return(true)
-          rm2.should_receive(:handle_message).with(e).and_return(true)
-          rm3.should_receive(:can_handle_message?).with(e).and_return(true)
-          rm3.should_receive(:handle_message).with(e).and_return(true)
+          expect(rm1).to receive(:can_handle_message?).with(e).and_return(true)
+          expect(rm1).to receive(:handle_message).with(e).and_return(true)
+          expect(rm2).to receive(:can_handle_message?).with(e).and_return(true)
+          expect(rm2).to receive(:handle_message).with(e).and_return(true)
+          expect(rm3).to receive(:can_handle_message?).with(e).and_return(true)
+          expect(rm3).to receive(:handle_message).with(e).and_return(true)
         }
         subject.initialize_projections cleanup_all: true
       end
@@ -185,8 +185,8 @@ describe CommonDomain::DomainContext do
   describe "with_dispatch_undispatched_commits" do
     it "should dispatch_undispatched" do
       event_store = double(:event_store)
-      subject.stub(:event_store) {event_store}
-      event_store.should_receive(:dispatch_undispatched)
+      allow(subject).to receive(:event_store) {event_store}
+      expect(event_store).to receive(:dispatch_undispatched)
       subject.with_dispatch_undispatched_commits
     end
   end

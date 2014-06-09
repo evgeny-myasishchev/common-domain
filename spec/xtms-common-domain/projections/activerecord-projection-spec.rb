@@ -18,7 +18,7 @@ describe CommonDomain::Projections::ActiveRecord do
     subject { ProjectionConfigSpec.create_projection }
     
     it "should create and configure instance of the projection class" do
-      subject.should be_a CommonDomain::Projections::ActiveRecord::Projection
+      expect(subject).to be_a CommonDomain::Projections::ActiveRecord::Projection
     end
     
     it "should invoke the projection block in context of projection class" do
@@ -31,8 +31,8 @@ describe CommonDomain::Projections::ActiveRecord do
           self
         end
       end
-      subject.class.get_the_self.should eql subject.class
-      subject.get_the_self.should eql subject
+      expect(subject.class.get_the_self).to eql subject.class
+      expect(subject.get_the_self).to eql subject
     end
     
     it "should supply create_projection args to the projection configuration block" do
@@ -43,11 +43,11 @@ describe CommonDomain::Projections::ActiveRecord do
         end
       end
       projection = ProjectionConfigSpec.create_projection 100, "arg-2", "arg-3"
-      projection.class.the_args.should eql [100, 'arg-2', 'arg-3']
+      expect(projection.class.the_args).to eql [100, 'arg-2', 'arg-3']
     end
     
     it "should have default config" do
-      subject.config.should eql version: 0, identifier: 'projection_config_specs'
+      expect(subject.config).to eql version: 0, identifier: 'projection_config_specs'
     end
     
     describe "configured" do
@@ -56,7 +56,7 @@ describe CommonDomain::Projections::ActiveRecord do
       end
       
       it "should assign specific values" do
-        subject.config.should eql version: 100, identifier: 'some-identifier-100'
+        expect(subject.config).to eql version: 100, identifier: 'some-identifier-100'
       end
     end
   end
@@ -75,18 +75,18 @@ describe CommonDomain::Projections::ActiveRecord do
       class ProjectionConfigSetupSpec1 < ActiveRecord::Base
         include CommonDomain::Projections::ActiveRecord
       end
-      meta_class.should_receive(:ensure_schema!).and_call_original
+      expect(meta_class).to receive(:ensure_schema!).and_call_original
       ProjectionConfigSetupSpec1.create_projection.setup
     end
     
     it "should raise error if initialized before" do
-      lambda { subject.create_projection.setup }.should raise_error("Projection 'projection-110' has already been initialized.")
+      expect(lambda { subject.create_projection.setup }).to raise_error("Projection 'projection-110' has already been initialized.")
     end
     
     it "should record corresponding record" do
       meta = meta_class.find_by projection_id: 'projection-110'
-      meta.should_not be_nil
-      meta.version.should eql 110
+      expect(meta).not_to be_nil
+      expect(meta.version).to eql 110
     end
   end
   
@@ -116,45 +116,45 @@ describe CommonDomain::Projections::ActiveRecord do
     end
     
     it "should delete all data" do
-      model_class.count.should eql 0
+      expect(model_class.count).to eql 0
     end
     
     it "should delete corresponding meta record" do
-      meta_class.find_by(projection_id: 'projection-120').should be_nil
+      expect(meta_class.find_by(projection_id: 'projection-120')).to be_nil
     end
   end
   
   describe "rebuild_required?" do
     before(:each) do
-      meta_class.stub(:table_exists?) { true }
+      allow(meta_class).to receive(:table_exists?) { true }
       subject.projection version: 130, identifier: "projection-130"
     end
     
     it "should use meta model to define that" do
-      meta_class.should_receive(:rebuild_required?).with('projection-130', 130).and_return(true)
-      subject.create_projection.rebuild_required?.should be_true
+      expect(meta_class).to receive(:rebuild_required?).with('projection-130', 130).and_return(true)
+      expect(subject.create_projection.rebuild_required?).to be_truthy
     end
         
     it "should be false if meta model table does not exist" do
-      meta_class.should_receive(:table_exists?) { false }
-      subject.create_projection.rebuild_required?.should be_false
+      expect(meta_class).to receive(:table_exists?) { false }
+      expect(subject.create_projection.rebuild_required?).to be_falsey
     end
   end
   
   describe "setup_required?" do
     before(:each) do
       subject.projection version: 130, identifier: "projection-130"
-      meta_class.stub(:table_exists?) { true }
+      allow(meta_class).to receive(:table_exists?) { true }
     end
     
     it "should use meta model to define that" do
-      meta_class.should_receive(:setup_required?).with('projection-130').and_return(true)
-      subject.create_projection.setup_required?.should be_true
+      expect(meta_class).to receive(:setup_required?).with('projection-130').and_return(true)
+      expect(subject.create_projection.setup_required?).to be_truthy
     end
     
     it "should be true if meta model table does not exist" do
-      meta_class.should_receive(:table_exists?) { false }
-      subject.create_projection.setup_required?.should be_true
+      expect(meta_class).to receive(:table_exists?) { false }
+      expect(subject.create_projection.setup_required?).to be_truthy
     end
   end
   
@@ -188,14 +188,14 @@ describe CommonDomain::Projections::ActiveRecord do
       e1 = ArProjectionSpecEvents::EmployeeCreated.new('e-1')
       e2 = ArProjectionSpecEvents::EmployeeChanged.new('e-2')
       e3 = ArProjectionSpecEvents::EmployeeRemoved.new('e-3')
-      subject.can_handle_message?(e1).should be_true
-      subject.can_handle_message?(e2).should be_false
-      subject.can_handle_message?(e3).should be_true
+      expect(subject.can_handle_message?(e1)).to be_truthy
+      expect(subject.can_handle_message?(e2)).to be_falsey
+      expect(subject.can_handle_message?(e3)).to be_truthy
       subject.handle_message(e1)
       subject.handle_message(e3)
-      subject.handled_events.should have(2).items
-      subject.handled_events.should include(e1)
-      subject.handled_events.should include(e3)
+      expect(subject.handled_events.length).to eql(2)
+      expect(subject.handled_events).to include(e1)
+      expect(subject.handled_events).to include(e3)
     end
   end
 end

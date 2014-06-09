@@ -8,11 +8,11 @@ describe CommonDomain::Infrastructure::MessagesRouter do
     
     it "shold return true if there is at least one handler registered" do
       subject.register(handler)
-      subject.handlers?.should be_true
+      expect(subject.handlers?).to be_truthy
     end
     
     it "should return false if no handlers registered" do
-      subject.handlers?.should be_false
+      expect(subject.handlers?).to be_falsey
     end
   end
   
@@ -26,16 +26,16 @@ describe CommonDomain::Infrastructure::MessagesRouter do
       message_two = double(:message_two)
       
       handler_one = double(:handler_one)
-      handler_one.should_receive(:can_handle_message?).with(message_one).and_return(true)
-      handler_one.should_receive(:handle_message).with(message_one)
-      handler_one.should_receive(:can_handle_message?).with(message_two).and_return(true)
-      handler_one.should_receive(:handle_message).with(message_two)
+      expect(handler_one).to receive(:can_handle_message?).with(message_one).and_return(true)
+      expect(handler_one).to receive(:handle_message).with(message_one)
+      expect(handler_one).to receive(:can_handle_message?).with(message_two).and_return(true)
+      expect(handler_one).to receive(:handle_message).with(message_two)
       
       handler_two = double(:handler_one_two)
-      handler_two.should_receive(:can_handle_message?).with(message_one).and_return(true)
-      handler_two.should_receive(:handle_message).with(message_one)
-      handler_two.should_receive(:can_handle_message?).with(message_two).and_return(true)
-      handler_two.should_receive(:handle_message).with(message_two)
+      expect(handler_two).to receive(:can_handle_message?).with(message_one).and_return(true)
+      expect(handler_two).to receive(:handle_message).with(message_one)
+      expect(handler_two).to receive(:can_handle_message?).with(message_two).and_return(true)
+      expect(handler_two).to receive(:handle_message).with(message_two)
       
       subject.register handler_one
       subject.register handler_two
@@ -49,8 +49,8 @@ describe CommonDomain::Infrastructure::MessagesRouter do
       message_two = double(:message_two)
       
       handler_one = double(:handler_one)
-      handler_one.should_receive(:can_handle_message?).with(message_one).and_return(false)
-      handler_one.should_receive(:can_handle_message?).with(message_two).and_return(false)
+      expect(handler_one).to receive(:can_handle_message?).with(message_one).and_return(false)
+      expect(handler_one).to receive(:can_handle_message?).with(message_two).and_return(false)
       
       subject.register handler_one
       
@@ -62,7 +62,7 @@ describe CommonDomain::Infrastructure::MessagesRouter do
       message_one = double(:message_one)
       handler_one = double(:handler_one, :can_handle_message? => true, :handle_message => "handler result")
       subject.register handler_one
-      subject.route(message_one).should be_nil
+      expect(subject.route(message_one)).to be_nil
     end
     
     it "should do nothing if there are no handlers for the msssage found" do
@@ -71,7 +71,7 @@ describe CommonDomain::Infrastructure::MessagesRouter do
     
     context "fail_if_no_handlers" do
       it "should fail if there are no handlers for the msssage found" do
-        lambda { subject.route(double(:message), fail_if_no_handlers: true) }.should raise_error(CommonDomain::Infrastructure::MessagesRouter::NoHandlersFound)
+        expect(lambda { subject.route(double(:message), fail_if_no_handlers: true) }).to raise_error(CommonDomain::Infrastructure::MessagesRouter::NoHandlersFound)
       end
     end
     
@@ -84,14 +84,14 @@ describe CommonDomain::Infrastructure::MessagesRouter do
         subject.register handler_one
         subject.register handler_two
 
-        lambda { subject.route(message_one, ensure_single_handler: true) }.should raise_error(CommonDomain::Infrastructure::MessagesRouter::SeveralHandlersFound)
+        expect(lambda { subject.route(message_one, ensure_single_handler: true) }).to raise_error(CommonDomain::Infrastructure::MessagesRouter::SeveralHandlersFound)
       end
       
       it "should return handler result" do
         message_one = double(:message_one)
         handler_one = double(:handler_one, :can_handle_message? => true, :handle_message => "handler result")
         subject.register handler_one
-        subject.route(message_one, ensure_single_handler: true).should eql "handler result"
+        expect(subject.route(message_one, ensure_single_handler: true)).to eql "handler result"
       end
     end
 
@@ -101,10 +101,10 @@ describe CommonDomain::Infrastructure::MessagesRouter do
         message = double(:message)
 
         handler_one = double(:handler_one, :can_handle_message? => true)
-        handler_one.should_receive(:handle_message).with(message, headers)
+        expect(handler_one).to receive(:handle_message).with(message, headers)
 
         handler_two = double(:handler_two, :can_handle_message? => true)
-        handler_two.should_receive(:handle_message).with(message, headers)
+        expect(handler_two).to receive(:handle_message).with(message, headers)
 
         subject.register handler_one
         subject.register handler_two

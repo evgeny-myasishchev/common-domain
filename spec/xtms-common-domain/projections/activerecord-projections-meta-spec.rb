@@ -13,23 +13,23 @@ describe CommonDomain::Projections::ActiveRecord::ProjectionsMeta do
   end
   
   it "should be active record" do
-    described_class.superclass.should eql ::ActiveRecord::Base
+    expect(described_class.superclass).to eql ::ActiveRecord::Base
   end
   
   it "should setup schema table to store schema meta" do
     connection = Sequel.connect adapter: "sqlite", database: @db_path.to_s
-    connection.should have_table described_class.table_name.to_sym do |table|
-      table.should have_column(:id, primary_key: true, allow_null: false)
-      table.should have_column(:projection_id, allow_null: false, type: :string)
-      table.should have_column(:version, allow_null: false, type: :integer)
+    expect(connection).to have_table described_class.table_name.to_sym do |table|
+      expect(table).to have_column(:id, primary_key: true, allow_null: false)
+      expect(table).to have_column(:projection_id, allow_null: false, type: :string)
+      expect(table).to have_column(:version, allow_null: false, type: :integer)
     end
   end
   
   describe "setup_required?" do
     it "should be true if there is no corresponding record for the specified projection" do
-      described_class.setup_required?('projection-992').should be_false
+      expect(described_class.setup_required?('projection-992')).to be_falsey
       described_class.create! projection_id: 'projection-992', version: 0
-      described_class.setup_required?('projection-992').should be_true
+      expect(described_class.setup_required?('projection-992')).to be_truthy
     end
   end
   
@@ -39,12 +39,12 @@ describe CommonDomain::Projections::ActiveRecord::ProjectionsMeta do
     end
     
     it "should be true if last recorded version is lowwer" do
-      described_class.rebuild_required?('projection-993', 20).should be_true
-      described_class.rebuild_required?('projection-993', 10).should be_false
+      expect(described_class.rebuild_required?('projection-993', 20)).to be_truthy
+      expect(described_class.rebuild_required?('projection-993', 10)).to be_falsey
     end
     
     it "should raise error if last known version is higher" do
-      lambda { described_class.rebuild_required?('projection-993', 5) }.should raise_error("Downgrade is not supported for projection projection-993. Last known version is 10. Requested projection version was 5.")
+      expect(lambda { described_class.rebuild_required?('projection-993', 5) }).to raise_error("Downgrade is not supported for projection projection-993. Last known version is 10. Requested projection version was 5.")
     end
   end
 end

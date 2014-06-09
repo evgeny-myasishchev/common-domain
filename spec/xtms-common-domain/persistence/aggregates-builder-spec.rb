@@ -6,8 +6,8 @@ describe CommonDomain::Persistence::AggregatesBuilder do
       class Account < CommonDomain::Aggregate
       end
       account = subject.build Account, "account-1"
-      account.should be_instance_of(Account)
-      account.aggregate_id.should eql "account-1"
+      expect(account).to be_instance_of(Account)
+      expect(account.aggregate_id).to eql "account-1"
     end
   end
 end

@@ -9,23 +9,23 @@ describe CommonDomain::Command do
   
   it "should initialize attributes" do
     cmd = Commands::SampleCommand.new "aggregate-1", :name => "name-1", :description => "description-1"
-    cmd.aggregate_id.should eql "aggregate-1"
-    cmd.name.should eql "name-1"
-    cmd.description.should eql "description-1"
+    expect(cmd.aggregate_id).to eql "aggregate-1"
+    expect(cmd.name).to eql "name-1"
+    expect(cmd.description).to eql "description-1"
   end
   
   it "should have headers hash" do
     cmd = Commands::SampleCommand.new
-    cmd.headers.should_not be_nil
-    cmd.headers.should be_instance_of(Hash)
+    expect(cmd.headers).not_to be_nil
+    expect(cmd.headers).to be_instance_of(Hash)
   end
 
   it "should initialize headers and attributes" do
     cmd = Commands::SampleCommand.new "aggregate-1", attributes: { name: "name-1", description: "description-1" }, headers: {header1: 'header 1', header2: 'header 2'}
-    cmd.aggregate_id.should eql "aggregate-1"
-    cmd.name.should eql "name-1"
-    cmd.description.should eql "description-1"
-    cmd.headers.should eql(header1: 'header 1', header2: 'header 2')
+    expect(cmd.aggregate_id).to eql "aggregate-1"
+    expect(cmd.name).to eql "name-1"
+    expect(cmd.description).to eql "description-1"
+    expect(cmd.headers).to eql(header1: 'header 1', header2: 'header 2')
   end
   
   describe "from_hash" do
@@ -35,14 +35,14 @@ describe CommonDomain::Command do
         aggregate_id: "aggregate-1",
         name: "name-1",
         description: "description-1")
-      target.should be_instance_of(Commands::SampleCommand)
-      target.aggregate_id.should eql "aggregate-1"
-      target.name.should eql "name-1"
-      target.description.should eql "description-1"
+      expect(target).to be_instance_of(Commands::SampleCommand)
+      expect(target.aggregate_id).to eql "aggregate-1"
+      expect(target.name).to eql "name-1"
+      expect(target.description).to eql "description-1"
     end
     
     it "should fail if no class_name argument present" do
-      lambda { described_class.from_hash(aggregate_id: "aggregate-id") }.should raise_error(CommonDomain::CommandClassMissingError)
+      expect(lambda { described_class.from_hash(aggregate_id: "aggregate-id") }).to raise_error(CommonDomain::CommandClassMissingError)
     end
   end
 end

@@ -19,12 +19,12 @@ describe CommonDomain::Infrastructure::MessagesHandler do
     it "should return true if handler method is defined" do
       subject_class.send(:define_method, :'on_MessageOne_message') {}
       subject_class.send(:define_method, :'on_Messages_MessageTwo_message') {}
-      subject.can_handle_message?(MessageOne.new).should be_true
-      subject.can_handle_message?(Messages::MessageTwo.new).should be_true
+      expect(subject.can_handle_message?(MessageOne.new)).to be_truthy
+      expect(subject.can_handle_message?(Messages::MessageTwo.new)).to be_truthy
     end
     
     it "should return false for unknown message" do
-      subject.can_handle_message?(UnhandledMessage.new).should be_false
+      expect(subject.can_handle_message?(UnhandledMessage.new)).to be_falsey
     end
   end
   
@@ -52,12 +52,12 @@ describe CommonDomain::Infrastructure::MessagesHandler do
       message_one = MessageOne.new
       message_two = Messages::MessageTwo.new
       subject.handle_message message_one
-      subject.message_one_processed.should be_true
-      subject.processed_message.should be message_one
+      expect(subject.message_one_processed).to be_truthy
+      expect(subject.processed_message).to be message_one
       
       subject.handle_message message_two
-      subject.message_two_processed.should be_true
-      subject.processed_message.should be message_two
+      expect(subject.message_two_processed).to be_truthy
+      expect(subject.processed_message).to be message_two
     end
     
     it "should be able to handle messages handled by base class" do
@@ -65,33 +65,33 @@ describe CommonDomain::Infrastructure::MessagesHandler do
       derived_instance = derived_class.new
       message_one = MessageOne.new
       message_two = Messages::MessageTwo.new
-      derived_instance.can_handle_message?(message_one).should be_true
-      derived_instance.can_handle_message?(message_two).should be_true
+      expect(derived_instance.can_handle_message?(message_one)).to be_truthy
+      expect(derived_instance.can_handle_message?(message_two)).to be_truthy
       derived_instance.handle_message message_one
-      derived_instance.message_one_processed.should be_true
-      derived_instance.processed_message.should be message_one
+      expect(derived_instance.message_one_processed).to be_truthy
+      expect(derived_instance.processed_message).to be message_one
       
       derived_instance.handle_message message_two
-      derived_instance.message_two_processed.should be_true
-      derived_instance.processed_message.should be message_two
+      expect(derived_instance.message_two_processed).to be_truthy
+      expect(derived_instance.processed_message).to be message_two
     end
     
     it "should raise error if no handler found" do
-      lambda { subject.handle_message UnhandledMessage.new }.should raise_error(CommonDomain::Infrastructure::MessagesHandler::UnknownHandlerError)
+      expect(lambda { subject.handle_message UnhandledMessage.new }).to raise_error(CommonDomain::Infrastructure::MessagesHandler::UnknownHandlerError)
     end
 
     it "should invoke corresponding handler with headers" do
       message = MessageThree.new
       subject.handle_message message, {header1: "header-1", header2: "header-2"}
-      subject.processed_message.should eql message
-      subject.headers.should eql({header1: "header-1", header2: "header-2"})
+      expect(subject.processed_message).to eql message
+      expect(subject.headers).to eql({header1: "header-1", header2: "header-2"})
     end
   end
   
   describe "on" do
     it "should fail to register same handler twice" do
       subject_class.send(:on, MessageOne) { }
-      lambda { subject_class.send(:on, MessageOne) { } }.should raise_error(CommonDomain::Infrastructure::MessagesHandler::HandlerAlreadyRegistered)
+      expect(lambda { subject_class.send(:on, MessageOne) { } }).to raise_error(CommonDomain::Infrastructure::MessagesHandler::HandlerAlreadyRegistered)
     end
     
     it "should define instance method for each message" do
@@ -104,30 +104,30 @@ describe CommonDomain::Infrastructure::MessagesHandler do
           
         end
       end
-      subject.respond_to?(:'on_MessageOne_message').should be_true
-      subject.respond_to?(:'on_Messages_MessageTwo_message').should be_true
+      expect(subject.respond_to?(:'on_MessageOne_message')).to be_truthy
+      expect(subject.respond_to?(:'on_Messages_MessageTwo_message')).to be_truthy
     end
   end
   
   describe "on_any" do
     let(:block) { lambda { |event|  }}
     it "should perform on for each message class" do
-      subject_class.should_receive(:on).with(MessageOne, &block)
-      subject_class.should_receive(:on).with(Messages::MessageTwo, &block)
+      expect(subject_class).to receive(:on).with(MessageOne, &block)
+      expect(subject_class).to receive(:on).with(Messages::MessageTwo, &block)
       subject_class.send(:on_any, MessageOne, Messages::MessageTwo, &block)
     end
     
     it "should perform on for each message class if messages are passed as a single arg array" do
-      subject_class.should_receive(:on).with(MessageOne, &block)
-      subject_class.should_receive(:on).with(Messages::MessageTwo, &block)
+      expect(subject_class).to receive(:on).with(MessageOne, &block)
+      expect(subject_class).to receive(:on).with(Messages::MessageTwo, &block)
       subject_class.send(:on_any, [MessageOne, Messages::MessageTwo], &block)
     end
   end
 
   describe "message_handler_name" do
     it "should use underscores as namespaces delimiters" do
-      subject.send(:message_handler_name, MessageOne).should eql :on_MessageOne_message
-      subject.send(:message_handler_name, Messages::MessageTwo).should eql :on_Messages_MessageTwo_message
+      expect(subject.send(:message_handler_name, MessageOne)).to eql :on_MessageOne_message
+      expect(subject.send(:message_handler_name, Messages::MessageTwo)).to eql :on_Messages_MessageTwo_message
     end
   end
 end

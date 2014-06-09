@@ -57,9 +57,9 @@ describe "Integration - CommonDomain::Projections::SqlProjection" do
   end
   
   it "should setup schema of the projection" do
-    connection.should have_table(:employees_projection) do |table|
-      table.should have_column(:id, primary_key: true, allow_null: false)
-      table.should have_column(:name, allow_null: false)
+    expect(connection).to have_table(:employees_projection) do |table|
+      expect(table).to have_column(:id, primary_key: true, allow_null: false)
+      expect(table).to have_column(:name, allow_null: false)
     end
   end
   
@@ -67,14 +67,14 @@ describe "Integration - CommonDomain::Projections::SqlProjection" do
     stream = @app.event_store.open_stream('stream-1')
     stream.add EventStore::EventMessage.new Events::EmployeeCreated.new('stream-1', 'Initial name')
     stream.commit_changes
-    connection[:employees_projection][id: 'stream-1'].should eql id: 'stream-1', name: 'Initial name'
+    expect(connection[:employees_projection][id: 'stream-1']).to eql id: 'stream-1', name: 'Initial name'
     
     stream.add EventStore::EventMessage.new Events::EmployeeRenamed.new('stream-1', 'New name')
     stream.commit_changes
-    connection[:employees_projection][id: 'stream-1'].should eql id: 'stream-1', name: 'New name'
+    expect(connection[:employees_projection][id: 'stream-1']).to eql id: 'stream-1', name: 'New name'
     
     stream.add EventStore::EventMessage.new Events::EmployeeRemoved.new('stream-1')
     stream.commit_changes
-    connection[:employees_projection][id: 'stream-1'].should be_nil
+    expect(connection[:employees_projection][id: 'stream-1']).to be_nil
   end
 end

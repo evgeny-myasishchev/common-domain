@@ -5,24 +5,24 @@ describe CommonDomain::Entity do
   subject { described_class.new aggregate }
   
   it "should be a messages handler" do
-    subject.should be_a CommonDomain::Infrastructure::MessagesHandler
+    expect(subject).to be_a CommonDomain::Infrastructure::MessagesHandler
   end
   
   it "should have entity_id attribute initialized" do
-    subject.entity_id.should be_nil
+    expect(subject.entity_id).to be_nil
   end
   
   describe "initializer" do
     it "should assign aggregate and aggregate_id" do
-      subject.aggregate.should be aggregate
-      subject.aggregate_id.should eql 'aggregate-220'
+      expect(subject.aggregate).to be aggregate
+      expect(subject.aggregate_id).to eql 'aggregate-220'
     end
   end
   
   describe "raise_event" do
     it "should delegate the event to the aggregate" do
       event = double(:event)
-      aggregate.should_receive(:raise_event).with(event)
+      expect(aggregate).to receive(:raise_event).with(event)
       subject.send(:raise_event, event)
     end
   end
@@ -30,7 +30,7 @@ describe CommonDomain::Entity do
   describe "apply_event" do
     it "should just handle_message" do
       event = double(:event)
-      subject.should_receive(:handle_message).with(event)
+      expect(subject).to receive(:handle_message).with(event)
       subject.apply_event event
     end
   end

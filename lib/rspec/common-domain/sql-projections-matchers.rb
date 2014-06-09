@@ -15,19 +15,19 @@ class HaveTableMatcher
     result
   end
 
-  def failure_message_for_should
+  def failure_message
     "expected #{@actual} to have table #{@table_name}"
   end
 
-  def failure_message_for_should_not
+  def failure_message_when_negated
     "expected #{@actual} not to have table #{@table_name}"
   end
 end
 
 # Have table matcher
-# connection.should have_table(:empllyees) do |table|
-#   table.should have_column(:id, primary_key: true, allow_null: false)
-#   table.should have_column(:name, allow_null: false)
+# expect(connection).to have_table(:empllyees) do |table|
+#   expect(table).to have_column(:id, primary_key: true, allow_null: false)
+#   expect(table).to have_column(:name, allow_null: false)
 # end
 def have_table(table_name, &block)
   HaveTableMatcher.new table_name, &block
@@ -58,12 +58,12 @@ RSpec::Matchers.define :have_column do |column_name, attribs|
     end
   end
   
-  def failure_message_for_should
+  def failure_message
     but = @column.nil? ? "but no column found" : "but was #{@column} (specified only attribs are matched)"
     "table #{@table_name} expected to have column [#{@column_name}, #{@attribs}] #{but}"
   end
   
-  def failure_message_for_should_not
+  def failure_message_when_negated
     "table #{@table_name} expected not to have column [#{@column_name}, #{@attribs}]"
   end
 end

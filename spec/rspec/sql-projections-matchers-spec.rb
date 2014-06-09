@@ -13,29 +13,29 @@ describe "sql-projections-matcher" do
   
   describe "have_table" do
     it "should pass if table exists" do
-      connection.should have_table :departments
+      expect(connection).to have_table :departments
     end
       
     it "should work if table name is string" do
-      connection.should have_table 'departments' do |table|
-        table.opts[:from].should eql [:departments]
+      expect(connection).to have_table 'departments' do |table|
+        expect(table.opts[:from]).to eql [:departments]
       end
     end
     
     it "should yield the block with the corresponding table" do
       expect { |block| 
-        connection.should have_table(:departments) {|table| block.to_proc.call(table)}
+        expect(connection).to have_table(:departments) {|table| block.to_proc.call(table)}
       }.to yield_with_args(connection[:departments])
       
       expect { |block| 
-        connection.should have_table(:departments) do |table|
+        expect(connection).to have_table(:departments) do |table|
           block.to_proc.call(table)
         end
       }.to yield_with_args(connection[:departments])
     end
     
     it "should fail if table does not exists" do
-      lambda { connection.should have_table(:unknown_table) }.should raise_error(RSpec::Expectations::ExpectationNotMetError)
+      expect{ expect(connection).to have_table(:unknown_table) }.to raise_error(RSpec::Expectations::ExpectationNotMetError)
     end
     
     describe "failure_messages" do
@@ -46,11 +46,11 @@ describe "sql-projections-matcher" do
       }
       
       it "should tell that table does not exist for should" do
-        subject.failure_message_for_should.should eql "expected #{connection} to have table departments"
+        expect(subject.failure_message).to eql "expected #{connection} to have table departments"
       end
       
       it "should tell that table does not exist for should_not" do
-        subject.failure_message_for_should_not.should eql "expected #{connection} not to have table departments"
+        expect(subject.failure_message_when_negated).to eql "expected #{connection} not to have table departments"
       end
     end
   end
@@ -59,20 +59,20 @@ describe "sql-projections-matcher" do
     let(:actual) { connection[:departments] }
     
     it "should pass if given column exists" do
-      have_column(:id, type: :string, primary_key: true, allow_null: false).matches?(actual).should be_true
+      expect(have_column(:id, type: :string, primary_key: true, allow_null: false).matches?(actual)).to be_truthy
     end
     
     it "should fail if given column does not exists" do
-      have_column(:unknown, type: :string, primary_key: true, allow_null: false).matches?(actual).should be_false
+      expect(have_column(:unknown, type: :string, primary_key: true, allow_null: false).matches?(actual)).to be_falsey
     end
     
     it "should fail if some attributes doesn't match" do
-      have_column(:id, type: :int, primary_key: true, allow_null: false).matches?(actual).should be_false
+      expect(have_column(:id, type: :int, primary_key: true, allow_null: false).matches?(actual)).to be_falsey
     end
     
     it "should handle null" do
-      have_column(:name, allow_null: true).matches?(actual).should be_true
-      have_column(:name, allow_null: false).matches?(actual).should be_false
+      expect(have_column(:name, allow_null: true).matches?(actual)).to be_truthy
+      expect(have_column(:name, allow_null: false).matches?(actual)).to be_falsey
     end
     
     describe "failure_messages" do
@@ -89,16 +89,16 @@ describe "sql-projections-matcher" do
       }
       
       it "should tell there is no such column" do
-        not_existing.failure_message_for_should.should eql "table departments expected to have column [unknown, {:type=>:string, :primary_key=>true, :allow_null=>false}] but no column found"
+        expect(not_existing.failure_message).to eql "table departments expected to have column [unknown, {:type=>:string, :primary_key=>true, :allow_null=>false}] but no column found"
       end
       
       it "should tell there expected column is different from actual" do
-        existing.failure_message_for_should.should eql "table departments expected to have column [id, {:type=>:string, :primary_key=>true, :allow_null=>false}] but was [:id, {:allow_null=>false, :default=>nil, :primary_key=>true, :db_type=>\"varchar(255)\", :type=>:string, :ruby_default=>nil}] (specified only attribs are matched)"
+        expect(existing.failure_message).to eql "table departments expected to have column [id, {:type=>:string, :primary_key=>true, :allow_null=>false}] but was [:id, {:allow_null=>false, :default=>nil, :primary_key=>true, :db_type=>\"varchar(255)\", :type=>:string, :ruby_default=>nil}] (specified only attribs are matched)"
       end
       
       it "should tell that the column was not expected" do
-        existing.failure_message_for_should_not.should eql "table departments expected not to have column [id, {:type=>:string, :primary_key=>true, :allow_null=>false}]"
-        not_existing.failure_message_for_should_not.should eql "table departments expected not to have column [unknown, {:type=>:string, :primary_key=>true, :allow_null=>false}]"
+        expect(existing.failure_message_when_negated).to eql "table departments expected not to have column [id, {:type=>:string, :primary_key=>true, :allow_null=>false}]"
+        expect(not_existing.failure_message_when_negated).to eql "table departments expected not to have column [unknown, {:type=>:string, :primary_key=>true, :allow_null=>false}]"
       end
     end
   end
