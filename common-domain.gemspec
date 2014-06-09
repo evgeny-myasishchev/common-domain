@@ -12,10 +12,10 @@ Gem::Specification.new do |s|
   s.files       = Dir["lib/**/*"]
   s.test_files  = Dir['spec/**/*']
   
-  s.add_dependency 'event-store', '>= 0.0.4a'
+  s.add_dependency 'event-store', '~> 1.0'
   
   s.add_development_dependency 'log4r'
-  s.add_development_dependency 'rspec', '< 2.99'
+  s.add_development_dependency 'rspec', '~> 3'
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'activerecord'
 end
