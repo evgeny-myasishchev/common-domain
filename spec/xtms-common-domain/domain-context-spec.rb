@@ -92,9 +92,9 @@ describe CommonDomain::DomainContext do
     let(:all_events) { [event11, event12, event21, event22]}
     
     before(:each) do
-      allow(rm1).to receive(:setup => nil, :cleanup! => nil, :rebuild_required? => false, :setup_required? => false, :can_handle_message? => false)
-      allow(rm2).to receive(:setup => nil, :cleanup! => nil, :rebuild_required? => false, :setup_required? => false, :can_handle_message? => false)
-      allow(rm3).to receive(:setup => nil, :cleanup! => nil, :rebuild_required? => false, :setup_required? => false, :can_handle_message? => false)
+      allow(rm1).to receive_messages(:setup => nil, :cleanup! => nil, :rebuild_required? => false, :setup_required? => false, :can_handle_message? => false)
+      allow(rm2).to receive_messages(:setup => nil, :cleanup! => nil, :rebuild_required? => false, :setup_required? => false, :can_handle_message? => false)
+      allow(rm3).to receive_messages(:setup => nil, :cleanup! => nil, :rebuild_required? => false, :setup_required? => false, :can_handle_message? => false)
 
       allow(subject).to receive(:event_store) { event_store }
       expect(persistence_engine).to receive(:for_each_commit) do |&block|

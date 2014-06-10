@@ -28,13 +28,13 @@ describe "aggregate-matchers" do
     it "provides message, expected and actual on #failure_message" do
       matcher = be_an_aggregate
       matcher.matches? aggregate
-      expect(matcher.failure_message).to == "\nexpected: \"#{aggregate}\" to be a kind of CommonDomain::Aggregate\ngot: #{AggregateImplementation}\n"
+      expect(matcher.failure_message).to eql "\nexpected: \"#{aggregate}\" to be a kind of CommonDomain::Aggregate\ngot: #{AggregateImplementation}\n"
     end
     
     it "provides message, expected and actual on #negative_failure_message" do
       matcher = be_an_aggregate
       matcher.matches? aggregate
-      expect(matcher.failure_message_when_negated).to == "\nexpected: \"#{aggregate}\" not to be a kind of CommonDomain::Aggregate"
+      expect(matcher.failure_message_when_negated).to eql "\nexpected: \"#{aggregate}\" not to be a kind of CommonDomain::Aggregate"
     end
   end
 end

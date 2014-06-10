@@ -1,12 +1,12 @@
 module RSpec::Matchers::CommonDomainMatchers
-  def self.setup_work_mock(double)
-    allow(double).to receive(on_committed: nil)
+  def self.setup_work_mock(host, double)
+    host.allow(double).to host.receive(:on_committed) { nil }
   end
     
   RSpec::Matchers.define :begin_work do
     match do |repository|
       work = double(:work)
-      RSpec::Matchers::CommonDomainMatchers::setup_work_mock work
+      RSpec::Matchers::CommonDomainMatchers::setup_work_mock self, work
       expect(repository).to receive(:begin_work) do |headers = {}, &block|
         block.call(work)
       end
@@ -18,7 +18,7 @@ module RSpec::Matchers::CommonDomainMatchers
     raise "Headers must be supplied" if headers.nil?
     match do |repository|
       work = double(:work)
-      RSpec::Matchers::CommonDomainMatchers::setup_work_mock work
+      RSpec::Matchers::CommonDomainMatchers::setup_work_mock self, work
       expect(repository).to receive(:begin_work) do |h, &block|
         expect(h).to eql headers
         block.call(work) unless block.nil?

@@ -5,13 +5,13 @@ describe "work-matchers" do
   
   describe "begin_work" do
     it "should setup :begin_work and yield passed block with mocked work when called" do
-      expect(work = repository).to begin_work
-      expect(work).to be_instance_of RSpec::Mocks::Mock
+      work = expect(repository).to begin_work
+      expect(work).to be_instance_of RSpec::Mocks::Double
       expect { |block| repository.begin_work(&block) }.to yield_with_args(work)
     end
     
     it "should stub on_committed" do
-      expect(work = repository).to begin_work
+      work = expect(repository).to begin_work
       expect(work.on_committed).to be_nil
       repository.begin_work { }
     end
@@ -24,19 +24,19 @@ describe "work-matchers" do
     
     it "should setup :begin_work and yield passed block with mocked work when called" do
       headers = {header1: 'header-1', header2: 'header-2'}
-      expect(work = repository).to begin_work_with_headers headers
-      expect(work).to be_instance_of RSpec::Mocks::Mock
+      work = expect(repository).to begin_work_with_headers headers
+      expect(work).to be_instance_of RSpec::Mocks::Double
       expect { |block| repository.begin_work(headers, &block) }.to yield_with_args(work)
     end
     
     it "should make sure that supplied headers match" do
       headers = {header: 'header-100'}
-      expect(work = repository).to begin_work_with_headers headers
+      work = expect(repository).to begin_work_with_headers headers
       expect(lambda { repository.begin_work({wrong: 'header-100'}) }).to raise_error(RSpec::Expectations::ExpectationNotMetError)
     end
     
     it "should stub on_committed" do
-      expect(work = repository).to begin_work_with_headers({header: 'header-1'})
+      work = expect(repository).to begin_work_with_headers({header: 'header-1'})
       expect(work.on_committed).to be_nil
       repository.begin_work({header: 'header-1'}) { }
     end
@@ -61,7 +61,7 @@ describe "work-matchers" do
   describe "register_on_committed" do
     let(:work) { double(:work) }
     it "should setup on_committed expectation and return a callback to trigger committed callback" do
-      expect(callback = work).to register_on_committed
+      callback = expect(work).to register_on_committed
       expect { |block|
         work.on_committed &block
         callback.call
@@ -69,7 +69,7 @@ describe "work-matchers" do
     end
     
     it "should call the block only if the callback was registered" do
-      expect(callback = work).to register_on_committed
+      callback = expect(work).to register_on_committed
       expect(lambda { callback.call }).not_to raise_error
       work.on_committed {}
     end
