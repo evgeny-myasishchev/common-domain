@@ -184,6 +184,14 @@ describe CommonDomain::Projections::ActiveRecord do
     
     subject { EventsHandlingSpec.create_projection }
     
+    it "should create class once" do
+      expect(subject.class).to eql EventsHandlingSpec.create_projection.class
+    end
+    
+    it "should assign const to the class" do
+      expect(subject.class.name).to eql 'EventsHandlingSpec::Projection'
+    end
+    
     it "should handle events" do
       e1 = ArProjectionSpecEvents::EmployeeCreated.new('e-1')
       e2 = ArProjectionSpecEvents::EmployeeChanged.new('e-2')

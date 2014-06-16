@@ -104,6 +104,8 @@ module CommonDomain::Projections
       def projection(projection_config = {}, &block)
         @projection_config = default_projection_config.merge projection_config
         @projection_init_block = block
+        self.send(:remove_const, 'Projection') unless @projection_class.nil?
+        @projection_class = nil
       end
       
       def default_projection_config
@@ -114,9 +116,13 @@ module CommonDomain::Projections
       end
       
       def create_projection(*args)
-        projection_class = Class.new(Projection)
-        projection_class.class_exec(*args, &@projection_init_block) if @projection_init_block
-        projection_class.new self, projection_config
+        @projection_class ||= begin
+          projection_class = Class.new(Projection)
+          projection_class.class_exec(*args, &@projection_init_block) if @projection_init_block
+          self.const_set("Projection", projection_class)
+          projection_class
+        end
+        @projection_class.new self, projection_config
       end
     end
     
