@@ -54,19 +54,19 @@ module CommonDomain
       cleanup_all = options[:cleanup_all]
       Log.info "Initializing projections. Cleanup all option is: #{cleanup_all}"
       
-      projections.for_each do |read_model|
-        Log.info "Checking projection: #{read_model}"
-        if cleanup_all || read_model.rebuild_required?
-          Log.info "Read model needs rebuild."
+      projections.for_each do |projection|
+        Log.info "Checking projection: #{projection}"
+        if cleanup_all || projection.rebuild_required?
+          Log.info "Projection needs rebuild."
           Log.info "Cleaning projection..."
-          read_model.cleanup!
+          projection.cleanup!
           Log.info "Setup clean projection..."
-          read_model.setup
-          bus.register read_model
-        elsif read_model.setup_required?
-          Log.info "Doing setup of new projection: #{read_model}"
-          read_model.setup
-          bus.register read_model
+          projection.setup
+          bus.register projection
+        elsif projection.setup_required?
+          Log.info "Doing setup of new projection: #{projection}"
+          projection.setup
+          bus.register projection
         end
       end
       
