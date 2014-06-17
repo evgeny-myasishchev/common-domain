@@ -3,8 +3,9 @@ RSpec::Matchers.define :have_one_uncommitted_event do |event_type, attribs|
     return false unless actual.get_uncommitted_events.length == 1
     event = actual.get_uncommitted_events[0]
     return false unless event.instance_of?(event_type)
+    validate_attribs! event.attribute_names.dup << :aggregate_id, attribs.keys
     attribs.each_key do |attrib|
-      return false unless event.send(attrib) == attribs[attrib]
+      return false unless event.attribute(attrib) == attribs[attrib]
     end
     return true
   end
@@ -22,6 +23,17 @@ RSpec::Matchers.define :have_one_uncommitted_event do |event_type, attribs|
       return %(expected: attribute "#{attrib}" to equal "#{expected_value}"\ngot: "#{actual_value}") unless expected_value == actual_value
     end
     nil
+  end
+  
+  def validate_attribs! required, actual
+    diff = required - actual
+    if diff.length > 0
+      raise ArgumentError.new "Missing attributes: #{diff.join(', ')}"
+    end
+    diff = actual - required
+    if diff.length > 0
+      raise ArgumentError.new "Unknown attributes: #{diff.join(', ')}"
+    end
   end
 end
 

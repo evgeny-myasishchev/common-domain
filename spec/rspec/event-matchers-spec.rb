@@ -102,7 +102,7 @@ describe "event-matchers" do
   describe "have_one_uncommitted_event" do
     it "should match if actual has one uncommitted event of specified kind" do
       aggregate.raise_event Events::AggregateCreated.new "aggregate-1", 'name', 'descr'
-      expect(aggregate).to have_one_uncommitted_event Events::AggregateCreated, aggregate_id: "aggregate-1"
+      expect(aggregate).to have_one_uncommitted_event Events::AggregateCreated, aggregate_id: "aggregate-1", name: 'name', description: 'descr'
     end
     
     it "should match if all attributes of the uncommitted event match" do
@@ -123,6 +123,18 @@ describe "event-matchers" do
     it "should not match if attributes of the event are not equal" do
       aggregate.raise_event Events::AggregateCreated.new "aggregate-1", "aggregate-100", "aggregate-1 description"
       expect(aggregate).not_to have_one_uncommitted_event Events::AggregateCreated, aggregate_id: "aggregate-1", name: "aggregate-1", description: "aggregate-1 description"
+    end
+    
+    it "should fail if some attributes are not specified" do
+      aggregate.raise_event Events::AggregateCreated.new "aggregate-1", "aggregate-100", "aggregate-1 description"
+      expect { have_one_uncommitted_event(Events::AggregateCreated, aggregate_id: "aggregate-1").matches?(aggregate) }.
+        to raise_error(ArgumentError, 'Missing attributes: name, description')
+    end
+    
+    it "should fail if wrong attributes are specified" do
+      aggregate.raise_event Events::AggregateCreated.new "aggregate-1", "aggregate-100", "aggregate-1 description"
+      expect { have_one_uncommitted_event(Events::AggregateCreated, aggregate_id: "aggregate-1", name: '', description: '', wrong1: 'value1', wrong2: 'value2').matches?(aggregate) }.
+        to raise_error(ArgumentError, 'Unknown attributes: wrong1, wrong2')
     end
     
     describe "failure_message" do
