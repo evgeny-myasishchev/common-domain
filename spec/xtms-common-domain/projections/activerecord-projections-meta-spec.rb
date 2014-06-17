@@ -27,9 +27,9 @@ describe CommonDomain::Projections::ActiveRecord::ProjectionsMeta do
   
   describe "setup_required?" do
     it "should be true if there is no corresponding record for the specified projection" do
-      expect(described_class.setup_required?('projection-992')).to be_falsey
-      described_class.create! projection_id: 'projection-992', version: 0
       expect(described_class.setup_required?('projection-992')).to be_truthy
+      described_class.create! projection_id: 'projection-992', version: 0
+      expect(described_class.setup_required?('projection-992')).to be_falsey
     end
   end
   

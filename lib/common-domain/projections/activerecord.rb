@@ -47,7 +47,7 @@ module CommonDomain::Projections
         
         def setup_required?(projection_id)
           return true unless table_exists?
-          exists? projection_id: projection_id
+          !exists? projection_id: projection_id
         end
         
         def rebuild_required?(projection_id, version)
@@ -84,11 +84,15 @@ module CommonDomain::Projections
       end
       
       def rebuild_required?
-        ProjectionsMeta.rebuild_required?(config[:identifier], config[:version])
+        result = ProjectionsMeta.rebuild_required?(config[:identifier], config[:version])
+        puts "rebuild_required?(#{config[:identifier]}, #{config[:version]}): #{result}"
+        result
       end
       
       def setup_required?
-        ProjectionsMeta.setup_required?(config[:identifier])
+        result = ProjectionsMeta.setup_required?(config[:identifier])
+        puts "setup_required?(#{config[:identifier]}): #{result}"
+        result
       end
     end
     
