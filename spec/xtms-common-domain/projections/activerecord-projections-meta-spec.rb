@@ -38,6 +38,10 @@ describe CommonDomain::Projections::ActiveRecord::ProjectionsMeta do
       described_class.create! projection_id: 'projection-993', version: 10
     end
     
+    it "should be false if not recorded" do
+      expect(described_class.rebuild_required?('projection-33223322', 1)).to be_falsey
+    end
+    
     it "should be true if last recorded version is lowwer" do
       expect(described_class.rebuild_required?('projection-993', 20)).to be_truthy
       expect(described_class.rebuild_required?('projection-993', 10)).to be_falsey

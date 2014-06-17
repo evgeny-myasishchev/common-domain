@@ -53,6 +53,7 @@ module CommonDomain::Projections
         def rebuild_required?(projection_id, version)
           return false unless table_exists?
           meta = find_by projection_id: projection_id
+          return false if meta.nil?
           return true if version > meta.version
           return false if version == meta.version
           raise "Downgrade is not supported for projection #{projection_id}. Last known version is #{meta.version}. Requested projection version was #{version}."
