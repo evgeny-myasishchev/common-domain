@@ -1,7 +1,9 @@
-RSpec::Matchers.define :have_one_uncommitted_event do |event_type, attribs|
+RSpec::Matchers.define :have_one_uncommitted_event do |event_type, attribs, at_index: nil|
   match do |actual|
-    return false unless actual.get_uncommitted_events.length == 1
-    event = actual.get_uncommitted_events[0]
+    if at_index.nil?
+      return false unless actual.get_uncommitted_events.length == 1
+    end
+    event = actual.get_uncommitted_events[at_index || 0]
     return false unless event.instance_of?(event_type)
     validate_attribs! event.attribute_names.dup << :aggregate_id, attribs.keys
     attribs.each_key do |attrib|
@@ -11,10 +13,12 @@ RSpec::Matchers.define :have_one_uncommitted_event do |event_type, attribs|
   end
 
   failure_message do |actual|
-    events_length = actual.get_uncommitted_events.length
-    return %(expected: aggregate "#{actual}" has 1 uncommitted event\ngot: #{events_length}) unless events_length == 1
+    if at_index.nil?
+      events_length = actual.get_uncommitted_events.length
+      return %(expected: aggregate "#{actual}" has 1 uncommitted event\ngot: #{events_length}) unless events_length == 1
+    end
       
-    event = actual.get_uncommitted_events[0]
+    event = actual.get_uncommitted_events[at_index || 0]
     return %(expected that the event to be an instance of #{event_type} but got #{event.class}) unless event.instance_of?(event_type)
       
     attribs.each_key do |attrib|
@@ -38,17 +42,23 @@ RSpec::Matchers.define :have_one_uncommitted_event do |event_type, attribs|
 end
 
 
-RSpec::Matchers.define :have_uncommitted_events do
+RSpec::Matchers.define :have_uncommitted_events do |exactly: nil|
   match do |actual|
-    actual.get_uncommitted_events.length != 0
+    exactly.nil? ?
+      actual.get_uncommitted_events.length != 0 :
+      actual.get_uncommitted_events.length == exactly
   end
   
   failure_message do |actual|
-    %(expected that an aggregate "#{actual}" has uncommitted events.)
+    exactly.nil? ?
+      %(expected that an aggregate "#{actual}" has uncommitted events) :
+      %(expected that an aggregate "#{actual}" has exactly #{exactly} uncommitted events\ngot: #{actual.get_uncommitted_events.length})
   end
   
   failure_message_when_negated do |actual|
-    %(expected that an aggregate "#{actual}" has no uncommitted events\ngot: #{actual.get_uncommitted_events.length})
+    exactly.nil? ?
+      %(expected that an aggregate "#{actual}" has no uncommitted events\ngot: #{actual.get_uncommitted_events.length}) : 
+      %(expected that an aggregate "#{actual}" has no #{exactly} uncommitted events)
   end
 end
 

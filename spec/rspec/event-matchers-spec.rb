@@ -22,6 +22,14 @@ describe "event-matchers" do
       expect(aggregate).to have_uncommitted_events
     end
     
+    it "should match exact number if specified" do
+      matcher = have_uncommitted_events exactly: 2
+      aggregate.raise_event Events::AggregateCreated.new "aggregate-id", 'name', 'descr'
+      expect(matcher.matches?(aggregate)).to be_falsey
+      aggregate.raise_event Events::AggregateCreated.new "aggregate-id", 'name', 'descr'
+      expect(matcher.matches?(aggregate)).to be_truthy
+    end
+    
     it "should not match if actual has no uncommitted events" do
       expect(aggregate).not_to have_uncommitted_events
     end
@@ -29,7 +37,13 @@ describe "event-matchers" do
     it "should provide failure message for should" do
       matcher = have_uncommitted_events
       matcher.matches? aggregate
-      expect(matcher.failure_message).to eql %(expected that an aggregate "#{aggregate}" has uncommitted events.)
+      expect(matcher.failure_message).to eql %(expected that an aggregate "#{aggregate}" has uncommitted events)
+    end
+    
+    it "should provide failure message for should with exact match" do
+      matcher = have_uncommitted_events exactly: 3
+      matcher.matches? aggregate
+      expect(matcher.failure_message).to eql %(expected that an aggregate "#{aggregate}" has exactly 3 uncommitted events\ngot: 0)
     end
     
     it "should provide failure message for should_not" do
@@ -38,6 +52,14 @@ describe "event-matchers" do
       matcher = have_uncommitted_events
       matcher.matches? aggregate
       expect(matcher.failure_message_when_negated).to eql %(expected that an aggregate "#{aggregate}" has no uncommitted events\ngot: 2)
+    end
+        
+    it "should provide failure message for should_not with exact match" do
+      aggregate.raise_event Events::AggregateCreated.new "aggregate-id", 'name', 'descr'
+      aggregate.raise_event Events::AggregateCreated.new "aggregate-id", 'name', 'descr'
+      matcher = have_uncommitted_events exactly: 2
+      matcher.matches? aggregate
+      expect(matcher.failure_message_when_negated).to eql %(expected that an aggregate "#{aggregate}" has no 2 uncommitted events)
     end
   end
   
@@ -120,6 +142,13 @@ describe "event-matchers" do
       expect(aggregate).not_to have_one_uncommitted_event
     end
     
+    it "should match if actual has more than one uncommitted event and index is specified" do
+      aggregate.raise_event Events::AggregateCreated.new "aggregate-1", 'name-1', 'descr-1'
+      aggregate.raise_event Events::AggregateCreated.new "aggregate-1", 'name-2', 'descr-2'
+      expect(aggregate).to have_one_uncommitted_event Events::AggregateCreated, {aggregate_id: "aggregate-1", name: 'name-1', description: 'descr-1'}, at_index: 0
+      expect(aggregate).to have_one_uncommitted_event Events::AggregateCreated, {aggregate_id: "aggregate-1", name: 'name-2', description: 'descr-2'}, at_index: 1
+    end
+    
     it "should not match if attributes of the event are not equal" do
       aggregate.raise_event Events::AggregateCreated.new "aggregate-1", "aggregate-100", "aggregate-1 description"
       expect(aggregate).not_to have_one_uncommitted_event Events::AggregateCreated, aggregate_id: "aggregate-1", name: "aggregate-1", description: "aggregate-1 description"
@@ -138,7 +167,7 @@ describe "event-matchers" do
     end
     
     describe "failure_message" do
-      it "should be specific if number of uncommitted events is not one" do
+      it "should be specific if number of uncommitted events is not one and no index" do
         aggregate.raise_event Events::AggregateCreated.new "aggregate-1", 'name', 'descr'
         aggregate.raise_event Events::AggregateCreated.new "aggregate-1", 'name', 'descr'
         matcher = have_one_uncommitted_event
@@ -153,9 +182,25 @@ describe "event-matchers" do
         expect(matcher.failure_message).to eql %(expected that the event to be an instance of Events::AggregateRemoved but got Events::AggregateCreated)
       end
       
+      it "should be specific if event type is different with index" do
+        aggregate.raise_event Events::AggregateCreated.new "aggregate-1", 'name', 'descr'
+        aggregate.raise_event Events::AggregateRemoved.new 'aggregate-1'
+        matcher = have_one_uncommitted_event Events::AggregateRemoved, {aggregate_id: 'aggregate-1'}, at_index: 0
+        matcher.matches? aggregate
+        expect(matcher.failure_message).to eql %(expected that the event to be an instance of Events::AggregateRemoved but got Events::AggregateCreated)
+      end
+      
       it "should be specific if attributes are different" do
         aggregate.raise_event Events::AggregateCreated.new "aggregate-1", "aggregate-1", "aggregate-1 description"
         matcher = have_one_uncommitted_event Events::AggregateCreated, aggregate_id: "aggregate-1", name: "aggregate-2", description: "aggregate-1 description"
+        matcher.matches? aggregate
+        expect(matcher.failure_message).to eql %(expected: attribute "name" to equal "aggregate-2"\ngot: "aggregate-1")
+      end
+      
+      it "should be specific if attributes are different with index" do
+        aggregate.raise_event Events::AggregateCreated.new "aggregate-1", "aggregate-1", "aggregate-1 description"
+        aggregate.raise_event Events::AggregateRemoved.new 'aggregate-1'
+        matcher = have_one_uncommitted_event Events::AggregateCreated, {aggregate_id: "aggregate-1", name: "aggregate-2", description: "aggregate-1 description"}, at_index: 0
         matcher.matches? aggregate
         expect(matcher.failure_message).to eql %(expected: attribute "name" to equal "aggregate-2"\ngot: "aggregate-1")
       end
