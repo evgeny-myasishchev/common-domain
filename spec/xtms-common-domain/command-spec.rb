@@ -2,9 +2,10 @@ require 'spec-helper'
 
 describe CommonDomain::Command do
   module Commands
-    class SampleCommand < CommonDomain::Command
-      attr_reader :name, :description
-    end
+    include CommonDomain::Command::DSL
+    
+    command :SampleCommand, :name, :description
+    command :OtherCommand
   end
   
   it "should initialize attributes" do
@@ -51,6 +52,11 @@ describe CommonDomain::Command do
       expect(cmd.aggregate_id).to eql 'a-1'
       expect(cmd.name).to eql 'name-1'
       expect(cmd.description).to eql 'description-1'
+    end
+    
+    it "should force the class to be an instance of a concrete class even if class_name is present" do
+      cmd = Commands::SampleCommand.from_hash class_name: Commands::OtherCommand.to_s, aggregate_id: 'a-1', name: 'name-1'
+      expect(cmd).to be_an_instance_of Commands::SampleCommand
     end
   end
 end
