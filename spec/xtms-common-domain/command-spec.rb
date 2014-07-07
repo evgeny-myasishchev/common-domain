@@ -44,5 +44,13 @@ describe CommonDomain::Command do
     it "should fail if no class_name argument present" do
       expect(lambda { described_class.from_hash(aggregate_id: "aggregate-id") }).to raise_error(CommonDomain::CommandClassMissingError)
     end
+    
+    it "should not fail if no class_name argument and calling on concrete class" do
+      cmd = Commands::SampleCommand.from_hash aggregate_id: 'a-1', name: 'name-1', description: 'description-1'
+      expect(cmd).to be_an_instance_of Commands::SampleCommand
+      expect(cmd.aggregate_id).to eql 'a-1'
+      expect(cmd.name).to eql 'name-1'
+      expect(cmd.description).to eql 'description-1'
+    end
   end
 end

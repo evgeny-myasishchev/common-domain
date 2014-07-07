@@ -23,8 +23,12 @@ module CommonDomain
       #
       def from_hash(hash)
         hash = hash.dup
-        raise CommandClassMissingError.new unless hash.key?(:class_name)
-        klass = constantize(hash.delete(:class_name))
+        klass = self
+        if hash.key?(:class_name)
+          klass = constantize(hash.delete(:class_name))
+        elsif klass == Command
+          raise CommandClassMissingError.new
+        end
         aggregate_id = hash.delete(:aggregate_id)
         klass.new aggregate_id, hash
       end
