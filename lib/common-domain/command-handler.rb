@@ -30,9 +30,13 @@ module CommonDomain
           message = args[0]
           repository.begin_work message.headers do |work|
             args_number = bound_handler_method.arity
-            bound_handler_method.call(work, args[0]) if args_number == 2
-            bound_handler_method.call(work, args[0], args[1]) if args_number == 3
-            raise ArgumentError.new "#{message_class} handler block should have 2 or 3 arguments: work, command and optionally headers. Got: #{args_number}."
+            if args_number == 2
+              bound_handler_method.call(work, args[0])
+            elsif args_number == 3 
+              bound_handler_method.call(work, args[0], args[1]) 
+            else
+              raise ArgumentError.new "#{message_class} handler block should have 2 or 3 arguments: work, command and optionally headers. Got: #{args_number}."
+            end
           end
         end
       end
