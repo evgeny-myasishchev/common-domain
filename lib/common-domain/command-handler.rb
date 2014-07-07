@@ -17,7 +17,7 @@ module CommonDomain
     # end
     #
     # # Handler with headers wrapped into work
-    # on EmployeeHired begin_work: true do |work, command, headers|
+    # on EmployeeHired, begin_work: true do |work, command, headers|
     # end
     
     def self.on message_class, options = {}, &block
