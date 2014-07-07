@@ -91,4 +91,12 @@ describe CommonDomain::CommandHandler do
     end
     expect(subject.handle_message(Messages::Dummy.new)).to eql "Dummy result"
   end
+  
+  it "should raise ArgumentError if handler block has wrong number of args" do
+    expect(repository).to begin_work
+    subject.class.class_eval do
+      on(Messages::Dummy, begin_work: true) { |message| }
+    end
+    expect{subject.handle_message(Messages::Dummy.new)}.to raise_error ArgumentError, 'Messages::Dummy handler block should have 2 or 3 arguments: work, message and optionally headers. Got: 1.'
+  end
 end
