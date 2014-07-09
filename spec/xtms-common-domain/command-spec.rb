@@ -6,6 +6,7 @@ describe CommonDomain::Command do
     
     command :SampleCommand, :name, :description
     command :OtherCommand
+    command :OtherCommand1
   end
   
   it "should initialize attributes" do
@@ -57,6 +58,59 @@ describe CommonDomain::Command do
     it "should force the class to be an instance of a concrete class even if class_name is present" do
       cmd = Commands::SampleCommand.from_hash class_name: Commands::OtherCommand.to_s, aggregate_id: 'a-1', name: 'name-1'
       expect(cmd).to be_an_instance_of Commands::SampleCommand
+    end
+  end
+  
+  describe "equality" do
+    it "should do the equality by aggregate_id" do
+      left = Commands::OtherCommand.new "aggregate-1"
+      right = Commands::OtherCommand.new "aggregate-1"
+      
+      expect(left == right).to be_truthy
+      expect(left).to eql right
+      
+      left = Commands::OtherCommand.new "aggregate-2"
+      expect(left == right).not_to be_truthy
+      expect(left).not_to eql right
+    end
+      
+    it "should do the equality by class" do
+      left = Commands::OtherCommand.new "aggregate-1"
+      right = Commands::OtherCommand1.new "aggregate-1"
+      
+      expect(left == right).not_to be_truthy
+      expect(left).not_to eql right
+    end
+    
+    it "should do equality by all attributes" do
+      left = Commands::SampleCommand.new "aggregate-1", name: 'cmd 1', description: 'cmd 1 desc'
+      right = Commands::SampleCommand.new "aggregate-1", name: 'cmd 1', description: 'cmd 1 desc'
+
+      expect(left == right).to be_truthy
+      expect(left).to eql right
+      
+      left = Commands::SampleCommand.new "aggregate-1", name: 'cmd 1-changed', description: 'cmd 1 desc'
+      expect(left == right).to be_falsy
+      expect(left).not_to eql right
+      
+      left = Commands::SampleCommand.new "aggregate-1", name: 'cmd 1', description: 'cmd 1 desc-changed'
+      expect(left == right).to be_falsy
+      expect(left).not_to eql right
+    end
+    
+    it "should do the equality by headers" do
+      left = Commands::OtherCommand.new "aggregate-1"
+      right = Commands::OtherCommand.new "aggregate-1"
+      
+      left.headers[:header1] = 'header-1'
+      right.headers[:header1] = 'header-1'
+      
+      expect(left == right).to be_truthy
+      expect(left).to eql right
+      
+      left.headers[:header1] = 'header-1-changed'
+      expect(left == right).not_to be_truthy
+      expect(left).not_to eql right
     end
   end
 end

@@ -12,7 +12,23 @@ module CommonDomain
       @aggregate_id = aggregate_id
       attributes = options.key?(:attributes) ? options[:attributes] : options
       attributes.each_key { |key| instance_variable_set("@#{key}", attributes[key]) }
+      @attribute_names = attributes.keys
       @headers = options.key?(:headers) ? options[:headers] : {}
+    end
+    
+    def attribute(name)
+      instance_variable_get "@#{name}"
+    end
+    
+    def ==(other)
+      aggregate_id == other.aggregate_id &&
+      self.class == other.class &&
+      @attribute_names.all? { |key| self.attribute(key) == other.attribute(key) } &&
+      headers.all? { |key, value| value == other.headers[key] }
+    end
+
+    def eql?(other)
+      self == other
     end
 
     class << self
