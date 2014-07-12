@@ -85,14 +85,15 @@ module CommonDomain
           const_set(group_name, group)
         end
         
-        def command(const_name, *args)
-          event_class = Class.new(CommonDomain::Command) do
+        def command(const_name, *args, &block)
+          command_class = Class.new(CommonDomain::Command) do
             attr_reader *args
             define_method :initialize do |*args|
               super(*args)
             end
           end
-          const_set(const_name, event_class)
+          command_class.class_eval &block if block_given?
+          const_set(const_name, command_class)
         end
 
       end

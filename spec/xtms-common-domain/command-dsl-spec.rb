@@ -7,7 +7,7 @@ describe CommonDomain::Command::DSL do
     end
   }
   
-  describe "event" do
+  describe "command" do
     before(:each) do
       subject.class_eval do
         command :CreateAccount, :login_name, :email_address
@@ -41,6 +41,16 @@ describe CommonDomain::Command::DSL do
       
       instance = subject::RemoveAccount.new
       expect(instance.aggregate_id).to be_nil
+    end
+    
+    it "should open the command class with provided block" do
+      block_scope = nil
+      subject.class_eval do
+        command :AnotherCommand do
+          block_scope = self
+        end
+      end
+      expect(block_scope).to eql subject::AnotherCommand
     end
   end
   
