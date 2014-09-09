@@ -93,7 +93,7 @@ describe "sql-projections-matcher" do
       end
       
       it "should tell there expected column is different from actual" do
-        expect(existing.failure_message).to eql "table departments expected to have column [id, {:type=>:string, :primary_key=>true, :allow_null=>false}] but was [:id, {:allow_null=>false, :default=>nil, :primary_key=>true, :db_type=>\"varchar(255)\", :type=>:string, :ruby_default=>nil}] (specified only attribs are matched)"
+        expect(existing.failure_message).to match /table departments expected to have column \[id, .*\] but was \[:id, .*\] \(specified only attribs are matched\)/
       end
       
       it "should tell that the column was not expected" do
