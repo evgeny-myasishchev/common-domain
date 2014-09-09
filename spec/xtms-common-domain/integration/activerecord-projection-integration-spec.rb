@@ -44,7 +44,7 @@ module ActiveRecordProjectionIntegrationSpec
   
     class IntegrationContext < CommonDomain::DomainContext
       def with_event_store
-        bootstrap_event_store do |with|
+        bootstrap_event_store dispatcher: :synchronous do |with|
           with.log4r_logging
           with.in_memory_persistence
         end

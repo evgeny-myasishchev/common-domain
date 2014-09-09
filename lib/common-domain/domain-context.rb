@@ -99,7 +99,7 @@ module CommonDomain
         yield(@projections)
       end
     
-      def bootstrap_event_store(&block)
+      def bootstrap_event_store(dispatcher: :asynchronous, &block)
         Log.info "Initializing event store..."
         Log.debug "Using connection specification: #{event_store_database_config}"
 
@@ -111,7 +111,7 @@ module CommonDomain
             #Using SQL persistance as a standard persistance if no other is configured
             with.sql_persistence event_store_database_config
           end
-          with.synchorous_dispatcher do |commit|
+          with.send("#{dispatcher}_dispatcher") do |commit|
             commit.events.each { |event| 
               domain_event_bus.publish(event.body) 
             }

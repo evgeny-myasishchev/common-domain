@@ -56,6 +56,10 @@ describe "Integration - CommonDomain::Projections::SqlProjection" do
     end
   end
   
+  after(:each) do
+    @app.event_store.dispatcher.stop
+  end
+  
   it "should setup schema of the projection" do
     expect(connection).to have_table(:employees_projection) do |table|
       expect(table).to have_column(:id, primary_key: true, allow_null: false)
@@ -65,16 +69,21 @@ describe "Integration - CommonDomain::Projections::SqlProjection" do
   
   it "should route domain messages to the projection" do
     stream = @app.event_store.open_stream('stream-1')
-    stream.add EventStore::EventMessage.new Events::EmployeeCreated.new('stream-1', 'Initial name')
+    stream.add EventStore::EventMessage.new Events::EmployeeCreated.new('stream-1', 'Employee 1')
+    stream.add EventStore::EventMessage.new Events::EmployeeCreated.new('stream-2', 'Employee 2')
+    stream.add EventStore::EventMessage.new Events::EmployeeCreated.new('stream-3', 'Employee 3')
     stream.commit_changes
-    expect(connection[:employees_projection][id: 'stream-1']).to eql id: 'stream-1', name: 'Initial name'
     
-    stream.add EventStore::EventMessage.new Events::EmployeeRenamed.new('stream-1', 'New name')
+    stream.add EventStore::EventMessage.new Events::EmployeeRenamed.new('stream-2', 'New name 2')
     stream.commit_changes
-    expect(connection[:employees_projection][id: 'stream-1']).to eql id: 'stream-1', name: 'New name'
     
-    stream.add EventStore::EventMessage.new Events::EmployeeRemoved.new('stream-1')
+    stream.add EventStore::EventMessage.new Events::EmployeeRemoved.new('stream-3')
     stream.commit_changes
-    expect(connection[:employees_projection][id: 'stream-1']).to be_nil
+    
+    @app.event_store.dispatcher.stop
+    
+    expect(connection[:employees_projection][id: 'stream-1']).to eql id: 'stream-1', name: 'Employee 1'
+    expect(connection[:employees_projection][id: 'stream-2']).to eql id: 'stream-2', name: 'New name 2'
+    expect(connection[:employees_projection][id: 'stream-3']).to be_nil
   end
 end
