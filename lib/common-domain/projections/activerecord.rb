@@ -86,13 +86,11 @@ module CommonDomain::Projections
       
       def rebuild_required?
         result = ProjectionsMeta.rebuild_required?(config[:identifier], config[:version])
-        puts "rebuild_required?(#{config[:identifier]}, #{config[:version]}): #{result}"
         result
       end
       
       def setup_required?
         result = ProjectionsMeta.setup_required?(config[:identifier])
-        puts "setup_required?(#{config[:identifier]}): #{result}"
         result
       end
     end
