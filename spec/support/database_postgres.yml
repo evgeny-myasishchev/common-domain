@@ -1,0 +1,4 @@
+adapter: postgres
+encoding: unicode
+database: common_domain_test
+pool: 5
