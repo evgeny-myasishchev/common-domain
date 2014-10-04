@@ -2,7 +2,7 @@ require 'spec-helper'
 
 describe CommonDomain::Projections::Sql::DatasetsRegistry do
   include SqlConnectionHelper
-  let(:connection) { sqlite_memory_connection }
+  let(:connection) { open_sequel_connection }
   subject { described_class.new connection }
   
   describe "table" do

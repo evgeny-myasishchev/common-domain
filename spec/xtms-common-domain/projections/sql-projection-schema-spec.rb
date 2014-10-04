@@ -3,7 +3,7 @@ require 'spec-helper'
 describe CommonDomain::Projections::Sql::Schema do
   include SqlConnectionHelper
   include SchemaHelper
-  let(:connection) { sqlite_memory_connection }
+  let(:connection) { open_sequel_connection }
   let(:info_table_name) { described_class::MetaStoreTableName }
   subject {
     described_class.new connection, identifier: "schema-1", version: 20 do |schema|

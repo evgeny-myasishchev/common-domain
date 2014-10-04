@@ -14,7 +14,7 @@ describe CommonDomain::Projections::Sql do
   }
   
   let(:connection) {
-    sqlite_memory_connection "common-domain::sql-projection-spec::orm"
+    open_sequel_connection "common-domain::sql-projection-spec::orm"
   }
   subject { described_class.new connection, ensure_rebuilt: false }
   

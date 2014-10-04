@@ -2,7 +2,7 @@ require 'spec-helper'
 
 describe "Integration - CommonDomain::Projections::SqlProjection" do
   include SqlConnectionHelper
-  let(:connection) { sqlite_memory_connection }
+  let(:connection) { open_sequel_connection }
   
   module Events
     include CommonDomain::DomainEvent::DSL

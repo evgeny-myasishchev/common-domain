@@ -2,7 +2,7 @@ require 'spec-helper'
 
 describe "sql-projections-matcher" do
   include SqlConnectionHelper
-  let(:connection) { sqlite_memory_connection }
+  let(:connection) { open_sequel_connection }
   
   before(:each) do
     connection.create_table :departments do
