@@ -148,6 +148,7 @@ describe CommonDomain::Projections::Sql::Schema do
     
     before(:each) do
       subject.setup
+      connection.drop_table?(:'table-three')
       connection.create_table :'table-three' do
         Integer :id, :primary_key => true
       end
@@ -171,12 +172,14 @@ describe CommonDomain::Projections::Sql::Schema do
   
   describe "table" do
     before(:each) do
+      connection.drop_table? :new_table_name
       subject.table(:table1, :new_table_name) do
         String :id, :primary_key=>true, :size => 50, :null=>false
       end
     end
     
     it "should remember all schema tables" do
+      connection.drop_table? :new_table_name2
       subject.table(:table2, :new_table_name2) do
         String :id, :primary_key=>true, :size => 50, :null=>false
       end    

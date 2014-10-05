@@ -1,2 +1,2 @@
 adapter: sqlite
-database: ":memory:"
+database: spec/tmp/common_domain_test.sqlite

@@ -5,6 +5,7 @@ describe "sql-projections-matcher" do
   let(:connection) { open_sequel_connection }
   
   before(:each) do
+    connection.drop_table? :departments
     connection.create_table :departments do
       String :id, primary_key: true, allow_null: false
       String :name, size: 50, allow_null: true
