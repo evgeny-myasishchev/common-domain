@@ -10,6 +10,10 @@ describe CommonDomain::Projections::Sql::Schema do
     end
   }
   
+  before(:each) do
+    connection[info_table_name].delete if connection.table_exists? info_table_name
+  end
+  
   describe "initialize" do
     it "should raise error if identifier is not provided" do
       expect(lambda { described_class.new connection, {} }).to raise_error(RuntimeError)
