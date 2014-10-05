@@ -1,2 +1,3 @@
-adapter: sqlite
+# AR friendly specification
+adapter: sqlite3
 database: spec/tmp/common_domain_test.sqlite

@@ -2,7 +2,7 @@ require 'spec-helper'
 
 describe CommonDomain::Projections::ActiveRecord do
   include ActiveRecordHelpers
-  use_sqlite_activerecord_connection 'ar-projections-spec.sqlite'
+  establish_activerecord_connection
   
   class TheProjection < ActiveRecord::Base
     include CommonDomain::Projections::ActiveRecord

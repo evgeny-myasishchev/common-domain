@@ -3,8 +3,9 @@ require 'spec-helper'
 module ActiveRecordProjectionIntegrationSpec
   describe "Integration - CommonDomain::Projections::ActiveRecordProjection" do
     include ActiveRecordHelpers
-    use_sqlite_activerecord_connection 'integration-ar-projections-spec.sqlite'
-    let(:sequel_connection) { Sequel.connect adapter: "sqlite", database: @db_path.to_s }
+    include SqlConnectionHelper
+    establish_activerecord_connection
+    let(:sequel_connection) { open_sequel_connection }
   
     module Events
       include CommonDomain::DomainEvent::DSL

@@ -2,7 +2,8 @@ require 'spec-helper'
 
 describe CommonDomain::Projections::ActiveRecord::ProjectionsMeta do
   include ActiveRecordHelpers
-  use_sqlite_activerecord_connection 'ar-projections-spec.sqlite'
+  include SqlConnectionHelper
+  establish_activerecord_connection
   
   before(:each) do
     described_class.ensure_schema!
@@ -17,7 +18,7 @@ describe CommonDomain::Projections::ActiveRecord::ProjectionsMeta do
   end
   
   it "should setup schema table to store schema meta" do
-    connection = Sequel.connect adapter: "sqlite", database: @db_path.to_s
+    connection = open_sequel_connection
     expect(connection).to have_table described_class.table_name.to_sym do |table|
       expect(table).to have_column(:id, primary_key: true, allow_null: false)
       expect(table).to have_column(:projection_id, allow_null: false, type: :string)
