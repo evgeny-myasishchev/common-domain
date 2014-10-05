@@ -1,7 +1,14 @@
 language: ruby
 rvm:
 - 2.1.1
+addons:
+  postgresql: "9.3"
+before_script:
+- psql -c 'create database common_domain_test;' -U postgres
 script: bundle exec rspec spec
 env:
   global:
     secure: bOyxfae5hmz1NL2ZOvGvngqP65ZfX599SbA0wWU5O77GxY6sK/pKC0ndKmnLQbVicuxuAhcXVC5RctK+NSChCEfBgXeVpYI3bAxcBLjtq4lTT0FWgADqwc08gX1nMyzQTnemW72i8Cvm4MTnZ18drJBKfUvPdrdn288nbfqYXaE=
+  matrix:
+    - DB_CONFIG=spec/support/database_postgres.yml
+    - DB_CONFIG=spec/support/database_sqlite.yml
