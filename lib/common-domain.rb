@@ -10,6 +10,7 @@ module CommonDomain
   autoload :EventBus, 'common-domain/event-bus'
   module Infrastructure
     autoload :AggregateId, 'common-domain/infrastructure/aggregate-id'
+    autoload :ConnectionSpecHelper, 'common-domain/infrastructure/connection-spec-helper'
     autoload :MessagesHandler, 'common-domain/infrastructure/messages-handler'
     autoload :MessagesRouter, 'common-domain/infrastructure/messages-router'
   end

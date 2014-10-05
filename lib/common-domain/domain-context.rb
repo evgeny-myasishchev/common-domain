@@ -2,6 +2,7 @@ require 'sequel'
 
 module CommonDomain
   class DomainContext
+    include CommonDomain::Infrastructure::ConnectionSpecHelper
     Log = Logger.get "common-domain::domain-context"
     
     attr_reader :event_store
@@ -32,8 +33,7 @@ module CommonDomain
     def with_database_configs(database_configuration, fallback_config_name = 'default')
       default_db_config = nil
       if database_configuration.key?(fallback_config_name)
-        default_db_config            = database_configuration[fallback_config_name].dup
-        default_db_config["adapter"] = "sqlite" if default_db_config["adapter"] == "sqlite3"
+        default_db_config = make_sequel_friendly database_configuration[fallback_config_name].dup
       end
       @event_store_database_config = database_configuration.key?("event-store") ? database_configuration['event-store'] : default_db_config
       @read_store_database_config  = database_configuration.key?("read-store") ? database_configuration["read-store"] : default_db_config
