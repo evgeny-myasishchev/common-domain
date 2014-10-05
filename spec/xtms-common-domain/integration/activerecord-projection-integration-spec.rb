@@ -59,6 +59,10 @@ module ActiveRecordProjectionIntegrationSpec
     end
   
     before(:all) do
+      c = ActiveRecord::Base.connection
+      c.drop_table 'projections_meta' if c.table_exists?('projections_meta')
+      c.drop_table 'employees_projections'if c.table_exists?('employees_projections')
+      
       EmployeesProjection.ensure_schema!
       @app = IntegrationContext.new do |bootstrap|
         bootstrap.with_event_bus
@@ -69,18 +73,19 @@ module ActiveRecordProjectionIntegrationSpec
     end
   
     it "should route domain messages to the projection" do
-      stream = @app.event_store.open_stream('stream-1')
-      stream.add EventStore::EventMessage.new Events::EmployeeCreated.new('stream-1', 'Initial name')
+      stream_1_id = SecureRandom.uuid
+      stream = @app.event_store.open_stream(stream_1_id)
+      stream.add EventStore::EventMessage.new Events::EmployeeCreated.new(stream_1_id, 'Initial name')
       stream.commit_changes
-      expect(sequel_connection[:employees_projections][employee_id: 'stream-1']).to eql id: 1, employee_id: 'stream-1', name: 'Initial name'
+      expect(sequel_connection[:employees_projections][employee_id: stream_1_id]).to eql id: 1, employee_id: stream_1_id, name: 'Initial name'
     
-      stream.add EventStore::EventMessage.new Events::EmployeeRenamed.new('stream-1', 'New name')
+      stream.add EventStore::EventMessage.new Events::EmployeeRenamed.new(stream_1_id, 'New name')
       stream.commit_changes
-      expect(sequel_connection[:employees_projections][employee_id: 'stream-1']).to eql id: 1, employee_id: 'stream-1', name: 'New name'
+      expect(sequel_connection[:employees_projections][employee_id: stream_1_id]).to eql id: 1, employee_id: stream_1_id, name: 'New name'
     
-      stream.add EventStore::EventMessage.new Events::EmployeeRemoved.new('stream-1')
+      stream.add EventStore::EventMessage.new Events::EmployeeRemoved.new(stream_1_id)
       stream.commit_changes
-      expect(sequel_connection[:employees_projections][employee_id: 'stream-1']).to be_nil
+      expect(sequel_connection[:employees_projections][employee_id: stream_1_id]).to be_nil
     end
   end
 end

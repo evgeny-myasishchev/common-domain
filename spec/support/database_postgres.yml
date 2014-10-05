@@ -1,5 +1,5 @@
 # AR friendly specification
-adapter: postgres
+adapter: postgresql
 encoding: unicode
 database: common_domain_test
 pool: 5

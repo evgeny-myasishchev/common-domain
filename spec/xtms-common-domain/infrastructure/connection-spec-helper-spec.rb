@@ -13,5 +13,10 @@ describe CommonDomain::Infrastructure::ConnectionSpecHelper do
       original_spec['adapter'] = 'sqlite3'
       expect(make_sequel_friendly(original_spec)['adapter']).to eql 'sqlite'
     end
+    
+    it 'should replace postgresql adapter with postgres' do
+      original_spec['adapter'] = 'postgresql'
+      expect(make_sequel_friendly(original_spec)['adapter']).to eql 'postgres'
+    end
   end
 end

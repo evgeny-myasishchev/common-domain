@@ -38,7 +38,7 @@ describe CommonDomain::Projections::Sql::Schema do
         expect(column[:allow_null]).to be_falsey
         expect(column[:primary_key]).to be_truthy
         expect(column[:type]).to be :string
-        expect(column[:db_type]).to eql "varchar(200)"
+        expect(column[:max_length]).to eql 200
       end
       
       check_column(connection, info_table_name, :'schema-version') do |column|

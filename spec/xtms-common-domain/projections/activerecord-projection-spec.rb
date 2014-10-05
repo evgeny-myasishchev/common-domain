@@ -11,6 +11,11 @@ describe CommonDomain::Projections::ActiveRecord do
   subject { TheProjection }
   let(:meta_class) { CommonDomain::Projections::ActiveRecord::ProjectionsMeta }
   
+  before(:each) do
+    c = ActiveRecord::Base.connection
+    c.drop_table 'projections_meta' if c.table_exists? 'projections_meta'
+  end
+  
   describe "create_projection" do
     class ProjectionConfigSpec < ActiveRecord::Base
       include CommonDomain::Projections::ActiveRecord

@@ -6,6 +6,7 @@ module CommonDomain::Infrastructure
     def make_sequel_friendly spec
       normalized_spec = spec.dup
       normalized_spec['adapter'] = 'sqlite' if(normalized_spec['adapter'] == 'sqlite3')
+      normalized_spec['adapter'] = 'postgres' if(normalized_spec['adapter'] == 'postgresql')
       normalized_spec
     end
   end

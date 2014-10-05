@@ -4,8 +4,10 @@ describe CommonDomain::Projections::ActiveRecord::ProjectionsMeta do
   include ActiveRecordHelpers
   include SqlConnectionHelper
   establish_activerecord_connection
+  let(:connection) { open_sequel_connection }
   
   before(:each) do
+    connection.drop_table? described_class.table_name
     described_class.ensure_schema!
   end
   
@@ -18,7 +20,6 @@ describe CommonDomain::Projections::ActiveRecord::ProjectionsMeta do
   end
   
   it "should setup schema table to store schema meta" do
-    connection = open_sequel_connection
     expect(connection).to have_table described_class.table_name.to_sym do |table|
       expect(table).to have_column(:id, primary_key: true, allow_null: false)
       expect(table).to have_column(:projection_id, allow_null: false, type: :string)
