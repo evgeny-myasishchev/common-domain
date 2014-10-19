@@ -99,4 +99,73 @@ describe CommonDomain::CommandHandler do
     end
     expect{subject.handle_message(Messages::Dummy.new)}.to raise_error ArgumentError, 'Messages::Dummy handler block should have 2 or 3 arguments: work, command and optionally headers. Got: 1.'
   end
+  
+  describe 'handle DSL' do
+    let(:aggregate_class) { Class.new }
+    let(:aggregate) { double(:aggregate) }
+    
+    class DummyCommand < CommonDomain::Command
+    end
+    
+    class PerformDummyAction < CommonDomain::Command
+    end
+    
+    class PerformDummyActionCommand < CommonDomain::Command
+    end
+    
+    it 'should define a handler and route the command to the given aggregate using specified method' do
+      ac = aggregate_class
+      subject.class.class_eval do
+        handle(DummyCommand).with(ac).using(:dummy_logic)
+      end
+      command = DummyCommand.new 'aggregate-1'
+      work = expect(repository).to begin_work
+      expect(work).to get_and_return_aggregate aggregate_class, 'aggregate-1', aggregate
+      expect(aggregate).to receive(:dummy_logic).with(command)
+      subject.handle_message command
+    end
+    
+    describe 'resolve method name' do
+      before(:each) do
+        work = expect(repository).to begin_work
+        expect(work).to get_and_return_aggregate aggregate_class, 'aggregate-1', aggregate
+        ac = aggregate_class
+        subject.class.class_eval do
+          handle(DummyCommand).with(ac)
+          handle(PerformDummyAction).with(ac)
+          handle(PerformDummyActionCommand).with(ac)
+        end
+      end
+      
+      it 'should resolve one verb ignoring command' do
+        cmd = DummyCommand.new 'aggregate-1'
+        expect(aggregate).to receive(:dummy).with(cmd)
+        subject.handle_message cmd
+      end
+      
+      it 'should resolve two verbs ignoring command' do
+        cmd = PerformDummyActionCommand.new 'aggregate-1'
+        expect(aggregate).to receive(:perform_dummy_action).with(cmd)
+        subject.handle_message cmd
+      end
+      
+      it 'should resolve two verbs' do
+        cmd = PerformDummyAction.new 'aggregate-1'
+        expect(aggregate).to receive(:perform_dummy_action).with(cmd)
+        subject.handle_message cmd
+      end
+    end
+    
+    describe described_class::HandleSyntax do
+      let(:handler) { double(:handler) }
+      subject { described_class.new handler, DummyCommand }
+      describe 'with' do
+        it 'should raise error if aggregate_class is nil' do
+          expect {
+            subject.with(nil)
+          }.to raise_error ArgumentError, 'aggregate_class should not be nil'
+        end
+      end
+    end
+  end
 end
