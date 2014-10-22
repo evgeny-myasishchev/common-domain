@@ -113,6 +113,11 @@ describe CommonDomain::CommandHandler do
     class PerformDummyActionCommand < CommonDomain::Command
     end
     
+    module Commands
+      class PerformAnotherDummyAction < CommonDomain::Command
+      end
+    end
+    
     it 'should define a handler and route the command to the given aggregate using specified method' do
       ac = aggregate_class
       subject.class.class_eval do
@@ -134,6 +139,7 @@ describe CommonDomain::CommandHandler do
           handle(DummyCommand).with(ac)
           handle(PerformDummyAction).with(ac)
           handle(PerformDummyActionCommand).with(ac)
+          handle(Commands::PerformAnotherDummyAction).with(ac)
         end
       end
       
@@ -152,6 +158,12 @@ describe CommonDomain::CommandHandler do
       it 'should resolve two verbs' do
         cmd = PerformDummyAction.new 'aggregate-1'
         expect(aggregate).to receive(:perform_dummy_action).with(cmd)
+        subject.handle_message cmd
+      end
+      
+      it 'should ignore module part' do
+        cmd = Commands::PerformAnotherDummyAction.new 'aggregate-1'
+        expect(aggregate).to receive(:perform_another_dummy_action).with(cmd)
         subject.handle_message cmd
       end
     end

@@ -25,7 +25,7 @@ module CommonDomain
       if options[:begin_work]
         handler_method_name = message_handler_name message_class
         handler_method = instance_method handler_method_name
-        define_method handler_method_name do |*args|          
+        define_method handler_method_name do |*args|
           bound_handler_method = handler_method.bind(self)
           message = args[0]
           repository.begin_work message.headers do |work|
@@ -74,26 +74,30 @@ module CommonDomain
       end
       
       def method_name
-        @method_name ||= begin
-          underscore @command_class.name
-        end
+        @method_name ||= self.class.resolve_aggregate_method_name @command_class
       end
       
-      private 
-        AcronymRegex = /(?=a)b/
-      
-        # Taken from ActiveSupport. It may be not available if using outside of the RoR
-        # File activesupport/lib/active_support/inflector/methods.rb, line 90
-        def underscore(camel_cased_word)
-          word = camel_cased_word.to_s.gsub('::', '/')
-          word.gsub!(/Command/,'')
-          word.gsub!(/(?:([A-Za-z\d])|^)(#{AcronymRegex})(?=\b|[^a-z])/) { "#{$1}#{$1 && '_'}#{$2.downcase}" }
-          word.gsub!(/([A-Z\d]+)([A-Z][a-z])/,'\1_\2')
-          word.gsub!(/([a-z\d])([A-Z])/,'\1_\2')
-          word.tr!("-", "_")
-          word.downcase!
-          word
+      class << self
+        def resolve_aggregate_method_name command_class
+          underscore command_class.name.split('::').last
         end
+        
+        private
+          AcronymRegex = /(?=a)b/
+      
+          # Taken from ActiveSupport. It may be not available if using outside of the RoR
+          # File activesupport/lib/active_support/inflector/methods.rb, line 90
+          def underscore(camel_cased_word)
+            word = camel_cased_word.to_s.gsub('::', '/')
+            word.gsub!(/Command/,'')
+            word.gsub!(/(?:([A-Za-z\d])|^)(#{AcronymRegex})(?=\b|[^a-z])/) { "#{$1}#{$1 && '_'}#{$2.downcase}" }
+            word.gsub!(/([A-Z\d]+)([A-Z][a-z])/,'\1_\2')
+            word.gsub!(/([a-z\d])([A-Z])/,'\1_\2')
+            word.tr!("-", "_")
+            word.downcase!
+            word
+          end
+      end
     end
   end
 end
