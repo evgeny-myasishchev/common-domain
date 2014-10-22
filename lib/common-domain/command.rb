@@ -30,6 +30,19 @@ module CommonDomain
     def eql?(other)
       self == other
     end
+    
+    def to_s
+      output = "#{self.class.name}"
+      output << '{'
+      output << 'attributes: {'
+      @attribute_names.each { |name|
+        output << name.to_s << ':' << '"' << attribute(name) << '"'
+        output << ', ' unless @attribute_names.last == name
+      }
+      output << '}'
+      output << '}'
+      output
+    end
 
     class << self
       #
