@@ -39,6 +39,11 @@ module CommonDomain
       @read_store_database_config  = database_configuration.key?("read-store") ? database_configuration["read-store"] : default_db_config
     end
     
+    # Initializes snapshoting. Given repository will be used to get or add snapshots.
+    def with_snapshots(repository)
+      raise 'Not implemented'
+    end
+    
     def with_event_store
       # bootstrap_event_store do |with|
       #   with.log4r_logging

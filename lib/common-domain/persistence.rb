@@ -19,5 +19,6 @@ module CommonDomain
       autoload :Work, 'common-domain/persistence/event-store/work'
     end
     autoload :Repository, 'common-domain/persistence/repository'
+    autoload :Snapshots, 'common-domain/persistence/snapshots'
   end
 end

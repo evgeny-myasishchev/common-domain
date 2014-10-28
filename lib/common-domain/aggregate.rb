@@ -47,6 +47,12 @@ module CommonDomain
       @uncommitted_events.clear
     end
     
+    # Returns a snapshots policy for given aggregate. See the SnapshotsPolicy class
+    # Returns nil by default which means no snapshots
+    def self.snapshots_policy
+      nil
+    end
+    
     protected
     
       # This method should be used by subclasses to publish events which are results of aggregate state change.

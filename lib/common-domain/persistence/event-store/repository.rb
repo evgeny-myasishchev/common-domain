@@ -4,7 +4,7 @@ module CommonDomain::Persistence::EventStore
     
     Log = CommonDomain::Logger.get("common-domain::persistence::event-store::repository")
     
-    def initialize(event_store, builder)
+    def initialize(event_store, builder, snapshots: nil)
       @event_store = event_store
       @builder = builder
     end
