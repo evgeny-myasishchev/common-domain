@@ -24,6 +24,11 @@ module CommonDomain
     # 
     # The handler should accept a single argument, the event itself.
     #
+    # Simplified on syntax can be used as well. Sample:
+    # on AccountClosedEvent do |event| {
+    #   #Your logic goes here
+    # }
+    #
     def apply_event(event)
       handle_message(event)
       @version = event.version
