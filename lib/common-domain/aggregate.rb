@@ -35,6 +35,10 @@ module CommonDomain
       self
     end
     
+    def apply_snapshot(snapshot)
+      raise 'Not implemented'
+    end
+    
     def get_uncommitted_events
       @uncommitted_events.clone
     end
