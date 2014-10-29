@@ -30,10 +30,5 @@ module CommonDomain::Persistence::EventStore
       Log.debug "Aggregate '#{aggregate.aggregate_id}' saved."
       aggregate
     end
-    
-    protected
-      def create_work
-        Work.new @event_store, @builder
-      end
   end
 end

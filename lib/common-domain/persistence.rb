@@ -16,7 +16,6 @@ module CommonDomain
     module EventStore
       autoload :Repository, 'common-domain/persistence/event-store/repository'
       autoload :StreamIO, 'common-domain/persistence/event-store/stream-io'
-      autoload :Work, 'common-domain/persistence/event-store/work'
     end
     autoload :Repository, 'common-domain/persistence/repository'
     autoload :Snapshots, 'common-domain/persistence/snapshots'

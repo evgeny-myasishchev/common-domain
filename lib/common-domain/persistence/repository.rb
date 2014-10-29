@@ -2,45 +2,12 @@ module CommonDomain::Persistence
   class Repository
     Log = CommonDomain::Logger.get("common-domain::persistence::repository")
     
-    class AbstractWork
-      def initialize
-        @on_committed = []
-      end
-      
-      # Returns true if the aggregate exists in the repository or it was added as a new aggregate.
-      def exists?(aggregate_id)
-        raise 'Not implemented'
-      end
-      
-      def get_by_id(aggregate_class, id)
-        raise "Not implemented"
-      end
-      
-      def add_new(aggregate)
-        raise "Not implemented"
-      end
-      
-      def commit_changes(headers = {})
-        raise "Not implemented"
-      end
-      
-      # Register a callback that'll be called right after work changes are commited.
-      def on_committed(&block)
-        @on_committed << block
-      end
-      
-      protected
-        # Invokes all callbacks previously registered with on_committed method
-        def notify_on_committed
-          @on_committed.each { |block| block.call }
-        end
-    end
-    
     def exists?(aggregate_id)
       raise 'Not implemented'
     end
     
     # Returns the aggregate. Raises AggregateNotFoundError for not existing aggregates.
+    # If block supplied then the aggregate will be automatically saved after the block exists
     def get_by_id(aggregate_class, id)
       raise "Not implemented"
     end
@@ -48,17 +15,5 @@ module CommonDomain::Persistence
     def save(aggregate, headers = {})
       raise "Not implemented"
     end
-    
-    def begin_work(headers = {}, &block)
-      work = create_work
-      result = yield(work)
-      work.commit_changes headers
-      result
-    end
-    
-    protected
-      def create_work
-        raise "Abstract method. Needs to be implemented and should return an instance of AbstractWork."
-      end
   end
 end

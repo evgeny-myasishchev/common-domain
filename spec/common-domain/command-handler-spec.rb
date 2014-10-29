@@ -41,65 +41,6 @@ describe CommonDomain::CommandHandler do
     expect(actual_headers).to be expected_headers
   end
   
-  it "should be possible to define message handlers that will be wrapped into begin_work" do
-    work = double(:work)
-    msg1 = Messages::Dummy.new
-    msg2 = Messages::Dummy1.new
-    headers = { header: 'header-1'}
-    actual_args = {}
-    subject.class.class_eval do
-      on Messages::Dummy, begin_work: true do |work, message|
-        actual_args = {work: work, message: message}
-      end
-      
-      on Messages::Dummy1, begin_work: true do |work, message, headers|
-        actual_args = {work: work, message: message, headers: headers}
-      end
-    end
-    expect(repository).to receive(:begin_work).twice do |&block|
-      block.call(work)
-    end
-
-    subject.handle_message msg1
-    expect(actual_args).to eql({work: work, message: msg1})
-    
-    subject.handle_message msg2, headers
-    expect(actual_args).to eql({work: work, message: msg2, headers: headers})
-  end
-  
-  it "should begin_work with headers" do
-    subject.class.class_eval do
-      on Messages::Dummy, begin_work: true do |work, message|
-      end
-    end
-    message = Messages::Dummy.new
-    message.headers = {header: 'header-1'}
-    expect(repository).to receive(:begin_work).with(message.headers) do |&block|
-      block.call(double(:work))
-    end
-    subject.handle_message(message)
-  end
-
-  it "should return message result for wrapped methods" do
-    subject.class.class_eval do
-      on Messages::Dummy, begin_work: true do |work, message|
-        return "Dummy result"
-      end
-    end
-    expect(repository).to receive(:begin_work) do |&block|
-      block.call(double(:work))
-    end
-    expect(subject.handle_message(Messages::Dummy.new)).to eql "Dummy result"
-  end
-  
-  it "should raise ArgumentError if handler block has wrong number of args" do
-    expect(repository).to begin_work
-    subject.class.class_eval do
-      on(Messages::Dummy, begin_work: true) { |message| }
-    end
-    expect{subject.handle_message(Messages::Dummy.new)}.to raise_error ArgumentError, 'Messages::Dummy handler block should have 2 or 3 arguments: work, command and optionally headers. Got: 1.'
-  end
-  
   describe 'handle DSL' do
     let(:aggregate_class) { Class.new }
     let(:aggregate) { double(:aggregate) }

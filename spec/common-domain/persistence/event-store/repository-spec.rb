@@ -69,12 +69,4 @@ describe CommonDomain::Persistence::EventStore::Repository do
       subject.save(aggregate, headers)
     end
   end
-  
-  describe "create_work" do
-    it "should create and return an instance of EventStore::Work" do
-      work = double(:work)
-      expect(CommonDomain::Persistence::EventStore::Work).to receive(:new).with(event_store, builder).and_return(work)
-      expect(subject.send(:create_work)).to be work
-    end
-  end
 end
