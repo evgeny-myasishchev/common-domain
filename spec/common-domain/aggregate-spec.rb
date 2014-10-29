@@ -2,7 +2,32 @@ require 'spec-helper'
 
 describe CommonDomain::Aggregate do
   subject { described_class.new "account-1" }
+  
+  describe 'initializer' do
+    it 'should initialize the aggregate with given id' do
+      expect(subject.aggregate_id).to eql 'account-1'
+    end
+    
+    it 'should initialize the aggregate with snapshot' do
+      aggregate_class = Class.new(described_class) do
+        attr_reader :applied_snapshot
+        def apply_snapshot(data)
+          @applied_snapshot = data
+        end
+      end
+      snapshot = CommonDomain::Persistence::Snapshots::Snapshot.new 'account-from-snapshot-1', 223, 'snapshot-data'
+      subject = aggregate_class.new snapshot
+      expect(subject.aggregate_id).to eql 'account-from-snapshot-1'
+      expect(subject.version).to eql 223
+      expect(subject.applied_snapshot).to eql 'snapshot-data'
+    end
+  end
+  
   describe "apply_event" do
+    before(:each) do
+      allow(subject).to receive(:handle_message)
+    end
+    
     it "should process events" do
       event1 = double(:event1, :version => 1)
       event2 = double(:event2, :version => 2)
@@ -18,16 +43,22 @@ describe CommonDomain::Aggregate do
       event1 = double(:event1, :version => 1)
       event2 = double(:event2, :version => 2)
       
-      allow(subject).to receive(:handle_message)
-      
       subject.apply_event event1
       expect(subject.version).to eql 1
       subject.apply_event event2
       expect(subject.version).to eql 2
     end
     
+    it 'should increment applied_events_number number' do
+      subject.apply_event double(:event1, :version => 1)
+      expect(subject.applied_events_number).to eql 1
+      subject.apply_event double(:event1, :version => 1)
+      expect(subject.applied_events_number).to eql 2
+      subject.apply_event double(:event1, :version => 1)
+      expect(subject.applied_events_number).to eql 3
+    end
+    
     it "should return self" do
-      allow(subject).to receive(:handle_message)
       expect(subject.apply_event(double(:event1, :version => 1))).to be subject
     end
   end

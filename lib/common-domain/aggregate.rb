@@ -8,10 +8,22 @@ module CommonDomain
     
     attr_reader :aggregate_id, :version
     
-    def initialize(id = nil)
-      @aggregate_id = id
-      @version = 0
+    # Number of applied events. If there was a snapshot then 
+    # this would be a number of events applied since the snapshot
+    attr_reader :applied_events_number
+    
+    def initialize(id_or_snapshot = nil)
+      if id_or_snapshot.is_a?(CommonDomain::Persistence::Snapshots::Snapshot)
+        snapshot = id_or_snapshot
+        @aggregate_id = snapshot.id
+        @version = snapshot.version
+        apply_snapshot snapshot.data
+      else
+        @aggregate_id = id_or_snapshot
+        @version = 0
+      end
       @uncommitted_events = []
+      @applied_events_number = 0
     end
     
     # Dispatch the event to a corresponding handler.
@@ -32,10 +44,17 @@ module CommonDomain
     def apply_event(event)
       handle_message(event)
       @version = event.version
+      @applied_events_number += 1
       self
     end
     
-    def apply_snapshot(snapshot)
+    # Reconstruct the state of the aggregate as a snapshot
+    def apply_snapshot(data)
+      raise 'Not implemented'
+    end
+    
+    # Get current state (snapshot). Data returned by this method should be recognized by apply_snapshot method
+    def get_snapshot
       raise 'Not implemented'
     end
     

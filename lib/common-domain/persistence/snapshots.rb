@@ -13,6 +13,14 @@ module CommonDomain::Persistence
     def process_committed(aggregate)
     end
     
+    class Snapshot
+      attr_reader :id, :version, :data
+      
+      def initialize(id, version, data)
+        @id, @version, @data = id, version, data
+      end
+    end
+    
     class SnapshotsRepository
       # Get the snapshot or nil
       def get(aggregate_id)
