@@ -66,10 +66,14 @@ module CommonDomain
       @uncommitted_events.clear
     end
     
-    # Returns a snapshots policy for given aggregate. See the SnapshotsPolicy class
-    # Returns nil by default which means no snapshots
-    def self.snapshots_policy
-      nil
+    #
+    # Should be overridden by specific aggregate class and return true if condition to add snapshot is meat
+    # In general you would add a snapshot if it has applied events number greather than some threashold. 
+    # Example of such logic would look like:
+    # aggregate.applied_events_number >= 10
+    #
+    def self.add_snapshot?(aggregate)
+      false
     end
     
     protected

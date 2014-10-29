@@ -1,18 +1,5 @@
 module CommonDomain::Persistence
-  class Snapshots
-    def initialize(snapshots_repository)
-      @snapshots_repository = snapshots_repository
-    end
-    
-    # Get the snapshot for given aggregate using the repository.
-    def get_snapshot(aggregate_id)
-    end
-    
-    # Uses snapshots policy for given aggregate to determine if a snapshot should be added.
-    # Uses snapshots repository to add the snapshot.
-    def process_committed(aggregate)
-    end
-    
+  module Snapshots
     class Snapshot
       attr_reader :id, :version, :data
       
@@ -33,16 +20,11 @@ module CommonDomain::Persistence
       end
     end
     
-    class SnapshotsPolicy
-      # Initializes the snapshots policy. Given block will be invoked with the aggregate as a first argument.
-      # The block should return true if the snapshot should be added.
-      def initialize(&block)
-        
-      end
-      
-      # Uses provided block (with initializer) to determine if a snapshot should be added for the given aggregate
-      def add_snapshot?(aggregate)
-        
+    class CommitsHandler
+      #
+      # Uses snapshots repository to add the snapshot if needed.
+      #
+      def process_committed(aggregate)
       end
     end
   end
