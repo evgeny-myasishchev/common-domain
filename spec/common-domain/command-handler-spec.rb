@@ -61,21 +61,29 @@ describe CommonDomain::CommandHandler do
     
     it 'should define a handler and route the command to the given aggregate using specified method' do
       ac = aggregate_class
+      expect(repository).to get_by_id(aggregate_class, 'aggregate-1').and_return aggregate
       subject.class.class_eval do
         handle(DummyCommand).with(ac).using(:dummy_logic)
       end
       command = DummyCommand.new 'aggregate-1'
-      work = expect(repository).to begin_work
-      expect(work).to get_and_return_aggregate aggregate_class, 'aggregate-1', aggregate
+      
       expect(aggregate).to receive(:dummy_logic).with(command)
       subject.handle_message command
     end
     
+    it 'raise error if aggregate class was not specified using with' do
+      ac = aggregate_class
+      subject.class.class_eval do
+        handle(DummyCommand)
+      end
+      command = DummyCommand.new 'aggregate-1'
+      expect { subject.handle_message(command) }.to raise_error 'aggregate_class is not defined for command \'DummyCommand\' handler definition'
+    end
+    
     describe 'resolve method name' do
       before(:each) do
-        work = expect(repository).to begin_work
-        expect(work).to get_and_return_aggregate aggregate_class, 'aggregate-1', aggregate
         ac = aggregate_class
+        expect(repository).to get_by_id(aggregate_class, 'aggregate-1').and_return aggregate
         subject.class.class_eval do
           handle(DummyCommand).with(ac)
           handle(PerformDummyAction).with(ac)
@@ -106,18 +114,6 @@ describe CommonDomain::CommandHandler do
         cmd = Commands::PerformAnotherDummyAction.new 'aggregate-1'
         expect(aggregate).to receive(:perform_another_dummy_action).with(cmd)
         subject.handle_message cmd
-      end
-    end
-    
-    describe described_class::HandleSyntax do
-      let(:handler) { double(:handler) }
-      subject { described_class.new handler, DummyCommand }
-      describe 'with' do
-        it 'should raise error if aggregate_class is nil' do
-          expect {
-            subject.with(nil)
-          }.to raise_error ArgumentError, 'aggregate_class should not be nil'
-        end
       end
     end
   end
