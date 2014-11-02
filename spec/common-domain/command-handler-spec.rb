@@ -61,11 +61,12 @@ describe CommonDomain::CommandHandler do
     
     it 'should define a handler and route the command to the given aggregate using specified method' do
       ac = aggregate_class
+      command = DummyCommand.new 'aggregate-1', headers: {header1: 'value-1'}
       expect(repository).to get_by_id(aggregate_class, 'aggregate-1').and_return aggregate
+      expect(repository).to receive(:save).with(aggregate, command.headers)
       subject.class.class_eval do
         handle(DummyCommand).with(ac).using(:dummy_logic)
       end
-      command = DummyCommand.new 'aggregate-1'
       
       expect(aggregate).to receive(:dummy_logic).with(command)
       subject.handle_message command
@@ -84,6 +85,7 @@ describe CommonDomain::CommandHandler do
       before(:each) do
         ac = aggregate_class
         expect(repository).to get_by_id(aggregate_class, 'aggregate-1').and_return aggregate
+        expect(repository).to receive(:save).with(aggregate, anything())
         subject.class.class_eval do
           handle(DummyCommand).with(ac)
           handle(PerformDummyAction).with(ac)

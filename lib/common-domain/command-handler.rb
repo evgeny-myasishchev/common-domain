@@ -29,6 +29,7 @@ module CommonDomain
           raise "aggregate_class is not defined for command '#{command_class}' handler definition" unless definition.aggregate_class
           aggregate = repository.get_by_id definition.aggregate_class, command.aggregate_id
           aggregate.send(definition.method_name, command)
+          repository.save aggregate, command.headers
         end
         definition
       end
@@ -42,7 +43,7 @@ module CommonDomain
       end
       
       def method_name
-        @method_name ||= resolve_aggregate_method_name @command_class
+        @method_name ||= self.class.resolve_aggregate_method_name @command_class
       end
       
       def with(aggregate_class)
@@ -54,17 +55,17 @@ module CommonDomain
         @method_name = method_name
         self
       end
+      
+      def self.resolve_aggregate_method_name command_class
+        underscore command_class.name.split('::').last
+      end
 
       private
         AcronymRegex = /(?=a)b/
-        
-        def resolve_aggregate_method_name command_class
-          underscore command_class.name.split('::').last
-        end
     
         # Taken from ActiveSupport. It may be not available if using outside of the RoR
         # File activesupport/lib/active_support/inflector/methods.rb, line 90
-        def underscore(camel_cased_word)
+        def self.underscore(camel_cased_word)
           word = camel_cased_word.to_s.gsub('::', '/')
           word.gsub!(/Command/,'')
           word.gsub!(/(?:([A-Za-z\d])|^)(#{AcronymRegex})(?=\b|[^a-z])/) { "#{$1}#{$1 && '_'}#{$2.downcase}" }

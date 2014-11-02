@@ -14,17 +14,15 @@ module RSpec::Matchers::CommonDomainMatchers
     end
     
     def do_match_command command
-      aggregate_method_name = CommonDomain::CommandHandler::HandleSyntax.resolve_aggregate_method_name command.class
+      aggregate_method_name = CommonDomain::CommandHandler::HandleDefinition.resolve_aggregate_method_name command.class
       repo = handler.repository
-      work = double(work)
       aggregate = spy(:aggregate)
-      allow(repository).to receive(:begin_work) do |headers = {}, &block|
-        block.call(work)
-      end
-      allow(work).to receive(:get_by_id).with(@aggregate_class, command.aggregate_id) { aggregate }
+      allow(repo).to receive(:get_by_id).with(@aggregate_class, command.aggregate_id).and_return(aggregate)
+      allow(repo).to receive(:save).with(aggregate, command.headers)
       handler.handle_message command
-      @matcher = have_received(aggregate_method_name.to_sym).with(command)
-      @matcher.matches?(aggregate)
+      @aggregate_matcher = have_received(aggregate_method_name.to_sym).with(command)
+      @repo_save_matcher = have_received(:save).with(aggregate, command.headers)
+      @aggregate_matcher.matches?(aggregate) && @repo_save_matcher.matches?(repo)
     end
   end
 end
