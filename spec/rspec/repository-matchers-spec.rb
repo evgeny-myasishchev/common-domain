@@ -16,5 +16,26 @@ describe "work-matchers" do
       expect(repository).to get_by_id(aggregate_class, 'aggregate-100').and_return aggregate_instance
       expect(repository.get_by_id(aggregate_class, 'aggregate-100')).to be aggregate_instance
     end
+    
+    it 'should fail if return chain not performed' do
+      expect {
+        expect(repository).to get_by_id(aggregate_class, 'aggregate-100')
+      }.to raise_error 'please provide aggregate instance with and_return chain'
+    end
+    
+    describe 'save chain' do
+      it 'should setup save with headers' do
+        headers = {header1: 'value1', header2: 'value2'}
+        expect(repository).to get_by_id(aggregate_class, 'aggregate-100').and_return(aggregate_instance).and_save(headers)
+        expect(repository.get_by_id(aggregate_class, 'aggregate-100')).to be aggregate_instance
+        repository.save(aggregate_instance, headers)
+      end
+      
+      it 'should fail if headers are nil' do
+        expect {
+          expect(repository).to get_by_id(aggregate_class, 'aggregate-100').and_return(aggregate_instance).and_save(nil)
+        }.to raise_error 'please provide expected headers to save with the aggregate'
+      end
+    end
   end
 end
