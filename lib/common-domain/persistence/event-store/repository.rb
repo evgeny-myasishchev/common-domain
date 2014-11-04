@@ -1,7 +1,5 @@
 module CommonDomain::Persistence::EventStore
   class Repository < CommonDomain::Persistence::Repository
-    include CommonDomain::Persistence::EventStore::StreamIO
-    
     Log = CommonDomain::Logger.get("common-domain::persistence::event-store::repository")
     
     def initialize(event_store, builder)
