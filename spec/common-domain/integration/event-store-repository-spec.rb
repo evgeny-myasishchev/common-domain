@@ -14,6 +14,8 @@ describe "Integration - Common Domain - Event Store Repository" do
     emp2.register 'employee-2'
     subject.save emp1
     subject.save emp2
+    expect(emp1.get_uncommitted_events).to be_empty
+    expect(emp2.get_uncommitted_events).to be_empty
     
     emp1_stream = event_store.open_stream('employee-1')
     expect(emp1_stream.committed_events.length).to eql(1)
@@ -44,6 +46,8 @@ describe "Integration - Common Domain - Event Store Repository" do
     
     subject.save(emp1)
     subject.save(emp2)
+    expect(emp1.get_uncommitted_events).to be_empty
+    expect(emp2.get_uncommitted_events).to be_empty
     
     emp1_stream = event_store.open_stream('employee-1')
     expect(emp1_stream.committed_events.length).to eql(2)

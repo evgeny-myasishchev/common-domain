@@ -15,7 +15,6 @@ module CommonDomain
     autoload :AggregatesBuilder, 'common-domain/persistence/aggregates-builder'
     module EventStore
       autoload :Repository, 'common-domain/persistence/event-store/repository'
-      autoload :StreamIO, 'common-domain/persistence/event-store/stream-io'
     end
     autoload :Repository, 'common-domain/persistence/repository'
     autoload :Snapshots, 'common-domain/persistence/snapshots'

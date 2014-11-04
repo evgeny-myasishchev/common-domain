@@ -46,26 +46,33 @@ describe CommonDomain::Persistence::EventStore::Repository do
   
   describe "save" do
     let(:stream) { double(:stream) }
-    it "should use stream-io to flush aggregate changes" do
-      expect(subject).to be_a_kind_of(CommonDomain::Persistence::EventStore::StreamIO)
-      expect(subject).to receive(:flush_changes).with(aggregate, event_store).and_return(aggregate)
+    
+    before(:each) do
+      allow(event_store).to receive(:open_stream) { stream }
+      allow(stream).to receive(:add)
+      allow(stream).to receive(:commit_changes)
+      allow(aggregate).to receive(:get_uncommitted_events) { [] }
+      allow(aggregate).to receive(:clear_uncommitted_events)
+    end
+    
+    it "should return the aggregate" do
       expect(subject.save(aggregate)).to be aggregate
     end
     
-    it "should commit stream on yield" do
-      expect(subject).to receive(:flush_changes) do |aggregate, opener, &block|
-        expect(stream).to receive(:commit_changes)
-        block.call(stream)
-      end
+    it "should get the stream, flush all the events into the stream and clear the aggregate" do
+      evt1, evt2, evt3 = double(:evt1), double(:evt2), double(:evt3)
+      expect(aggregate).to receive(:get_uncommitted_events).and_return([evt1, evt2, evt3])
+      expect(stream).to receive(:add).with(EventStore::EventMessage.new evt1)
+      expect(stream).to receive(:add).with(EventStore::EventMessage.new evt2)
+      expect(stream).to receive(:add).with(EventStore::EventMessage.new evt3)
+      expect(stream).to receive(:commit_changes)
+      expect(aggregate).to receive(:clear_uncommitted_events)
       subject.save(aggregate)
     end
     
     it "should commit stream with headers" do
       headers = {header: 'header-1'}
       expect(stream).to receive(:commit_changes).with(headers)
-      allow(subject).to receive(:flush_changes) do |aggregate, opener, &block|
-        block.call(stream)
-      end
       subject.save(aggregate, headers)
     end
   end
