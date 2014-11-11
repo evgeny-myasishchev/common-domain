@@ -42,6 +42,28 @@ describe CommonDomain::Persistence::EventStore::Repository do
       expect(event_store).to receive(:open_stream).with('aggregate-1').and_return(event_stream)
       expect(lambda { subject.get_by_id(aggregate_class, "aggregate-1") }).to raise_error(CommonDomain::Persistence::AggregateNotFoundError)
     end
+    
+    describe 'snapshots' do
+      let(:snapshots_repo) { double(:snapshots_repository, get: nil, add: nil)}
+      let(:s) { CommonDomain::Persistence::Snapshots }
+      
+      it 'should reconstruct the aggregate from snapshot if available' do
+        snapshot = s::Snapshot.new('aggregate-1', 10, 'snapshot-data')
+        expect(snapshots_repo).to receive(:get).with('aggregate-1') { snapshot }
+        expect(builder).to receive(:build).with(aggregate_class, snapshot) { aggregate }
+        
+        event1 = double(:event1, :body => double(:body1))
+        event2 = double(:event1, :body => double(:body2))
+        
+        expect(event_store).to receive(:open_stream).with('aggregate-1', min_revision: snapshot.version + 1).and_return(event_stream)
+        expect(event_stream).to receive(:committed_events).and_return [event1, event2]
+        expect(aggregate).to receive(:apply_event).with(event1.body)
+        expect(aggregate).to receive(:apply_event).with(event2.body)
+        
+        repository = described_class.new event_store, builder, snapshots_repo
+        actual_aggregate = repository.get_by_id aggregate_class, 'aggregate-1'
+      end
+    end
   end
   
   describe "save" do
