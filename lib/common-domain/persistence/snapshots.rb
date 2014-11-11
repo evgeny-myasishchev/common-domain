@@ -19,13 +19,5 @@ module CommonDomain::Persistence
         raise 'Not implemented'
       end
     end
-    
-    class CommitsHandler
-      #
-      # Uses snapshots repository to add the snapshot if needed.
-      #
-      def process_committed(aggregate)
-      end
-    end
   end
 end
