@@ -58,34 +58,35 @@ describe CommonDomain::Aggregate do
       expect(subject.applied_events_number).to eql 3
     end
     
+    it 'should increment version' do
+      subject.apply_event double(:event1)
+      expect(subject.version).to eql 1
+      subject.apply_event double(:event1)
+      expect(subject.version).to eql 2
+      subject.apply_event double(:event1)
+      expect(subject.version).to eql 3
+    end
+    
     it "should return self" do
       expect(subject.apply_event(double(:event1, :version => 1))).to be subject
     end
   end
   
   describe "raise_event" do
-    it "should set event version to aggregate version + 1" do
-      account_opened  = double(:account_opened)
-      allow(subject).to receive(:apply_event)
-      allow(subject).to receive(:version) { 10 }
-      expect(account_opened).to receive(:version=).with(11)
-      subject.send(:raise_event, account_opened)
-    end
-    
     it "should apply event" do
-      account_opened  = double(:account_opened, :version= => nil)
+      account_opened  = double(:account_opened)
       expect(subject).to receive(:apply_event).with(account_opened)
       subject.send(:raise_event, account_opened)
     end
     
     it "should return self" do
       allow(subject).to receive(:apply_event)
-      expect(subject.send(:raise_event, double(:account_opened, :version= => nil))).to be subject
+      expect(subject.send(:raise_event, double(:account_opened))).to be subject
     end
     
     it "should add an event to uncommitted events" do
-      account_opened  = double(:account_opened, :version= => nil)
-      account_renamed = double(:account_renamed, :version= => nil)
+      account_opened  = double(:account_opened)
+      account_renamed = double(:account_renamed)
       allow(subject).to receive(:apply_event)
       subject.send(:raise_event, account_opened)
       subject.send(:raise_event, account_renamed)
@@ -114,8 +115,8 @@ describe CommonDomain::Aggregate do
   
   describe "clear_uncommitted_events" do
     it "should empty uncommitted events" do
-      account_opened  = double(:account_opened, :version= => nil)
-      account_renamed = double(:account_renamed, :version= => nil)
+      account_opened  = double(:account_opened)
+      account_renamed = double(:account_renamed)
       allow(subject).to receive(:apply_event)
       subject.send(:raise_event, account_opened)
       subject.send(:raise_event, account_renamed)

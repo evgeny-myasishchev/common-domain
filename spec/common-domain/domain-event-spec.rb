@@ -27,11 +27,9 @@ describe CommonDomain::DomainEvent do
   end
   
   describe "equality" do
-    it "should do equality by aggregate_id and version" do
+    it "should do equality by aggregate_id" do
       left = SampleEvent.new "aggregate-1"
-      left.version = 1
       right = SampleEvent.new "aggregate-1"
-      right.version = 1
 
       expect(left == right).to be_truthy
       expect(left).to eql right
@@ -39,9 +37,7 @@ describe CommonDomain::DomainEvent do
     
     it "should do equality by all attributes" do
       left = SampleEvent.new "aggregate-1", name: 'name-1', description: 'description-1'
-      left.version = 1
       right = SampleEvent.new "aggregate-1", name: 'name-1', description: 'description-1'
-      right.version = 1
 
       expect(left == right).to be_truthy
       expect(left).to eql right

@@ -4,12 +4,15 @@ module CommonDomain
   # Base class for all domain models.
   # 
   class Aggregate
+    Log = CommonDomain::Logger.get("common-domain::aggregate")
     include Infrastructure::MessagesHandler
     
     attr_reader :aggregate_id, :version
     
     # Number of applied events. If there was a snapshot then 
     # this would be a number of events applied since the snapshot
+    # Main use of this is to detect if the aggregate needs a snapshot.
+    # See the add_snapshot? method for more details.
     attr_reader :applied_events_number
     
     def initialize(id_or_snapshot = nil)
@@ -43,7 +46,7 @@ module CommonDomain
     #
     def apply_event(event)
       handle_message(event)
-      @version = event.version
+      @version += 1
       @applied_events_number += 1
       self
     end
@@ -90,7 +93,6 @@ module CommonDomain
       #
       def raise_event(event)
         apply_event(event)
-        event.version = version + 1
         @uncommitted_events << event
         self
       end

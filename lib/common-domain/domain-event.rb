@@ -1,10 +1,8 @@
 module CommonDomain
   class DomainEvent
     attr_reader :aggregate_id, :attribute_names
-    attr_accessor :version
     def initialize(aggregate_id, attributes = {})
       @aggregate_id = aggregate_id
-      @version      = 0
       @attribute_names = attributes.keys
       @attribute_names.each { |key| instance_variable_set("@#{key}", attributes[key]) }
     end
@@ -15,7 +13,6 @@ module CommonDomain
     
     def ==(other)
       aggregate_id == other.aggregate_id && 
-      version == other.version &&
       @attribute_names.all? { |key| self.attribute(key) == other.attribute(key) }
     end
     
