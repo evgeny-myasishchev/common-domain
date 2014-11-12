@@ -5,7 +5,7 @@ describe CommonDomain::Persistence::EventStore::Repository do
   let(:event_stream) { double(:event_stream, new_stream?: false, :committed_events => []) }
   let(:event_store) { double(:event_store, :open_stream => event_stream) }
   let(:aggregate) { double("aggregate", :aggregate_id => "aggregate-1") }
-  
+  let(:s) { CommonDomain::Persistence::Snapshots }
   subject { described_class.new event_store, builder }
   
   describe "exists?" do
@@ -45,7 +45,6 @@ describe CommonDomain::Persistence::EventStore::Repository do
     
     describe 'snapshots' do
       let(:snapshots_repo) { double(:snapshots_repository, get: nil, add: nil)}
-      let(:s) { CommonDomain::Persistence::Snapshots }
       
       it 'should reconstruct the aggregate from snapshot if available' do
         snapshot = s::Snapshot.new('aggregate-1', 10, 'snapshot-data')
@@ -96,6 +95,26 @@ describe CommonDomain::Persistence::EventStore::Repository do
       headers = {header: 'header-1'}
       expect(stream).to receive(:commit_changes).with(headers)
       subject.save(aggregate, headers)
+    end
+    
+    describe 'snapshots' do
+      let(:aggregate_class) { double("aggregate-class") }
+      let(:snapshots_repo) { double(:snapshots_repo) }
+      let(:snapshot) { double(:snapshot_data) }
+      before(:each) do
+        allow(aggregate).to receive(:class) { aggregate_class }
+        allow(stream).to receive(:stream_id) { 'aggregate-1' }
+        allow(stream).to receive(:stream_revision) { 233 }
+      end
+      
+      it 'should add a snapshot if needed' do
+        snapshot_data = double(:snapshot_data)
+        subject = described_class.new event_store, builder, snapshots_repo
+        expect(aggregate_class).to receive(:add_snapshot?).with(aggregate) { true }
+        expect(aggregate).to receive(:get_snapshot) { snapshot_data }
+        expect(snapshots_repo).to receive(:add).with(s::Snapshot.new('aggregate-1', 233, snapshot_data))
+        subject.save(aggregate)
+      end
     end
   end
 end

@@ -6,6 +6,16 @@ module CommonDomain::Persistence
       def initialize(id, version, data)
         @id, @version, @data = id, version, data
       end
+      
+      def ==(other)
+        id == other.id && 
+        version == other.version &&
+        data == other.data
+      end
+    
+      def eql?(other)
+        self == other
+      end
     end
     
     class SnapshotsRepository
@@ -14,8 +24,8 @@ module CommonDomain::Persistence
         raise 'Not implemented'
       end
       
-      # Add the snapshot for given aggregate
-      def add(aggregate)
+      # Add the snapshot
+      def add(snapshot)
         raise 'Not implemented'
       end
     end

@@ -34,7 +34,16 @@ module CommonDomain::Persistence::EventStore
       stream.commit_changes headers
       aggregate.clear_uncommitted_events
       Log.debug "Aggregate '#{aggregate.aggregate_id}' saved."
+      add_snapshot_if_required aggregate, stream
       aggregate
+    end
+    
+    private def add_snapshot_if_required(aggregate, stream)
+      return if @snapshots_repository.nil?
+      return unless aggregate.class.add_snapshot?(aggregate)
+      Log.debug "Adding snapshot for aggregate #{stream.stream_id} (version: #{stream.stream_revision})"
+      snapshot = CommonDomain::Persistence::Snapshots::Snapshot.new stream.stream_id, stream.stream_revision, aggregate.get_snapshot
+      @snapshots_repository.add snapshot
     end
   end
 end
