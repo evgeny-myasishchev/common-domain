@@ -36,6 +36,12 @@ describe "work-matchers" do
           expect(repository).to get_by_id(aggregate_class, 'aggregate-100').and_return(aggregate_instance).and_save(nil)
         }.to raise_error 'please provide expected headers to save with the aggregate'
       end
+      
+      it 'should provide dummy_headers helpers' do
+        expect(repository).to get_by_id(aggregate_class, 'aggregate-100').and_return(aggregate_instance).and_save(with_dummy_headers)
+        repository.get_by_id(aggregate_class, 'aggregate-100')
+        repository.save(aggregate_instance, dummy_headers)
+      end
     end
   end
 end

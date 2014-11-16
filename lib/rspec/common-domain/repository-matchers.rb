@@ -1,5 +1,16 @@
 module RSpec::Matchers::CommonDomainMatchers
   
+  module Helpers
+    def dummy_headers
+      {dummy_header_1: 'dummy-value-1', dummy_header_2: 'dummy-value-2'}
+    end
+  
+    def with_dummy_headers
+      hash_including(dummy_headers)
+    end
+  end
+  
+  
   # Sample:
   #   expect(repository).to get_by_id(Acount, 'account-993').and_return(account_instance)
   RSpec::Matchers.define :get_by_id do |aggregate_class, aggregate_id|
@@ -21,4 +32,8 @@ module RSpec::Matchers::CommonDomainMatchers
       expect(repository).to receive(:save).with(@aggregate, headers)
     end
   end
+end
+
+RSpec.configure do |c|
+  c.include RSpec::Matchers::CommonDomainMatchers::Helpers
 end
