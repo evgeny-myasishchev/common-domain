@@ -78,6 +78,9 @@ describe CommonDomain::Persistence::EventStore::Repository do
     
     it "should return the aggregate" do
       expect(subject.save(aggregate)).to be aggregate
+      
+      expect(aggregate).to receive(:get_uncommitted_events).and_return([double(:evt3)])
+      expect(subject.save(aggregate)).to be aggregate
     end
     
     it "should get the stream, flush all the events into the stream and clear the aggregate" do
@@ -93,8 +96,15 @@ describe CommonDomain::Persistence::EventStore::Repository do
     
     it "should commit stream with headers" do
       headers = {header: 'header-1'}
+      expect(aggregate).to receive(:get_uncommitted_events).and_return([double(:evt3)])
       expect(stream).to receive(:commit_changes).with(headers)
       subject.save(aggregate, headers)
+    end
+    
+    it 'should do nothing if aggregate has no changes' do
+      expect(aggregate).to receive(:get_uncommitted_events).and_return([])
+      expect(event_store).not_to receive(:open_stream)
+      subject.save(aggregate)
     end
     
     describe 'snapshots' do
@@ -103,6 +113,7 @@ describe CommonDomain::Persistence::EventStore::Repository do
       let(:snapshot) { double(:snapshot_data) }
       before(:each) do
         allow(aggregate).to receive(:class) { aggregate_class }
+        allow(aggregate).to receive(:get_uncommitted_events).and_return([double(:evt3)])
         allow(stream).to receive(:stream_id) { 'aggregate-1' }
         allow(stream).to receive(:stream_revision) { 233 }
       end

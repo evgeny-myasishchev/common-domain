@@ -23,18 +23,21 @@ module CommonDomain::Persistence::EventStore
     end
     
     def save(aggregate, headers = {})
-      Log.debug "Saving aggregate '#{aggregate.aggregate_id}'..."
-      stream = @event_store.open_stream(aggregate.aggregate_id)
       uncommitted_events = aggregate.get_uncommitted_events
-      Log.debug "The aggregate '#{aggregate.aggregate_id}' has #{uncommitted_events.length} uncommitted events to flush..."
-      uncommitted_events.each { |event|
-        stream.add EventStore::EventMessage.new event
-      }
-      Log.debug "Committing changes..."
-      stream.commit_changes headers
-      aggregate.clear_uncommitted_events
-      Log.debug "Aggregate '#{aggregate.aggregate_id}' saved."
-      add_snapshot_if_required aggregate, stream
+      if uncommitted_events.length > 0
+        Log.debug "Saving the aggregate '#{aggregate.aggregate_id}' with '#{uncommitted_events.length}' uncommitted events..."
+        stream = @event_store.open_stream(aggregate.aggregate_id)
+        uncommitted_events.each { |event|
+          stream.add EventStore::EventMessage.new event
+        }
+        Log.debug "Committing changes..."
+        stream.commit_changes headers
+        aggregate.clear_uncommitted_events
+        Log.debug "Aggregate '#{aggregate.aggregate_id}' saved."
+        add_snapshot_if_required aggregate, stream
+      else
+        Log.debug "The aggregate '#{aggregate.aggregate_id}' has no uncommitted events. Saving skipped."
+      end
       aggregate
     end
     
