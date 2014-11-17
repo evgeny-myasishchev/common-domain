@@ -15,6 +15,7 @@ module CommonDomain
     autoload :MessagesRouter, 'common-domain/infrastructure/messages-router'
   end
   autoload :Logger, 'common-domain/logger'
+  autoload :NonAtomicUnitOfWork, 'common-domain/non-atomic-unit-of-work'
   autoload :Persistence, 'common-domain/persistence'
   module Projections
     autoload :ActiveRecord, 'common-domain/projections/activerecord'
