@@ -30,6 +30,14 @@ describe CommonDomain::Command do
     expect(cmd.headers).to eql(header1: 'header 1', header2: 'header 2')
   end
   
+  it 'should expose attribute names' do
+    cmd = Commands::SampleCommand.new "aggregate-1", :name => "name-1", :description => "description-1"
+    expect(cmd.attribute_names).to eql [:name, :description]
+    
+    cmd = Commands::SampleCommand.new "aggregate-1", attributes: { name: "name-1", description: "description-1" }
+    expect(cmd.attribute_names).to eql [:name, :description]
+  end
+  
   describe "from_hash" do
     it "should use class_name param to get command class, instantiate it passing other hash keys as arguments" do
       target = described_class.from_hash(

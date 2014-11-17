@@ -28,11 +28,21 @@ module CommonDomain
         on command_class do |command|
           raise "aggregate_class is not defined for command '#{command_class}' handler definition" unless definition.aggregate_class
           aggregate = repository.get_by_id definition.aggregate_class, command.aggregate_id
-          aggregate.send(definition.method_name, command)
+          arguments = collect_arguments definition.aggregate_class, command, definition.method_name
+          aggregate.send(definition.method_name, *arguments)
           repository.save aggregate, command.headers
         end
         definition
       end
+    end
+    
+    private def collect_arguments(aggregate_class, command, method_name)
+      action = aggregate_class.instance_method(method_name)
+      return [] unless action.parameters.length
+      action.parameters.map { |param| 
+        param_name = param[1]
+        command.attribute(param_name)
+      }
     end
     
     class HandleDefinition

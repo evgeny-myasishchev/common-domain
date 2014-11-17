@@ -42,8 +42,13 @@ describe CommonDomain::CommandHandler do
   end
   
   describe 'handle DSL' do
-    let(:aggregate_class) { Class.new }
-    let(:aggregate) { double(:aggregate) }
+    class TestAggregate < CommonDomain::Aggregate
+      def dummy_logic 
+      end
+    end
+    
+    let(:aggregate_class) { TestAggregate }
+    let(:aggregate) { aggregate_class.new }
     
     class DummyCommand < CommonDomain::Command
     end
@@ -68,7 +73,7 @@ describe CommonDomain::CommandHandler do
         handle(DummyCommand).with(ac).using(:dummy_logic)
       end
       
-      expect(aggregate).to receive(:dummy_logic).with(command)
+      expect(aggregate).to receive(:dummy_logic)
       subject.handle_message command
     end
     
@@ -95,28 +100,68 @@ describe CommonDomain::CommandHandler do
       end
       
       it 'should resolve one verb ignoring command' do
+        aggregate_class.class_eval { 
+          def dummy
+          end
+        }
         cmd = DummyCommand.new 'aggregate-1'
-        expect(aggregate).to receive(:dummy).with(cmd)
+        expect(aggregate).to receive(:dummy)
         subject.handle_message cmd
       end
       
       it 'should resolve two verbs ignoring command' do
+        aggregate_class.class_eval { 
+          def perform_dummy_action
+          end
+        }
         cmd = PerformDummyActionCommand.new 'aggregate-1'
-        expect(aggregate).to receive(:perform_dummy_action).with(cmd)
+        expect(aggregate).to receive(:perform_dummy_action)
         subject.handle_message cmd
       end
       
       it 'should resolve two verbs' do
+        aggregate_class.class_eval { 
+          def perform_dummy_action
+          end
+        }
         cmd = PerformDummyAction.new 'aggregate-1'
-        expect(aggregate).to receive(:perform_dummy_action).with(cmd)
+        expect(aggregate).to receive(:perform_dummy_action)
         subject.handle_message cmd
       end
       
       it 'should ignore module part' do
+        aggregate_class.class_eval { 
+          def perform_another_dummy_action
+          end
+        }
         cmd = Commands::PerformAnotherDummyAction.new 'aggregate-1'
-        expect(aggregate).to receive(:perform_another_dummy_action).with(cmd)
+        expect(aggregate).to receive(:perform_another_dummy_action)
         subject.handle_message cmd
       end
+    end
+    
+    describe 'map arguments' do
+      class TestAggregateToMapArguments < CommonDomain::Aggregate
+        def test_logic(first_arg, second_arg)
+        end
+      end
+      let(:aggregate) { TestAggregateToMapArguments.new }
+      
+      before(:each) do
+        allow(repository).to receive(:get_by_id).with(TestAggregateToMapArguments, 'aggregate-1').and_return aggregate
+        allow(repository).to receive(:save)
+      end
+      
+      it 'should map command attributes to domain method arguments' do
+        subject.class.class_eval do
+          handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_logic)
+        end
+        expect(aggregate).to receive(:test_logic).with('first-arg-value', 'second-arg-value')
+        cmd = DummyCommand.new 'aggregate-1', first_arg: 'first-arg-value', second_arg: 'second-arg-value'
+        subject.handle_message(cmd)
+      end
+      
+      xit 'should fail if the command does not provide some attributes'
     end
   end
 end

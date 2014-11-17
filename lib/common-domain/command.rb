@@ -6,7 +6,7 @@ module CommonDomain
   end
 
   class Command
-    attr_reader :aggregate_id, :headers
+    attr_reader :aggregate_id, :attribute_names, :headers
 
     def initialize(aggregate_id = nil, options = {})
       @aggregate_id = aggregate_id
