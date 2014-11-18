@@ -30,6 +30,12 @@ describe CommonDomain::Command do
     expect(cmd.headers).to eql(header1: 'header 1', header2: 'header 2')
   end
   
+  it "should initialize headers only" do
+    cmd = Commands::SampleCommand.new "aggregate-1", headers: {header1: 'header 1', header2: 'header 2'}
+    expect(cmd.headers).to eql(header1: 'header 1', header2: 'header 2')
+    expect(cmd.attribute_names).to be_empty
+  end
+  
   it 'should expose attribute names' do
     cmd = Commands::SampleCommand.new "aggregate-1", :name => "name-1", :description => "description-1"
     expect(cmd.attribute_names).to eql [:name, :description]

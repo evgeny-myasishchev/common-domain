@@ -10,10 +10,10 @@ module CommonDomain
 
     def initialize(aggregate_id = nil, options = {})
       @aggregate_id = aggregate_id
-      attributes = options.key?(:attributes) ? options[:attributes] : options
+      @headers = options.delete(:headers) || {}
+      attributes = options.delete(:attributes) || options
       attributes.each_key { |key| instance_variable_set("@#{key}", attributes[key]) }
       @attribute_names = attributes.keys
-      @headers = options.key?(:headers) ? options[:headers] : {}
     end
     
     def attribute(name)
