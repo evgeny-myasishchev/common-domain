@@ -11,12 +11,5 @@ describe CommonDomain::CommandDispatcher do
       expect(subject).to receive(:route).with(command, ensure_single_handler: true, fail_if_no_handlers: true)
       subject.dispatch(command)
     end
-
-    it "should route command with headers" do
-      command = double(:command)
-      headers = {header1: "header1", header2: "header2"}
-      expect(subject).to receive(:route).with(command, ensure_single_handler: true, fail_if_no_handlers: true, headers: headers)
-      subject.dispatch(command, headers)
-    end
   end
 end

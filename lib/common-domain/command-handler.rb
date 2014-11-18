@@ -8,15 +8,9 @@ module CommonDomain
     
     class << self
       # Defines command hanler. 
-      # Samples:
-      # # The most simplest way
+      # Sample:
       # on EmployeeHired do |command|
       # end
-      #
-      # # Handler with headers
-      # on EmployeeHired do |command, headers|
-      # end
-    
       #
       # Defines a handler that automatically dispatches the command to the appropriate aggregate
       # Samples:
