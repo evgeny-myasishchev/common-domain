@@ -11,6 +11,13 @@ module CommonDomain
       # Sample:
       # on EmployeeHired do |command|
       # end
+      def on(message_class, &block)
+        if block.arity != 1
+          raise ArgumentError.new "#{message_class} handler block is expected to receive single arguemnt that would be the command itself."
+        end
+        super
+      end
+      
       #
       # Defines a handler that automatically dispatches the command to the appropriate aggregate
       # Samples:

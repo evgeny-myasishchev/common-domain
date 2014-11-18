@@ -28,17 +28,12 @@ describe CommonDomain::CommandHandler do
     expect(actual).to be expected
   end
   
-  it "should also handle messages with headers" do
-    expected = Messages::Dummy.new
-    expected_headers = { header: 'header-1'}
-    actual_message = nil
-    actual_headers = nil
-    subject.class.class_eval do
-      on(Messages::Dummy) { |message, headers| actual_message, actual_headers = message, headers }
-    end
-    subject.handle_message expected, expected_headers
-    expect(actual_message).to be expected
-    expect(actual_headers).to be expected_headers
+  it "should fail to define handler with headers" do
+    expect {
+      subject.class.class_eval do
+        on(Messages::Dummy) { |message, headers|  }
+      end
+    }.to raise_error ArgumentError, 'Messages::Dummy handler block is expected to receive single arguemnt that would be the command itself.'
   end
   
   describe 'handle DSL' do
