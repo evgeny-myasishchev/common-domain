@@ -161,7 +161,21 @@ describe CommonDomain::CommandHandler do
         subject.handle_message(cmd)
       end
       
-      xit 'should fail if the command does not provide some attributes'
+      it 'should fail if the command does not provide some attributes' do
+        subject.class.class_eval do
+          handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_logic)
+        end
+        cmd = DummyCommand.new 'aggregate-1', first_arg: 'first-arg-value'
+        expect { subject.handle_message(cmd) }.to raise_error ArgumentError, 'Can not map arguments. The \'test_logic\' method expects \'second_arg\' parameter but the command does not have a corresponding attribute.'
+      end
+      
+      it 'should fail if the command has too much attributes' do
+        subject.class.class_eval do
+          handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_logic)
+        end
+        cmd = DummyCommand.new 'aggregate-1', first_arg: 'first-arg-value', second_arg: 'first-arg-value', new_arg: 'new-value'
+        expect { subject.handle_message(cmd) }.to raise_error ArgumentError, 'Can not map arguments. The command provides \'new_arg\' attribute but the \'test_logic\' method does not have a corresponding parameter.'
+      end
     end
   end
 end
