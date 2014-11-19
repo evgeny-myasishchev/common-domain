@@ -8,10 +8,17 @@ module CommonDomain
   class Command
     attr_reader :aggregate_id, :attribute_names, :headers
 
-    def initialize(aggregate_id = nil, options = {})
+    def initialize(aggregate_id_or_params = nil, params = {})
+      aggregate_id = nil
+      if aggregate_id_or_params.is_a?(Hash)
+        params = aggregate_id_or_params
+        aggregate_id = params.delete(:aggregate_id)
+      else
+        aggregate_id = aggregate_id_or_params
+      end
       @aggregate_id = aggregate_id
-      @headers = options.delete(:headers) || {}
-      attributes = options.delete(:attributes) || options
+      @headers = params.delete(:headers) || {}
+      attributes = params.delete(:attributes) || params
       attributes.each_key { |key| instance_variable_set("@#{key}", attributes[key]) }
       @attribute_names = attributes.keys
     end
@@ -60,8 +67,7 @@ module CommonDomain
         else
           raise CommandClassMissingError.new
         end
-        aggregate_id = hash.delete(:aggregate_id)
-        klass.new aggregate_id, hash
+        klass.new hash
       end
 
       private

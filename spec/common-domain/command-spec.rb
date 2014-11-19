@@ -44,6 +44,14 @@ describe CommonDomain::Command do
     expect(cmd.attribute_names).to eql [:name, :description]
   end
   
+  it 'should initialize from params only' do
+    cmd = Commands::SampleCommand.new aggregate_id: "aggregate-1", :name => "name-1", :description => "description-1"
+    expect(cmd.aggregate_id).to eql 'aggregate-1'
+    expect(cmd.attribute_names).to eql [:name, :description]
+    expect(cmd.name).to eql 'name-1'
+    expect(cmd.description).to eql 'description-1'
+  end
+  
   describe "from_hash" do
     it "should use class_name param to get command class, instantiate it passing other hash keys as arguments" do
       target = described_class.from_hash(
