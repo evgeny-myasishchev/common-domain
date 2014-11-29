@@ -7,6 +7,7 @@ module CommonDomain
     
     attr_reader :event_store
     attr_reader :repository
+    attr_reader :snapshots_repository
     attr_reader :application_event_bus
     attr_reader :domain_event_bus
     attr_reader :projections
@@ -41,7 +42,7 @@ module CommonDomain
     
     # Initializes snapshoting. Given repository will be used to get or add snapshots.
     def with_snapshots(repository)
-      raise 'Not implemented'
+      @snapshots_repository = repository
     end
     
     def with_event_store
@@ -123,7 +124,7 @@ module CommonDomain
           end
         end
         aggregates_builder = Persistence::AggregatesBuilder.new
-        @repository        = Persistence::EventStore::Repository.new(@event_store, aggregates_builder)
+        @repository        = Persistence::EventStore::Repository.new(@event_store, aggregates_builder, @snapshots_repository)
       end
       
       def bootstrap_command_handlers(&block)
