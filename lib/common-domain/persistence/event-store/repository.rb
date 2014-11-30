@@ -24,25 +24,11 @@ module CommonDomain::Persistence::EventStore
       aggregate
     end
     
-    private def get_snapshot aggregate_id
-      return @snapshots[aggregate_id] if @snapshots.key?(aggregate_id)
-      snapshot = @snapshots_repository.nil? ? nil : @snapshots_repository.get(aggregate_id)
-      @snapshots[aggregate_id] = snapshot
-      snapshot
-    end
-    
-    private def get_stream stream_id, snapshot
-      return @streams[stream_id] if @streams.key?(stream_id)
-      stream = snapshot.nil? ? @event_store.open_stream(stream_id) : @event_store.open_stream(stream_id, min_revision: snapshot.version + 1)
-      @streams[stream_id] = stream
-      stream
-    end
-    
     def save(aggregate, headers = {})
       uncommitted_events = aggregate.get_uncommitted_events
       if uncommitted_events.length > 0
         Log.debug "Saving the aggregate '#{aggregate.aggregate_id}' with '#{uncommitted_events.length}' uncommitted events..."
-        stream = @event_store.open_stream(aggregate.aggregate_id)
+        stream = @streams[aggregate.aggregate_id] || @event_store.open_stream(aggregate.aggregate_id)
         uncommitted_events.each { |event|
           stream.add EventStore::EventMessage.new event
         }
@@ -57,12 +43,27 @@ module CommonDomain::Persistence::EventStore
       aggregate
     end
     
-    private def add_snapshot_if_required(aggregate, stream)
-      return if @snapshots_repository.nil?
-      return unless aggregate.class.add_snapshot?(aggregate)
-      Log.debug "Adding snapshot for aggregate #{stream.stream_id} (version: #{stream.stream_revision})"
-      snapshot = CommonDomain::Persistence::Snapshots::Snapshot.new stream.stream_id, stream.stream_revision, aggregate.get_snapshot
-      @snapshots_repository.add snapshot
-    end
+    private
+      def get_snapshot aggregate_id
+        return @snapshots[aggregate_id] if @snapshots.key?(aggregate_id)
+        snapshot = @snapshots_repository.nil? ? nil : @snapshots_repository.get(aggregate_id)
+        @snapshots[aggregate_id] = snapshot
+        snapshot
+      end
+    
+      def get_stream stream_id, snapshot
+        return @streams[stream_id] if @streams.key?(stream_id)
+        stream = snapshot.nil? ? @event_store.open_stream(stream_id) : @event_store.open_stream(stream_id, min_revision: snapshot.version + 1)
+        @streams[stream_id] = stream
+        stream
+      end
+    
+      def add_snapshot_if_required(aggregate, stream)
+        return if @snapshots_repository.nil?
+        return unless aggregate.class.add_snapshot?(aggregate)
+        Log.debug "Adding snapshot for aggregate #{stream.stream_id} (version: #{stream.stream_revision})"
+        snapshot = CommonDomain::Persistence::Snapshots::Snapshot.new stream.stream_id, stream.stream_revision, aggregate.get_snapshot
+        @snapshots_repository.add snapshot
+      end
   end
 end

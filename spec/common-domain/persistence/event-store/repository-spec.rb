@@ -2,8 +2,9 @@ require 'spec-helper'
 
 describe CommonDomain::Persistence::EventStore::Repository do
   let(:builder) { double(:aggregate_builder) }
-  let(:event_stream) { double(:event_stream, new_stream?: false, :committed_events => []) }
-  let(:event_store) { double(:event_store, :open_stream => event_stream) }
+  let(:stream) { double(:stream, new_stream?: false, :committed_events => []) }
+  let(:event_store) { double(:event_store, :open_stream => stream) }
+  let(:aggregate_class) { double("aggregate-class") }
   let(:aggregate) { double("aggregate", :aggregate_id => "aggregate-1") }
   let(:s) { CommonDomain::Persistence::Snapshots }
   subject { described_class.new event_store, builder }
@@ -16,8 +17,6 @@ describe CommonDomain::Persistence::EventStore::Repository do
   end
   
   describe "get_by_id" do
-    let(:aggregate_class) { double("aggregate-class") }
-    
     before(:each) do
       allow(builder).to receive(:build) { aggregate }
     end
@@ -30,8 +29,8 @@ describe CommonDomain::Persistence::EventStore::Repository do
     it "should use event store to obtain event stream and apply all events from it" do
       event1 = double(:event1, :body => double(:body1))
       event2 = double(:event1, :body => double(:body2))
-      expect(event_store).to receive(:open_stream).with('aggregate-1').and_return(event_stream)
-      expect(event_stream).to receive(:committed_events).and_return [event1, event2]
+      expect(event_store).to receive(:open_stream).with('aggregate-1').and_return(stream)
+      expect(stream).to receive(:committed_events).and_return [event1, event2]
       expect(aggregate).to receive(:apply_event).with(event1.body)
       expect(aggregate).to receive(:apply_event).with(event2.body)
       expect(subject.get_by_id(aggregate_class, "aggregate-1")).to eql aggregate
@@ -40,16 +39,16 @@ describe CommonDomain::Persistence::EventStore::Repository do
     it 'should cache the stream for subsequent calls on the same repo' do
       event1 = double(:event1, :body => double(:body1))
       event2 = double(:event1, :body => double(:body2))
-      expect(event_store).to receive(:open_stream).with('aggregate-1').and_return(event_stream).once
-      expect(event_stream).to receive(:committed_events) { [event1, event2] }
+      expect(event_store).to receive(:open_stream).with('aggregate-1').and_return(stream).once
+      expect(stream).to receive(:committed_events) { [event1, event2] }
       allow(aggregate).to receive(:apply_event)
       expect(subject.get_by_id(aggregate_class, "aggregate-1")).to eql aggregate
       expect(subject.get_by_id(aggregate_class, "aggregate-1")).to eql aggregate
     end
     
     it "should raise aggregate not found error if trying to get not existing aggregate" do
-      expect(event_stream).to receive(:new_stream?).and_return(true)
-      expect(event_store).to receive(:open_stream).with('aggregate-1').and_return(event_stream)
+      expect(stream).to receive(:new_stream?).and_return(true)
+      expect(event_store).to receive(:open_stream).with('aggregate-1').and_return(stream)
       expect(lambda { subject.get_by_id(aggregate_class, "aggregate-1") }).to raise_error(CommonDomain::Persistence::AggregateNotFoundError)
     end
     
@@ -64,8 +63,8 @@ describe CommonDomain::Persistence::EventStore::Repository do
         event1 = double(:event1, :body => double(:body1))
         event2 = double(:event1, :body => double(:body2))
         
-        expect(event_store).to receive(:open_stream).with('aggregate-1', min_revision: snapshot.version + 1).and_return(event_stream)
-        expect(event_stream).to receive(:committed_events).and_return [event1, event2]
+        expect(event_store).to receive(:open_stream).with('aggregate-1', min_revision: snapshot.version + 1).and_return(stream)
+        expect(stream).to receive(:committed_events).and_return [event1, event2]
         expect(aggregate).to receive(:apply_event).with(event1.body)
         expect(aggregate).to receive(:apply_event).with(event2.body)
         
@@ -82,8 +81,8 @@ describe CommonDomain::Persistence::EventStore::Repository do
         event1 = double(:event1, :body => double(:body1))
         event2 = double(:event1, :body => double(:body2))
         
-        expect(event_store).to receive(:open_stream).with('aggregate-1', min_revision: snapshot.version + 1).and_return(event_stream).once
-        allow(event_stream).to receive(:committed_events).and_return [event1, event2]
+        expect(event_store).to receive(:open_stream).with('aggregate-1', min_revision: snapshot.version + 1).and_return(stream).once
+        allow(stream).to receive(:committed_events).and_return [event1, event2]
         allow(aggregate).to receive(:apply_event)
         
         repository = described_class.new event_store, builder, snapshots_repo
@@ -96,8 +95,6 @@ describe CommonDomain::Persistence::EventStore::Repository do
   end
   
   describe "save" do
-    let(:stream) { double(:stream) }
-    
     before(:each) do
       allow(event_store).to receive(:open_stream) { stream }
       allow(stream).to receive(:add)
@@ -121,6 +118,15 @@ describe CommonDomain::Persistence::EventStore::Repository do
       expect(stream).to receive(:add).with(EventStore::EventMessage.new evt3)
       expect(stream).to receive(:commit_changes)
       expect(aggregate).to receive(:clear_uncommitted_events)
+      subject.save(aggregate)
+    end
+    
+    it 'should reuse the stream' do
+      expect(event_store).to receive(:open_stream).and_return(stream).once
+      expect(stream).to receive(:commit_changes).once
+      allow(builder).to receive(:build).and_return(aggregate)
+      subject.get_by_id(aggregate_class, "aggregate-1")
+      expect(aggregate).to receive(:get_uncommitted_events).and_return([double(:evt1)])
       subject.save(aggregate)
     end
     
