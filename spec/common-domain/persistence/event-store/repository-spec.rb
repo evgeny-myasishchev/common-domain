@@ -37,6 +37,16 @@ describe CommonDomain::Persistence::EventStore::Repository do
       expect(subject.get_by_id(aggregate_class, "aggregate-1")).to eql aggregate
     end
     
+    it 'should cache the stream for subsequent calls on the same repo' do
+      event1 = double(:event1, :body => double(:body1))
+      event2 = double(:event1, :body => double(:body2))
+      expect(event_store).to receive(:open_stream).with('aggregate-1').and_return(event_stream).once
+      expect(event_stream).to receive(:committed_events) { [event1, event2] }
+      allow(aggregate).to receive(:apply_event)
+      expect(subject.get_by_id(aggregate_class, "aggregate-1")).to eql aggregate
+      expect(subject.get_by_id(aggregate_class, "aggregate-1")).to eql aggregate
+    end
+    
     it "should raise aggregate not found error if trying to get not existing aggregate" do
       expect(event_stream).to receive(:new_stream?).and_return(true)
       expect(event_store).to receive(:open_stream).with('aggregate-1').and_return(event_stream)
@@ -61,6 +71,26 @@ describe CommonDomain::Persistence::EventStore::Repository do
         
         repository = described_class.new event_store, builder, snapshots_repo
         actual_aggregate = repository.get_by_id aggregate_class, 'aggregate-1'
+        expect(actual_aggregate).to be aggregate
+      end
+      
+      it 'should cache the snapshot for subsequent calls' do
+        snapshot = s::Snapshot.new('aggregate-1', 10, 'snapshot-data')
+        expect(snapshots_repo).to receive(:get).with('aggregate-1').and_return(snapshot).once
+        allow(builder).to receive(:build) { aggregate }
+        
+        event1 = double(:event1, :body => double(:body1))
+        event2 = double(:event1, :body => double(:body2))
+        
+        expect(event_store).to receive(:open_stream).with('aggregate-1', min_revision: snapshot.version + 1).and_return(event_stream).once
+        allow(event_stream).to receive(:committed_events).and_return [event1, event2]
+        allow(aggregate).to receive(:apply_event)
+        
+        repository = described_class.new event_store, builder, snapshots_repo
+        actual_aggregate = repository.get_by_id aggregate_class, 'aggregate-1'
+        expect(actual_aggregate).to be aggregate
+        actual_aggregate = repository.get_by_id aggregate_class, 'aggregate-1'
+        expect(actual_aggregate).to be aggregate
       end
     end
   end

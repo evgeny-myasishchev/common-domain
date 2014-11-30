@@ -6,6 +6,8 @@ module CommonDomain::Persistence::EventStore
       @event_store = event_store
       @builder = builder
       @snapshots_repository = snapshots_repository
+      @streams = {}
+      @snapshots = {}
     end
     
     def exists?(aggregate_id)
@@ -13,13 +15,27 @@ module CommonDomain::Persistence::EventStore
     end
     
     def get_by_id(aggregate_class, aggregate_id)
-      snapshot = @snapshots_repository.nil? ? nil : @snapshots_repository.get(aggregate_id)
+      snapshot = get_snapshot(aggregate_id)
       Log.debug "Loading the aggregate '#{aggregate_id}' from the snapshot (version=#{snapshot.version})." unless snapshot.nil?
-      stream = snapshot.nil? ? @event_store.open_stream(aggregate_id) : @event_store.open_stream(aggregate_id, min_revision: snapshot.version + 1)
+      stream = get_stream aggregate_id, snapshot
       raise CommonDomain::Persistence::AggregateNotFoundError.new(aggregate_class, aggregate_id) if stream.new_stream?
       aggregate = @builder.build(aggregate_class, snapshot || aggregate_id)
       stream.committed_events.each { |event| aggregate.apply_event(event.body) }
       aggregate
+    end
+    
+    private def get_snapshot aggregate_id
+      return @snapshots[aggregate_id] if @snapshots.key?(aggregate_id)
+      snapshot = @snapshots_repository.nil? ? nil : @snapshots_repository.get(aggregate_id)
+      @snapshots[aggregate_id] = snapshot
+      snapshot
+    end
+    
+    private def get_stream stream_id, snapshot
+      return @streams[stream_id] if @streams.key?(stream_id)
+      stream = snapshot.nil? ? @event_store.open_stream(stream_id) : @event_store.open_stream(stream_id, min_revision: snapshot.version + 1)
+      @streams[stream_id] = stream
+      stream
     end
     
     def save(aggregate, headers = {})
