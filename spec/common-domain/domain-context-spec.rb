@@ -190,4 +190,27 @@ describe CommonDomain::DomainContext do
       subject.with_dispatch_undispatched_commits
     end
   end
+  
+  describe 'create_repository' do
+    let(:snapshots_repo) { double(:snapshots_repo) }
+    before(:each) do
+      described_class.class_eval do
+        def with_event_store
+          bootstrap_event_store do |with|
+            with.in_memory_persistence
+            with.log4r_logging
+          end
+        end
+      end
+      subject.with_event_store
+      subject.with_snapshots snapshots_repo
+    end
+    
+    it 'should return a new instance of the event store repository' do
+      repo = double(:repo)
+      expect(CommonDomain::Persistence::EventStore::Repository).to receive(:new)
+        .with(subject.event_store, instance_of(CommonDomain::Persistence::AggregatesBuilder), snapshots_repo) { repo }
+      expect(subject.create_repository()).to be(repo)
+    end
+  end
 end

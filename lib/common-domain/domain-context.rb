@@ -6,7 +6,6 @@ module CommonDomain
     Log = Logger.get "common-domain::domain-context"
     
     attr_reader :event_store
-    attr_reader :repository
     attr_reader :snapshots_repository
     attr_reader :application_event_bus
     attr_reader :domain_event_bus
@@ -17,6 +16,7 @@ module CommonDomain
     
     def initialize(&block)
       @application_event_bus = EventBus.new
+      @aggregates_builder = Persistence::AggregatesBuilder.new
       yield(self) if block_given?
     end
     
@@ -97,6 +97,10 @@ module CommonDomain
     def with_dispatch_undispatched_commits
       event_store.dispatch_undispatched
     end
+    
+    def create_repository
+      Persistence::EventStore::Repository.new(@event_store, @aggregates_builder, @snapshots_repository)
+    end
 
     protected
       def bootstrap_projections(&block)
@@ -123,8 +127,6 @@ module CommonDomain
             }
           end
         end
-        aggregates_builder = Persistence::AggregatesBuilder.new
-        @repository        = Persistence::EventStore::Repository.new(@event_store, aggregates_builder, @snapshots_repository)
       end
       
       def bootstrap_command_handlers(&block)
