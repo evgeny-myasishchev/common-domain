@@ -28,7 +28,7 @@ module CommonDomain::NonAtomicUnitOfWork
   end
   
   def begin_unit_of_work(headers, &block)
-    uow = UnitOfWork.new repository
+    uow = UnitOfWork.new repository_factory.create_repository
     result = yield(uow)
     uow.commit headers
     result

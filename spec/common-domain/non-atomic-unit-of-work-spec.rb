@@ -54,10 +54,12 @@ module NonAtomicUnitOfWorkSpec
     end
     
     describe 'begin_unit_of_work' do
+      let(:repository_factory) { double(:repository_factory, create_repository: repository) }
       let(:uow) { double(:uow) }
       include CommonDomain::NonAtomicUnitOfWork
       
       it 'should create the unit of work, yield it and commit with headers' do
+        expect(repository_factory).to receive(:create_repository) { repository }
         expect(described_class::UnitOfWork).to receive(:new) { uow }
         expect(uow).to receive(:commit).with(with_dummy_headers)
         expect { |b| begin_unit_of_work(dummy_headers, &b) }.to yield_with_args(uow)
