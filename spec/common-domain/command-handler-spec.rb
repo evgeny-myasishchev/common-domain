@@ -10,9 +10,10 @@ describe CommonDomain::CommandHandler do
     end
   end
   let(:repository) { double(:repository) }
+  let(:repository_factory) { double(:repository_factory, create_repository: repository )}
   subject { Class.new(CommonDomain::CommandHandler) do
     
-  end.new(repository)}
+  end.new(repository_factory)}
   
   it "should be a kind of a MessagesHandler" do
     expect(CommonDomain::CommandHandler.new).to be_a_kind_of CommonDomain::Infrastructure::MessagesHandler
@@ -62,6 +63,7 @@ describe CommonDomain::CommandHandler do
     it 'should define a handler and route the command to the given aggregate using specified method' do
       ac = aggregate_class
       command = DummyCommand.new 'aggregate-1', headers: {header1: 'value-1'}
+      expect(repository_factory).to receive(:create_repository) { repository }
       expect(repository).to get_by_id(aggregate_class, 'aggregate-1').and_return aggregate
       expect(repository).to receive(:save).with(aggregate, command.headers)
       subject.class.class_eval do

@@ -191,7 +191,7 @@ describe CommonDomain::DomainContext do
     end
   end
   
-  describe 'create_repository' do
+  describe 'repository_factory' do
     let(:snapshots_repo) { double(:snapshots_repo) }
     before(:each) do
       described_class.class_eval do
@@ -206,11 +206,13 @@ describe CommonDomain::DomainContext do
       subject.with_snapshots snapshots_repo
     end
     
-    it 'should return a new instance of the event store repository' do
-      repo = double(:repo)
-      expect(CommonDomain::Persistence::EventStore::Repository).to receive(:new)
-        .with(subject.event_store, instance_of(CommonDomain::Persistence::AggregatesBuilder), snapshots_repo) { repo }
-      expect(subject.create_repository()).to be(repo)
+    it 'should return a new instance of the event store RepositoryFactory' do
+      factory = double(:factory)
+      expect(CommonDomain::Persistence::EventStore::RepositoryFactory).to receive(:new)
+        .with(subject.event_store, instance_of(CommonDomain::Persistence::AggregatesBuilder), snapshots_repo)
+        .and_return(factory).once
+      expect(subject.repository_factory()).to be(factory)
+      expect(subject.repository_factory()).to be(factory)
     end
   end
 end

@@ -16,7 +16,6 @@ module CommonDomain
     
     def initialize(&block)
       @application_event_bus = EventBus.new
-      @aggregates_builder = Persistence::AggregatesBuilder.new
       yield(self) if block_given?
     end
     
@@ -98,8 +97,9 @@ module CommonDomain
       event_store.dispatch_undispatched
     end
     
-    def create_repository
-      Persistence::EventStore::Repository.new(@event_store, @aggregates_builder, @snapshots_repository)
+    def repository_factory
+      @aggregates_builder ||= Persistence::AggregatesBuilder.new
+      @repository_factory ||= Persistence::EventStore::RepositoryFactory.new(@event_store, @aggregates_builder, @snapshots_repository)
     end
 
     protected

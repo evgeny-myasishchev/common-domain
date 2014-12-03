@@ -15,6 +15,16 @@ module CommonDomain
     autoload :AggregatesBuilder, 'common-domain/persistence/aggregates-builder'
     module EventStore
       autoload :Repository, 'common-domain/persistence/event-store/repository'
+      
+      class RepositoryFactory
+        def initialize(event_store, builder, snapshots_repository = nil)
+          @event_store, @builder, @snapshots_repository = event_store, builder, snapshots_repository
+        end
+        
+        def create_repository
+          Repository.new @event_store, @builder, @snapshots_repository
+        end
+      end
     end
     autoload :Repository, 'common-domain/persistence/repository'
     autoload :Snapshots, 'common-domain/persistence/snapshots'
