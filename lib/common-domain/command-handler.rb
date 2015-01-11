@@ -45,13 +45,24 @@ module CommonDomain
         first_extra_attribute = (command.attribute_names - action.parameters.map { |param| param[1] }).first
         raise ArgumentError.new "Can not map arguments. The command provides '#{first_extra_attribute}' attribute but the '#{method_name}' method does not have a corresponding parameter."
       end
-      action.parameters.map { |param| 
+      result = []
+      named_args = {}
+      action.parameters.each { |param|
         param_name = param[1]
         unless command.attribute_names.include?(param_name)
-          raise ArgumentError.new "Can not map arguments. The '#{method_name}' method expects '#{param_name}' parameter but the command does not have a corresponding attribute." 
+          raise ArgumentError.new "Can not map arguments. The '#{method_name}' method expects '#{param_name}' parameter but the command does not have a corresponding attribute."
         end
-        command.attribute(param_name)
+        value = command.attribute(param_name)
+        if param[0] == :req
+          result << value
+        elsif param[0] == :key
+          named_args[param_name] = value
+        else
+          raise "Can not handle param '#{param[1]}' with specification '#{param[0]}"
+        end
       }
+      result << named_args unless named_args.empty?
+      result
     end
     
     class HandleDefinition
