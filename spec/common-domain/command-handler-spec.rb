@@ -144,6 +144,9 @@ describe CommonDomain::CommandHandler do
         
         def test_named_logic(first_arg, second_arg, named_arg1: nil, named_arg2: nil)
         end
+        
+        def test_optional_logic(first_arg, optional1 = nil, optional2 = nil)
+        end
       end
       let(:aggregate) { TestAggregateToMapArguments.new }
       
@@ -167,6 +170,15 @@ describe CommonDomain::CommandHandler do
         end
         expect(aggregate).to receive(:test_named_logic).with('first-arg-value', 'second-arg-value', named_arg1: 'value-1', named_arg2: 'value-2')
         cmd = DummyCommand.new 'aggregate-1', first_arg: 'first-arg-value', second_arg: 'second-arg-value', named_arg1: 'value-1', named_arg2: 'value-2'
+        subject.handle_message(cmd)
+      end
+      
+      it 'should map command attributes to domain method arguments' do
+        subject.class.class_eval do
+          handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_optional_logic)
+        end
+        expect(aggregate).to receive(:test_optional_logic).with('first-arg-value', 'optional-1', 'optional-2')
+        cmd = DummyCommand.new 'aggregate-1', first_arg: 'first-arg-value', optional1: 'optional-1', optional2: 'optional-2'
         subject.handle_message(cmd)
       end
       

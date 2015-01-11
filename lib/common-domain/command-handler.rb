@@ -53,7 +53,7 @@ module CommonDomain
           raise ArgumentError.new "Can not map arguments. The '#{method_name}' method expects '#{param_name}' parameter but the command does not have a corresponding attribute."
         end
         value = command.attribute(param_name)
-        if param[0] == :req
+        if param[0] == :req || param[0] == :opt
           result << value
         elsif param[0] == :key
           named_args[param_name] = value
