@@ -49,7 +49,7 @@ module CommonDomain
       named_args = {}
       action.parameters.each { |param|
         param_name = param[1]
-        unless command.attribute_names.include?(param_name)
+        unless command.attribute_names.include?(param_name) || command.attribute_names.include?(param_name.to_s)
           raise ArgumentError.new "Can not map arguments. The '#{method_name}' method expects '#{param_name}' parameter but the command does not have a corresponding attribute."
         end
         value = command.attribute(param_name)

@@ -173,6 +173,15 @@ describe CommonDomain::CommandHandler do
         subject.handle_message(cmd)
       end
       
+      it 'should map named command attributes provided as strings' do
+        subject.class.class_eval do
+          handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_named_logic)
+        end
+        expect(aggregate).to receive(:test_named_logic).with('first-arg-value', 'second-arg-value', named_arg1: 'value-1', named_arg2: 'value-2')
+        cmd = DummyCommand.new 'aggregate-1', "first_arg" => 'first-arg-value', "second_arg" => 'second-arg-value', "named_arg1" => 'value-1', "named_arg2" => 'value-2'
+        subject.handle_message(cmd)
+      end
+      
       it 'should map command attributes to domain method arguments' do
         subject.class.class_eval do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_optional_logic)
