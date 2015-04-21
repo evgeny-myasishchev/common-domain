@@ -48,15 +48,17 @@ module CommonDomain
       result = []
       named_args = {}
       action.parameters.each { |param|
+        param_kind = param[0] #:req, :opt, :key
         param_name = param[1]
-        unless command.attribute_names.include?(param_name) || command.attribute_names.include?(param_name.to_s)
+        param_provided = command.attribute_names.include?(param_name) || command.attribute_names.include?(param_name.to_s)
+        unless param_provided || param_kind == :opt || param_kind == :key
           raise ArgumentError.new "Can not map arguments. The '#{method_name}' method expects '#{param_name}' parameter but the command does not have a corresponding attribute."
         end
         value = command.attribute(param_name)
         if param[0] == :req || param[0] == :opt
-          result << value
+          result << value if param_provided
         elsif param[0] == :key
-          named_args[param_name] = value
+          named_args[param_name] = value if param_provided
         else
           raise "Can not handle param '#{param[1]}' with specification '#{param[0]}"
         end

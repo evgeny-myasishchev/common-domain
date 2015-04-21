@@ -173,6 +173,15 @@ describe CommonDomain::CommandHandler do
         subject.handle_message(cmd)
       end
       
+      it 'should ignore missing named attributes' do
+        subject.class.class_eval do
+          handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_named_logic)
+        end
+        expect(aggregate).to receive(:test_named_logic).with('first-arg-value', 'second-arg-value')
+        cmd = DummyCommand.new 'aggregate-1', first_arg: 'first-arg-value', second_arg: 'second-arg-value'
+        subject.handle_message(cmd)
+      end
+      
       it 'should map named command attributes provided as strings' do
         subject.class.class_eval do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_named_logic)
@@ -182,12 +191,21 @@ describe CommonDomain::CommandHandler do
         subject.handle_message(cmd)
       end
       
-      it 'should map command attributes to domain method arguments' do
+      it 'should map optional arguments' do
         subject.class.class_eval do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_optional_logic)
         end
         expect(aggregate).to receive(:test_optional_logic).with('first-arg-value', 'optional-1', 'optional-2')
         cmd = DummyCommand.new 'aggregate-1', first_arg: 'first-arg-value', optional1: 'optional-1', optional2: 'optional-2'
+        subject.handle_message(cmd)
+      end
+      
+      it 'should ignore missing optional arguments' do
+        subject.class.class_eval do
+          handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_optional_logic)
+        end
+        expect(aggregate).to receive(:test_optional_logic).with('first-arg-value')
+        cmd = DummyCommand.new 'aggregate-1', first_arg: 'first-arg-value'
         subject.handle_message(cmd)
       end
       
