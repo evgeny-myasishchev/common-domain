@@ -31,5 +31,10 @@ class CommonDomain::Messages::Message
       attribute_names.concat args
       super
     end
+    
+    def from_hash(hash)
+      raise ArgumentError.new "Expected argument to be Hash, got: #{hash}" unless hash.is_a?(Hash)
+      new(hash)
+    end
   end
 end

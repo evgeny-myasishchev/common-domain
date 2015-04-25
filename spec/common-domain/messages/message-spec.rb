@@ -56,6 +56,18 @@ module CommonDomainMessagesMessageSpec
         expect(AnotherSimpleMessage.new({}).attribute_names).to eql [:cell_phone, :email_address]
       end
     end
+    
+    describe 'from_hash' do
+      it 'should instantiate the message with provided hash' do
+        msg = SimpleMessage.from_hash name: 'name-232', email: 'email-100'
+        expect(msg.name).to eql 'name-232'
+        expect(msg.email).to eql 'email-100'
+      end
+        
+      it 'should fail if the arg is not hash' do
+        expect { SimpleMessage.from_hash 'fake' }.to raise_error ArgumentError, 'Expected argument to be Hash, got: fake'
+      end
+    end
   end
 
 end
