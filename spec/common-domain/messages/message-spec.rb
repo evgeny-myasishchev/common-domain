@@ -28,6 +28,12 @@ module CommonDomainMessagesMessageSpec
         expect(msg.email_address).to eql 'email-address-100'
       end
       
+      it 'should ignore extra hash values' do
+        msg = SimpleMessage.new name: 'name-232', email: 'email-100', extra1: 'false', extra2: 'true'
+        expect(msg.instance_variable_names).not_to include("@extra1")
+        expect(msg.instance_variable_names).not_to include("@extra2")
+      end
+      
       it 'should initialize the message with attributes provided as normal arguments' do
         msg = SimpleMessage.new 'name-232', 'email-100'
         expect(msg.name).to eql 'name-232'
