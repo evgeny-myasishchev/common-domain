@@ -1,4 +1,5 @@
 module CommonDomain
+  #TODO: Review and deprecate
   class Entity
     include Messages::MessagesHandler
     
