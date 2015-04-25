@@ -113,6 +113,11 @@ module CommonDomainMessagesMessageSpec
         expect(left).not_to eql right
       end
     end
+    
+    it 'should provide string representation of the message' do
+      msg = SimpleMessage.new name: 'name-232', email: 'email-100'
+      expect(msg.to_s).to eql "SimpleMessage {name: name-232, email: email-100}"
+    end
   end
 
 end

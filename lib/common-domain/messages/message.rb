@@ -30,6 +30,18 @@ class CommonDomain::Messages::Message
     instance_variable_get "@#{name}"
   end
   
+  def to_s
+    pure_class_name = self.class.name.split('::')[-1]
+    output = "#{pure_class_name}"
+    output << ' {'
+    @attribute_names.each { |name|
+      output << name.to_s << ': ' << attribute(name)
+      output << ', ' unless @attribute_names.last == name
+    }
+    output << '}'
+    output
+  end
+  
   private
     def set_attr_val attr_name, value
       instance_variable_set "@#{attr_name}", value
