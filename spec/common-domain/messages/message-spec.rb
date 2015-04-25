@@ -8,6 +8,10 @@ module CommonDomainMessagesMessageSpec
     attr_reader :name, :email
   end
   
+  class SimpleMessageCopy < CommonDomain::Messages::Message
+    attr_reader :name, :email
+  end
+  
   class AnotherSimpleMessage < CommonDomain::Messages::Message
     attr_reader :cell_phone, :email_address
   end
@@ -63,6 +67,15 @@ module CommonDomainMessagesMessageSpec
       end
     end
     
+    describe 'attribute' do
+      let(:msg) { SimpleMessage.new name: 'name-232', email: 'email-100' }
+      
+      it 'should get any attribute by name' do
+        expect(msg.attribute(:name)).to eql 'name-232'
+        expect(msg.attribute(:email)).to eql 'email-100'
+      end
+    end
+    
     describe 'from_hash' do
       it 'should instantiate the message with provided hash' do
         msg = SimpleMessage.from_hash name: 'name-232', email: 'email-100'
@@ -72,6 +85,32 @@ module CommonDomainMessagesMessageSpec
         
       it 'should fail if the arg is not hash' do
         expect { SimpleMessage.from_hash 'fake' }.to raise_error ArgumentError, 'Expected argument to be Hash, got: fake'
+      end
+    end
+    
+    describe 'equality' do
+      it "should do the equality by class" do
+        left = SimpleMessage.new Hash.new
+        right = SimpleMessageCopy.new Hash.new
+      
+        expect(left == right).not_to be_truthy
+        expect(left).not_to eql right
+      end
+      
+      it "should do equality by all attributes" do
+        left = SimpleMessage.new "aggregate-1", name: 'simple-msg-1', email: 'simple-msg-1@email'
+        right = SimpleMessage.new "aggregate-1", name: 'simple-msg-1', email: 'simple-msg-1@email'
+
+        expect(left == right).to be_truthy
+        expect(left).to eql right
+      
+        left = SimpleMessage.new "aggregate-1", name: 'simple-msg-1-changed', email: 'simple-msg-1@email'
+        expect(left == right).to be_falsy
+        expect(left).not_to eql right
+      
+        left = SimpleMessage.new "aggregate-1", name: 'simple-msg-1', email: 'simple-msg-1@email-changed'
+        expect(left == right).to be_falsy
+        expect(left).not_to eql right
       end
     end
   end

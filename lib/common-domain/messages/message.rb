@@ -17,6 +17,19 @@ class CommonDomain::Messages::Message
     end
   end
   
+  def ==(other)
+    self.class == other.class &&
+      @attribute_names.all? { |key| self.attribute(key) == other.attribute(key) }
+  end
+
+  def eql?(other)
+    self == other
+  end
+  
+  def attribute(name)
+    instance_variable_get "@#{name}"
+  end
+  
   private
     def set_attr_val attr_name, value
       instance_variable_set "@#{attr_name}", value
