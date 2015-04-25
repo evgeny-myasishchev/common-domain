@@ -9,6 +9,8 @@ module CommonDomain
   autoload :Entity, 'common-domain/entity'
   autoload :EventBus, 'common-domain/event-bus'
   module Messages
+    autoload :Dsl, 'common-domain/messages/dsl'
+    autoload :Message, 'common-domain/messages/message'
     autoload :MessagesHandler, 'common-domain/messages/messages-handler'
     autoload :MessagesRouter, 'common-domain/messages/messages-router'
   end
