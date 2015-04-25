@@ -16,7 +16,7 @@ describe CommonDomain::CommandHandler do
   end.new(repository_factory)}
   
   it "should be a kind of a MessagesHandler" do
-    expect(CommonDomain::CommandHandler.new).to be_a_kind_of CommonDomain::Infrastructure::MessagesHandler
+    expect(CommonDomain::CommandHandler.new).to be_a_kind_of CommonDomain::Messages::MessagesHandler
   end
   
   it "should handle messages" do

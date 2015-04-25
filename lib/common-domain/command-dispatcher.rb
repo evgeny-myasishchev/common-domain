@@ -10,7 +10,7 @@ module CommonDomain
   # dispatcher.dispatch AccountCreatedCommand.new
   #
   class CommandDispatcher
-    include Infrastructure::MessagesRouter
+    include Messages::MessagesRouter
     def initialize(&block)
       yield self if block_given?
     end

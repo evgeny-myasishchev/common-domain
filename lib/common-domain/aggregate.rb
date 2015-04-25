@@ -5,7 +5,7 @@ module CommonDomain
   # 
   class Aggregate
     Log = CommonDomain::Logger.get("common-domain::aggregate")
-    include Infrastructure::MessagesHandler
+    include Messages::MessagesHandler
     
     attr_reader :aggregate_id, :version
     

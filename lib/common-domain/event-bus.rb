@@ -1,6 +1,6 @@
 module CommonDomain
   class EventBus
-    include CommonDomain::Infrastructure::MessagesRouter
+    include CommonDomain::Messages::MessagesRouter
     
     alias_method :publish, :route
   end

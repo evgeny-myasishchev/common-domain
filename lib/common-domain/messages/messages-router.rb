@@ -1,8 +1,8 @@
-module CommonDomain::Infrastructure
+module CommonDomain::Messages
   
   # Routes messages to appropriate handlers
   module MessagesRouter
-    Log = CommonDomain::Logger.get "common-domain::infrastructure::messages-router"
+    Log = CommonDomain::Logger.get "common-domain::messages::messages-router"
     
     class SeveralHandlersFound < ::StandardError
       def initialize(message)

@@ -1,7 +1,7 @@
 require 'spec-helper'
 
-describe CommonDomain::Infrastructure::MessagesRouter do
-  subject { Class.new { include CommonDomain::Infrastructure::MessagesRouter }.new }
+describe CommonDomain::Messages::MessagesRouter do
+  subject { Class.new { include CommonDomain::Messages::MessagesRouter }.new }
   
   describe "handlers?" do
     let(:handler) { double(:handler) }
@@ -71,7 +71,7 @@ describe CommonDomain::Infrastructure::MessagesRouter do
     
     context "fail_if_no_handlers" do
       it "should fail if there are no handlers for the msssage found" do
-        expect(lambda { subject.route(double(:message), fail_if_no_handlers: true) }).to raise_error(CommonDomain::Infrastructure::MessagesRouter::NoHandlersFound)
+        expect(lambda { subject.route(double(:message), fail_if_no_handlers: true) }).to raise_error(CommonDomain::Messages::MessagesRouter::NoHandlersFound)
       end
     end
     
@@ -84,7 +84,7 @@ describe CommonDomain::Infrastructure::MessagesRouter do
         subject.register handler_one
         subject.register handler_two
 
-        expect(lambda { subject.route(message_one, ensure_single_handler: true) }).to raise_error(CommonDomain::Infrastructure::MessagesRouter::SeveralHandlersFound)
+        expect(lambda { subject.route(message_one, ensure_single_handler: true) }).to raise_error(CommonDomain::Messages::MessagesRouter::SeveralHandlersFound)
       end
       
       it "should return handler result" do

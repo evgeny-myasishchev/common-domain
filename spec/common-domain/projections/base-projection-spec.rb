@@ -8,6 +8,6 @@ describe CommonDomain::Projections::Base do
   }
   
   it "should be a MessagesHandler" do
-    expect(subject).to be_a(CommonDomain::Infrastructure::MessagesHandler)
+    expect(subject).to be_a(CommonDomain::Messages::MessagesHandler)
   end
 end

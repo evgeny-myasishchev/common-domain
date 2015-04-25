@@ -1,6 +1,6 @@
 module CommonDomain
   class Entity
-    include Infrastructure::MessagesHandler
+    include Messages::MessagesHandler
     
     attr_reader :aggregate, :aggregate_id, :entity_id
     

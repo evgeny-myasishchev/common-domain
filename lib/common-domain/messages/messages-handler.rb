@@ -1,10 +1,10 @@
-module CommonDomain::Infrastructure
+module CommonDomain::Messages
   
   # Generic messages handler.
   # Sample usage:
   #
   # class YourMessagesHandler
-  #    include CommonDomain::Infrastructure::MessagesHandler
+  #    include CommonDomain::Messages::MessagesHandler
   #    
   #    on MessageOne do |message|
   #      # message handling logic

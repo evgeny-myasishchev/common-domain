@@ -1,6 +1,6 @@
 module CommonDomain
   class CommandHandler
-    include Infrastructure::MessagesHandler
+    include Messages::MessagesHandler
     attr_reader :repository_factory
     def initialize(repository_factory = nil)
       @repository_factory = repository_factory

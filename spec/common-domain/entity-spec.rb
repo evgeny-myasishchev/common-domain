@@ -5,7 +5,7 @@ describe CommonDomain::Entity do
   subject { described_class.new aggregate }
   
   it "should be a messages handler" do
-    expect(subject).to be_a CommonDomain::Infrastructure::MessagesHandler
+    expect(subject).to be_a CommonDomain::Messages::MessagesHandler
   end
   
   it "should have entity_id attribute initialized" do

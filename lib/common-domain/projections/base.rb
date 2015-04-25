@@ -23,7 +23,7 @@ module CommonDomain::Projections
     end
     
     def self.included(receiver)
-      receiver.send :include, CommonDomain::Infrastructure::MessagesHandler
+      receiver.send :include, CommonDomain::Messages::MessagesHandler
     end
   end
 end

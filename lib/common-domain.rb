@@ -8,11 +8,13 @@ module CommonDomain
   autoload :DomainEvent, 'common-domain/domain-event'
   autoload :Entity, 'common-domain/entity'
   autoload :EventBus, 'common-domain/event-bus'
+  module Messages
+    autoload :MessagesHandler, 'common-domain/messages/messages-handler'
+    autoload :MessagesRouter, 'common-domain/messages/messages-router'
+  end
   module Infrastructure
     autoload :AggregateId, 'common-domain/infrastructure/aggregate-id'
     autoload :ConnectionSpecHelper, 'common-domain/infrastructure/connection-spec-helper'
-    autoload :MessagesHandler, 'common-domain/infrastructure/messages-handler'
-    autoload :MessagesRouter, 'common-domain/infrastructure/messages-router'
   end
   autoload :Logger, 'common-domain/logger'
   autoload :NonAtomicUnitOfWork, 'common-domain/non-atomic-unit-of-work'

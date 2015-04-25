@@ -1,6 +1,6 @@
 require 'spec-helper'
 
-describe CommonDomain::Infrastructure::MessagesHandler do
+describe CommonDomain::Messages::MessagesHandler do
   class MessageOne; end
   module Messages
     class MessageTwo; end
@@ -10,7 +10,7 @@ describe CommonDomain::Infrastructure::MessagesHandler do
   
   let(:subject_class) {
     Class.new do
-      include CommonDomain::Infrastructure::MessagesHandler
+      include CommonDomain::Messages::MessagesHandler
     end
   }
   subject { subject_class.new }
@@ -77,7 +77,7 @@ describe CommonDomain::Infrastructure::MessagesHandler do
     end
     
     it "should raise error if no handler found" do
-      expect(lambda { subject.handle_message UnhandledMessage.new }).to raise_error(CommonDomain::Infrastructure::MessagesHandler::UnknownHandlerError)
+      expect(lambda { subject.handle_message UnhandledMessage.new }).to raise_error(CommonDomain::Messages::MessagesHandler::UnknownHandlerError)
     end
 
     it "should invoke corresponding handler with headers" do
@@ -91,12 +91,12 @@ describe CommonDomain::Infrastructure::MessagesHandler do
   describe "on" do
     it "should fail to register same handler twice" do
       subject_class.send(:on, MessageOne) { }
-      expect(lambda { subject_class.send(:on, MessageOne) { } }).to raise_error(CommonDomain::Infrastructure::MessagesHandler::HandlerAlreadyRegistered)
+      expect(lambda { subject_class.send(:on, MessageOne) { } }).to raise_error(CommonDomain::Messages::MessagesHandler::HandlerAlreadyRegistered)
     end
     
     it "should define instance method for each message" do
       subject_class.class_eval do
-        include CommonDomain::Infrastructure::MessagesHandler
+        include CommonDomain::Messages::MessagesHandler
         on MessageOne do |event|
           
         end
