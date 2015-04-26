@@ -1,8 +1,8 @@
 require 'spec-helper'
 
-module CommonDomainMessagesDslSpec
+module CommonDomainMessagesDSLSpec
   module Messages
-    include CommonDomain::Messages::Dsl
+    include CommonDomain::Messages::DSL
     message :NoAttributesMessage
     message :SimpleMessage, :login, :password
     
@@ -11,7 +11,7 @@ module CommonDomainMessagesDslSpec
     end
   end
   
-  describe CommonDomain::Messages::Dsl do
+  describe CommonDomain::Messages::DSL do
     describe 'message' do
       it 'should define message without any attribute' do
         expect(Messages.const_defined?(:NoAttributesMessage)).to be_truthy

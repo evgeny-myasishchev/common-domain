@@ -1,8 +1,8 @@
-module CommonDomain::Messages::Dsl
+module CommonDomain::Messages::DSL
   module ClassMethods
     def group(group_name, &block)
       group = Module.new do
-        include CommonDomain::Messages::Dsl
+        include CommonDomain::Messages::DSL
       end
       group.module_exec &block
       const_set(group_name, group)

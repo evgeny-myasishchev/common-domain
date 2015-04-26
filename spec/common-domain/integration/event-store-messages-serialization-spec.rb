@@ -2,7 +2,7 @@ require 'spec-helper'
 
 module EventStoreSerializationSpec
   module Messages
-    include CommonDomain::Messages::Dsl
+    include CommonDomain::Messages::DSL
     message :EmployeeCreated, :aggregate_id, :full_name, :email
   end
   
