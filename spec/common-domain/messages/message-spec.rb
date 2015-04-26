@@ -38,6 +38,10 @@ module CommonDomainMessagesMessageSpec
         expect(msg.instance_variable_names).not_to include("@extra2")
       end
       
+      it 'should fail if some hash attributes are missing' do
+        expect { SimpleMessage.new name: 'name-232' }.to raise_error ArgumentError, "Value for the 'email' attribute is missing."
+      end
+      
       it 'should initialize the message with attributes provided as normal arguments' do
         msg = SimpleMessage.new 'name-232', 'email-100'
         expect(msg.name).to eql 'name-232'
@@ -62,8 +66,8 @@ module CommonDomainMessagesMessageSpec
       
       it 'should provide attribute_names on instance level' do
         expect(NoAttribsMessage.new({}).attribute_names).to be_empty
-        expect(SimpleMessage.new({}).attribute_names).to eql [:name, :email]
-        expect(AnotherSimpleMessage.new({}).attribute_names).to eql [:cell_phone, :email_address]
+        expect(SimpleMessage.new(name: 'name-232', email: 'email-100').attribute_names).to eql [:name, :email]
+        expect(AnotherSimpleMessage.new(email_address: '', cell_phone: '').attribute_names).to eql [:cell_phone, :email_address]
       end
     end
     
@@ -101,25 +105,25 @@ module CommonDomainMessagesMessageSpec
     
     describe 'equality' do
       it "should do the equality by class" do
-        left = SimpleMessage.new Hash.new
-        right = SimpleMessageCopy.new Hash.new
+        left = SimpleMessage.new name: 'simple-msg-1', email: 'simple-msg-1@email'
+        right = SimpleMessageCopy.new name: 'simple-msg-1', email: 'simple-msg-1@email'
       
         expect(left == right).not_to be_truthy
         expect(left).not_to eql right
       end
       
       it "should do equality by all attributes" do
-        left = SimpleMessage.new "aggregate-1", name: 'simple-msg-1', email: 'simple-msg-1@email'
-        right = SimpleMessage.new "aggregate-1", name: 'simple-msg-1', email: 'simple-msg-1@email'
+        left = SimpleMessage.new name: 'simple-msg-1', email: 'simple-msg-1@email'
+        right = SimpleMessage.new name: 'simple-msg-1', email: 'simple-msg-1@email'
 
         expect(left == right).to be_truthy
         expect(left).to eql right
       
-        left = SimpleMessage.new "aggregate-1", name: 'simple-msg-1-changed', email: 'simple-msg-1@email'
+        left = SimpleMessage.new name: 'simple-msg-1-changed', email: 'simple-msg-1@email'
         expect(left == right).to be_falsy
         expect(left).not_to eql right
       
-        left = SimpleMessage.new "aggregate-1", name: 'simple-msg-1', email: 'simple-msg-1@email-changed'
+        left = SimpleMessage.new name: 'simple-msg-1', email: 'simple-msg-1@email-changed'
         expect(left == right).to be_falsy
         expect(left).not_to eql right
       end

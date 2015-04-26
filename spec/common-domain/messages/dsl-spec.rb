@@ -21,7 +21,7 @@ module CommonDomainMessagesDslSpec
       
       it 'should define simple message with provided attributes' do
         expect(Messages.const_defined?(:SimpleMessage)).to be_truthy
-        expect(Messages::SimpleMessage.new({})).to be_a CommonDomain::Messages::Message
+        expect(Messages::SimpleMessage.new(login: 'test', password: 'password')).to be_a CommonDomain::Messages::Message
         expect(Messages::SimpleMessage.attribute_names).to eql [:login, :password]
       end
     end

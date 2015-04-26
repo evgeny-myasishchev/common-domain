@@ -5,7 +5,8 @@ class CommonDomain::Messages::Message
       attribute_names.each { |attr_name|
         attr_key = attr_name
         attr_key = attr_key.to_s unless hash.key?(attr_key)
-        set_attr_val attr_name, hash[attr_key] if hash.key?(attr_key)
+        raise ArgumentError.new "Value for the '#{attr_name}' attribute is missing." unless hash.key?(attr_key)
+        set_attr_val attr_name, hash[attr_key]
       }
     else
       raise ArgumentError.new "Expected #{attribute_names.length} arguments: #{attribute_names.join(', ')}, got #{args.length}." if args.length != attribute_names.length
