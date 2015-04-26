@@ -38,7 +38,7 @@ class CommonDomain::Messages::Message
     output = "#{pure_class_name}"
     output << ' {'
     attribute_names.each { |name|
-      output << name.to_s << ': ' << attribute(name)
+      output << name.to_s << ': ' << "#{attribute(name)}"
       output << ', ' unless attribute_names.last == name
     }
     output << '}'

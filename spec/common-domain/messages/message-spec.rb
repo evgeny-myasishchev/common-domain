@@ -132,6 +132,9 @@ module CommonDomainMessagesMessageSpec
     it 'should provide string representation of the message' do
       msg = SimpleMessage.new name: 'name-232', email: 'email-100'
       expect(msg.to_s).to eql "SimpleMessage {name: name-232, email: email-100}"
+      
+      msg = SimpleMessage.new name: 'name-232', email: 200000
+      expect(msg.to_s).to eql "SimpleMessage {name: name-232, email: 200000}"
     end
   end
 
