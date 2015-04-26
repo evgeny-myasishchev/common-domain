@@ -70,15 +70,26 @@ module CommonDomainMessagesMessageSpec
     describe 'attribute' do
       let(:msg) { SimpleMessage.new name: 'name-232', email: 'email-100' }
       
-      it 'should get any attribute by name' do
+      it 'should get any attribute by name (as symbol)' do
         expect(msg.attribute(:name)).to eql 'name-232'
         expect(msg.attribute(:email)).to eql 'email-100'
+      end
+      
+      it 'should get any attribute by name (as string)' do
+        expect(msg.attribute('name')).to eql 'name-232'
+        expect(msg.attribute('email')).to eql 'email-100'
       end
     end
     
     describe 'from_hash' do
       it 'should instantiate the message with provided hash' do
         msg = SimpleMessage.from_hash name: 'name-232', email: 'email-100'
+        expect(msg.name).to eql 'name-232'
+        expect(msg.email).to eql 'email-100'
+      end
+        
+      it 'should handle string keys' do
+        msg = SimpleMessage.from_hash 'name' => 'name-232', 'email' => 'email-100'
         expect(msg.name).to eql 'name-232'
         expect(msg.email).to eql 'email-100'
       end

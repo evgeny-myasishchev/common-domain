@@ -1,13 +1,11 @@
 class CommonDomain::Messages::Message
-  attr_reader :attribute_names
-  
   def initialize(*args)
-    @attribute_names = self.class.attribute_names
     if args.length == 1 && args[0].is_a?(Hash)
       hash = args[0]
-      @attribute_names = self.class.attribute_names
-      @attribute_names.each { |attr_name|
-        set_attr_val attr_name, hash[attr_name] if hash.key?(attr_name)
+      attribute_names.each { |attr_name|
+        attr_key = attr_name
+        attr_key = attr_key.to_s unless hash.key?(attr_key)
+        set_attr_val attr_name, hash[attr_key] if hash.key?(attr_key)
       }
     else
       raise ArgumentError.new "Expected #{attribute_names.length} arguments: #{attribute_names.join(', ')}, got #{args.length}." if args.length != attribute_names.length
@@ -17,9 +15,13 @@ class CommonDomain::Messages::Message
     end
   end
   
+  def attribute_names
+    self.class.attribute_names
+  end
+  
   def ==(other)
     self.class == other.class &&
-      @attribute_names.all? { |key| self.attribute(key) == other.attribute(key) }
+      attribute_names.all? { |key| self.attribute(key) == other.attribute(key) }
   end
 
   def eql?(other)
@@ -34,12 +36,22 @@ class CommonDomain::Messages::Message
     pure_class_name = self.class.name.split('::')[-1]
     output = "#{pure_class_name}"
     output << ' {'
-    @attribute_names.each { |name|
+    attribute_names.each { |name|
       output << name.to_s << ': ' << attribute(name)
-      output << ', ' unless @attribute_names.last == name
+      output << ', ' unless attribute_names.last == name
     }
     output << '}'
     output
+  end
+  
+  def to_json(*args)
+    attributes = {}
+    attribute_names.each { |attr_name| attributes[attr_name] = attribute(attr_name) }
+    {json_class: self.class, attributes: attributes}.to_json(*args)
+  end
+  
+  def self.json_create(data)
+    new(data['attributes'])
   end
   
   private
