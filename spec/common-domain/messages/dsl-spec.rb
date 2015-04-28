@@ -11,11 +11,21 @@ module CommonDomainMessagesDSLSpec
     end
   end
   
+  module ConfiguredMessages
+    class CustomMessagesClass
+    end
+    
+    include CommonDomain::Messages::DSL
+    setup_dsl message_base_class: CustomMessagesClass
+    
+    message :CustomSimpleMessage
+  end
+  
   describe CommonDomain::Messages::DSL do
     describe 'message' do
       it 'should define message without any attribute' do
         expect(Messages.const_defined?(:NoAttributesMessage)).to be_truthy
-        expect(Messages::NoAttributesMessage.new).to be_a CommonDomain::Messages::Message
+        expect(Messages::NoAttributesMessage.superclass).to be CommonDomain::Messages::Message
         expect(Messages::NoAttributesMessage.attribute_names).to be_empty
       end
       
@@ -31,6 +41,12 @@ module CommonDomainMessagesDSLSpec
         expect(Messages.const_defined?(:TheGroup)).to be_truthy
         expect(Messages::TheGroup.class).to eql Module
         expect(Messages::TheGroup::GroupMessage.superclass).to eql CommonDomain::Messages::Message
+      end
+    end
+    
+    describe 'setup_dsl' do
+      it 'should set base class' do
+        expect(ConfiguredMessages::CustomSimpleMessage.superclass).to be ConfiguredMessages::CustomMessagesClass
       end
     end
   end

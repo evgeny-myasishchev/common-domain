@@ -9,10 +9,14 @@ module CommonDomain::Messages::DSL
     end
     
     def message(const_name, *args)
-      event_class = Class.new(CommonDomain::Messages::Message) do
+      event_class = Class.new(@message_base_class || CommonDomain::Messages::Message) do
         attr_reader *args
       end
       const_set(const_name, event_class)
+    end
+    
+    def setup_dsl options
+      @message_base_class = options[:message_base_class]
     end
   end
   
