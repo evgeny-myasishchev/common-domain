@@ -15,10 +15,19 @@ module CommonDomainMessagesDSLSpec
     class CustomMessagesClass
     end
     
-    include CommonDomain::Messages::DSL
-    setup_dsl message_base_class: CustomMessagesClass
+    module DSL
+      def self.included(receiver)
+        receiver.include CommonDomain::Messages::DSL
+        receiver.setup_dsl message_base_class: CustomMessagesClass, dsl_module: CommonDomainMessagesDSLSpec::ConfiguredMessages::DSL
+      end
+    end
+    
+    include CommonDomainMessagesDSLSpec::ConfiguredMessages::DSL
     
     message :CustomSimpleMessage
+    group :CustomGroup do
+      message :ConfiguredSimpleGroupMessage
+    end
   end
   
   describe CommonDomain::Messages::DSL do
@@ -40,6 +49,7 @@ module CommonDomainMessagesDSLSpec
       it 'should define nested module' do
         expect(Messages.const_defined?(:TheGroup)).to be_truthy
         expect(Messages::TheGroup.class).to eql Module
+        expect(Messages::TheGroup).to include CommonDomain::Messages::DSL
         expect(Messages::TheGroup::GroupMessage.superclass).to eql CommonDomain::Messages::Message
       end
     end
@@ -47,6 +57,11 @@ module CommonDomainMessagesDSLSpec
     describe 'setup_dsl' do
       it 'should set base class' do
         expect(ConfiguredMessages::CustomSimpleMessage.superclass).to be ConfiguredMessages::CustomMessagesClass
+      end
+      
+      it 'should set dsl module' do
+        expect(ConfiguredMessages::CustomGroup).to include ConfiguredMessages::DSL
+        expect(ConfiguredMessages::CustomGroup::ConfiguredSimpleGroupMessage.superclass).to be ConfiguredMessages::CustomMessagesClass
       end
     end
   end
