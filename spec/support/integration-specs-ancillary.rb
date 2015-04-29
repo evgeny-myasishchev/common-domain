@@ -2,8 +2,8 @@ module IntegrationSpecsAncillary
   module Domain
     module Events
       include CommonDomain::DomainEvent::DSL
-      event :EmployeeRegistered
-      event :EmployeeResigned
+      event :EmployeeRegistered, :aggregate_id
+      event :EmployeeResigned, :aggregate_id
     end
 
     module Aggregates

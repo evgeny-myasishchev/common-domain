@@ -6,9 +6,9 @@ describe "Integration - CommonDomain::Projections::SqlProjection" do
   
   module Events
     include CommonDomain::DomainEvent::DSL
-    event :EmployeeCreated, :name
-    event :EmployeeRenamed, :name
-    event :EmployeeRemoved
+    event :EmployeeCreated, :aggregate_id, :name
+    event :EmployeeRenamed, :aggregate_id, :name
+    event :EmployeeRemoved, :aggregate_id
   end
   
   class EmployeesProjection < CommonDomain::Projections::Sql

@@ -3,8 +3,8 @@ require 'spec-helper'
 describe "event-matchers" do
   module Events
     include CommonDomain::DomainEvent::DSL
-    event :AggregateCreated, :name, :description
-    event :AggregateRemoved
+    event :AggregateCreated, :aggregate_id, :name, :description
+    event :AggregateRemoved, :aggregate_id
   end
   class Aggregate < CommonDomain::Aggregate
     def raise_event(*args)

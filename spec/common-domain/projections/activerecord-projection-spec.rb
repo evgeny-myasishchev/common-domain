@@ -166,9 +166,9 @@ describe CommonDomain::Projections::ActiveRecord do
   describe "events_handling" do
     module ArProjectionSpecEvents
       include CommonDomain::DomainEvent::DSL
-      event :EmployeeCreated
-      event :EmployeeChanged
-      event :EmployeeRemoved
+      event :EmployeeCreated, :aggregate_id
+      event :EmployeeChanged, :aggregate_id
+      event :EmployeeRemoved, :aggregate_id
     end
     class EventsHandlingSpec < ActiveRecord::Base
       include CommonDomain::Projections::ActiveRecord

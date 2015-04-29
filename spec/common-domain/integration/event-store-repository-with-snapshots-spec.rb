@@ -21,7 +21,7 @@ module EventStoreRepositoryWithSnapshotsSpec
     
     module Events
       include CommonDomain::DomainEvent::DSL
-      event :EmployeeRenamed, :new_name
+      event :EmployeeRenamed, :aggregate_id, :new_name
     end
     
     class EmployeeWithSnapshot < Aggregates::Employee
