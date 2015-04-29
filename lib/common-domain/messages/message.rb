@@ -5,11 +5,11 @@ class CommonDomain::Messages::Message
       attribute_names.each { |attr_name|
         attr_key = attr_name
         attr_key = attr_key.to_s unless hash.key?(attr_key)
-        raise ArgumentError.new "Value for the '#{attr_name}' attribute is missing." unless hash.key?(attr_key)
+        raise ArgumentError.new "#{failed_to_initialize_message}. Value for the '#{attr_name}' attribute is missing." unless hash.key?(attr_key)
         set_attr_val attr_name, hash[attr_key]
       }
     else
-      raise ArgumentError.new "Expected #{attribute_names.length} arguments: #{attribute_names.join(', ')}, got #{args.length}." if args.length != attribute_names.length
+      raise ArgumentError.new "#{failed_to_initialize_message}. Expected #{attribute_names.length} arguments: #{attribute_names.join(', ')}, got #{args.length}." if args.length != attribute_names.length
       args.each_index { |index|
         set_attr_val attribute_names[index], args[index]
       }
@@ -34,7 +34,6 @@ class CommonDomain::Messages::Message
   end
   
   def to_s
-    pure_class_name = self.class.name.split('::')[-1]
     output = "#{pure_class_name}"
     output << ' {'
     attribute_names.each { |name|
@@ -59,6 +58,14 @@ class CommonDomain::Messages::Message
     def set_attr_val attr_name, value
       instance_variable_set "@#{attr_name}", value
     end
+    
+    def failed_to_initialize_message
+      "Failed to initialize event '#{pure_class_name}'"
+    end
+    
+    def pure_class_name
+      self.class.name.split('::')[-1]
+    end
   
   class << self
     def attribute_names
@@ -71,8 +78,17 @@ class CommonDomain::Messages::Message
     end
     
     def from_hash(hash)
-      raise ArgumentError.new "Expected argument to be Hash, got: #{hash}" unless hash.is_a?(Hash)
+      raise ArgumentError.new "#{failed_to_initialize_message}. Expected argument to be Hash, got: #{hash}" unless hash.is_a?(Hash)
       new(hash)
     end
+    
+    private
+      def failed_to_initialize_message
+        "Failed to initialize event '#{pure_class_name}'"
+      end
+    
+      def pure_class_name
+        self.name.split('::')[-1]
+      end
   end
 end

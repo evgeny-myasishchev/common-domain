@@ -39,7 +39,7 @@ module CommonDomainMessagesMessageSpec
       end
       
       it 'should fail if some hash attributes are missing' do
-        expect { SimpleMessage.new name: 'name-232' }.to raise_error ArgumentError, "Value for the 'email' attribute is missing."
+        expect { SimpleMessage.new name: 'name-232' }.to raise_error ArgumentError, "Failed to initialize event 'SimpleMessage'. Value for the 'email' attribute is missing."
       end
       
       it 'should initialize the message with attributes provided as normal arguments' do
@@ -53,7 +53,7 @@ module CommonDomainMessagesMessageSpec
       end
       
       it 'should raise ArgumentError if number of normal arguments is wrong' do
-        expect { SimpleMessage.new 'name-232' }.to raise_error ArgumentError, "Expected 2 arguments: name, email, got 1."
+        expect { SimpleMessage.new 'name-232' }.to raise_error ArgumentError, "Failed to initialize event 'SimpleMessage'. Expected 2 arguments: name, email, got 1."
       end
     end
     
@@ -99,7 +99,7 @@ module CommonDomainMessagesMessageSpec
       end
         
       it 'should fail if the arg is not hash' do
-        expect { SimpleMessage.from_hash 'fake' }.to raise_error ArgumentError, 'Expected argument to be Hash, got: fake'
+        expect { SimpleMessage.from_hash 'fake' }.to raise_error ArgumentError, 'Failed to initialize event \'SimpleMessage\'. Expected argument to be Hash, got: fake'
       end
     end
     
