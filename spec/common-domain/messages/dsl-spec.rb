@@ -43,6 +43,16 @@ module CommonDomainMessagesDSLSpec
         expect(Messages::SimpleMessage.new(login: 'test', password: 'password')).to be_a CommonDomain::Messages::Message
         expect(Messages::SimpleMessage.attribute_names).to eql [:login, :password]
       end
+      
+      it 'should accept block to setup additional message stuff' do
+        block_scope = nil
+        ConfiguredMessages.class_eval do
+          message :MessageWithBlockInitializer do
+            block_scope = self
+          end
+        end
+        expect(block_scope).to eql ConfiguredMessages::MessageWithBlockInitializer
+      end
     end
     
     describe 'group' do
