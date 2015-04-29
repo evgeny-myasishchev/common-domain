@@ -46,6 +46,9 @@ describe CommonDomain::CommandHandler do
     let(:aggregate_class) { TestAggregate }
     let(:aggregate) { aggregate_class.new }
     
+    class NoAggregateIdCommand < CommonDomain::Command
+    end
+    
     class DummyCommand < CommonDomain::Command
       attr_reader :aggregate_id
       attr_reader :attribute_names
@@ -73,6 +76,15 @@ describe CommonDomain::CommandHandler do
       class PerformAnotherDummyAction < CommonDomain::Command
         attr_reader :aggregate_id
       end
+    end
+    
+    it 'should fail to handle if the command does not have an aggregate_id attribute' do
+      ac = aggregate_class
+      expect {
+        subject.class.class_eval do
+          handle(NoAggregateIdCommand).with(ac).using(:dummy_logic)
+        end
+      }.to raise_error ArgumentError, "Can not define handler. The command 'NoAggregateIdCommand' does not provide required 'aggregate_id' attribute."
     end
     
     it 'should define a handler and route the command to the given aggregate using specified method' do

@@ -25,6 +25,9 @@ module CommonDomain
       # * handle(AccountCommands::RenameAccount).with(Domain::Account).using(:rename)
       #
       def handle command_class
+        raise ArgumentError.new "Can not define handler. The command '#{command_class}' does not provide required 'aggregate_id' attribute." unless 
+          command_class.attribute_names.include?(:aggregate_id)
+        
         definition = HandleDefinition.new command_class
         on command_class do |command|
           raise "aggregate_class is not defined for command '#{command_class}' handler definition" unless definition.aggregate_class
