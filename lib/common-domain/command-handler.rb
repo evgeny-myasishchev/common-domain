@@ -41,8 +41,12 @@ module CommonDomain
     private def collect_arguments(aggregate_class, command, method_name)
       action = aggregate_class.instance_method(method_name)
       return [] unless action.parameters.length
-      if command.attribute_names.length > action.parameters.length
-        first_extra_attribute = (command.attribute_names - action.parameters.map { |param| param[1] }).first
+      
+      # aggregate_id is skipped since it's used to find the aggregate
+      command_attributes = command.attribute_names.to_set.delete(:aggregate_id)
+      
+      if command_attributes.length > action.parameters.length
+        first_extra_attribute = (command_attributes - action.parameters.map { |param| param[1] }).first
         raise ArgumentError.new "Can not map arguments. The command provides '#{first_extra_attribute}' attribute but the '#{method_name}' method does not have a corresponding parameter."
       end
       result = []
@@ -50,7 +54,7 @@ module CommonDomain
       action.parameters.each { |param|
         param_kind = param[0] #:req, :opt, :key
         param_name = param[1]
-        param_provided = command.attribute_names.include?(param_name) || command.attribute_names.include?(param_name.to_s)
+        param_provided = command_attributes.include?(param_name) || command_attributes.include?(param_name.to_s)
         unless param_provided || param_kind == :opt || param_kind == :key
           raise ArgumentError.new "Can not map arguments. The '#{method_name}' method expects '#{param_name}' parameter but the command does not have a corresponding attribute."
         end

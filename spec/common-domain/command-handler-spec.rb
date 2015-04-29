@@ -47,22 +47,37 @@ describe CommonDomain::CommandHandler do
     let(:aggregate) { aggregate_class.new }
     
     class DummyCommand < CommonDomain::Command
+      attr_reader :aggregate_id
+      attr_reader :attribute_names
+      
+      def initialize_by_hash(hash)
+        # Using dynamic attributes to simplify testing
+        if hash.key?(:attributes)
+          @attribute_names = hash[:attributes].keys.to_set
+        else
+          @attribute_names = hash.keys.to_set
+        end
+        super
+      end
     end
     
     class PerformDummyAction < CommonDomain::Command
+      attr_reader :aggregate_id
     end
     
     class PerformDummyActionCommand < CommonDomain::Command
+      attr_reader :aggregate_id
     end
     
     module Commands
       class PerformAnotherDummyAction < CommonDomain::Command
+        attr_reader :aggregate_id
       end
     end
     
     it 'should define a handler and route the command to the given aggregate using specified method' do
       ac = aggregate_class
-      command = DummyCommand.new 'aggregate-1', headers: {header1: 'value-1'}
+      command = DummyCommand.new attributes: {aggregate_id: 'aggregate-1'}, headers: {header1: 'value-1'}
       expect(repository_factory).to receive(:create_repository) { repository }
       expect(repository).to get_by_id(aggregate_class, 'aggregate-1').and_return aggregate
       expect(repository).to receive(:save).with(aggregate, command.headers)
@@ -79,7 +94,7 @@ describe CommonDomain::CommandHandler do
       subject.class.class_eval do
         handle(DummyCommand)
       end
-      command = DummyCommand.new 'aggregate-1'
+      command = DummyCommand.new aggregate_id: 'aggregate-1'
       expect { subject.handle_message(command) }.to raise_error 'aggregate_class is not defined for command \'DummyCommand\' handler definition'
     end
     
@@ -101,7 +116,7 @@ describe CommonDomain::CommandHandler do
           def dummy
           end
         }
-        cmd = DummyCommand.new 'aggregate-1'
+        cmd = DummyCommand.new aggregate_id: 'aggregate-1'
         expect(aggregate).to receive(:dummy)
         subject.handle_message cmd
       end
@@ -111,7 +126,7 @@ describe CommonDomain::CommandHandler do
           def perform_dummy_action
           end
         }
-        cmd = PerformDummyActionCommand.new 'aggregate-1'
+        cmd = PerformDummyActionCommand.new aggregate_id: 'aggregate-1'
         expect(aggregate).to receive(:perform_dummy_action)
         subject.handle_message cmd
       end
@@ -121,7 +136,7 @@ describe CommonDomain::CommandHandler do
           def perform_dummy_action
           end
         }
-        cmd = PerformDummyAction.new 'aggregate-1'
+        cmd = PerformDummyAction.new aggregate_id: 'aggregate-1'
         expect(aggregate).to receive(:perform_dummy_action)
         subject.handle_message cmd
       end
@@ -131,7 +146,7 @@ describe CommonDomain::CommandHandler do
           def perform_another_dummy_action
           end
         }
-        cmd = Commands::PerformAnotherDummyAction.new 'aggregate-1'
+        cmd = Commands::PerformAnotherDummyAction.new aggregate_id: 'aggregate-1'
         expect(aggregate).to receive(:perform_another_dummy_action)
         subject.handle_message cmd
       end
@@ -160,7 +175,7 @@ describe CommonDomain::CommandHandler do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_logic)
         end
         expect(aggregate).to receive(:test_logic).with('first-arg-value', 'second-arg-value')
-        cmd = DummyCommand.new 'aggregate-1', first_arg: 'first-arg-value', second_arg: 'second-arg-value'
+        cmd = DummyCommand.new aggregate_id: 'aggregate-1', first_arg: 'first-arg-value', second_arg: 'second-arg-value'
         subject.handle_message(cmd)
       end
       
@@ -169,7 +184,7 @@ describe CommonDomain::CommandHandler do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_named_logic)
         end
         expect(aggregate).to receive(:test_named_logic).with('first-arg-value', 'second-arg-value', named_arg1: 'value-1', named_arg2: 'value-2')
-        cmd = DummyCommand.new 'aggregate-1', first_arg: 'first-arg-value', second_arg: 'second-arg-value', named_arg1: 'value-1', named_arg2: 'value-2'
+        cmd = DummyCommand.new aggregate_id: 'aggregate-1', first_arg: 'first-arg-value', second_arg: 'second-arg-value', named_arg1: 'value-1', named_arg2: 'value-2'
         subject.handle_message(cmd)
       end
       
@@ -178,7 +193,7 @@ describe CommonDomain::CommandHandler do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_named_logic)
         end
         expect(aggregate).to receive(:test_named_logic).with('first-arg-value', 'second-arg-value')
-        cmd = DummyCommand.new 'aggregate-1', first_arg: 'first-arg-value', second_arg: 'second-arg-value'
+        cmd = DummyCommand.new aggregate_id: 'aggregate-1', first_arg: 'first-arg-value', second_arg: 'second-arg-value'
         subject.handle_message(cmd)
       end
       
@@ -187,7 +202,7 @@ describe CommonDomain::CommandHandler do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_named_logic)
         end
         expect(aggregate).to receive(:test_named_logic).with('first-arg-value', 'second-arg-value', named_arg1: 'value-1', named_arg2: 'value-2')
-        cmd = DummyCommand.new 'aggregate-1', "first_arg" => 'first-arg-value', "second_arg" => 'second-arg-value', "named_arg1" => 'value-1', "named_arg2" => 'value-2'
+        cmd = DummyCommand.new aggregate_id: 'aggregate-1', "first_arg" => 'first-arg-value', "second_arg" => 'second-arg-value', "named_arg1" => 'value-1', "named_arg2" => 'value-2'
         subject.handle_message(cmd)
       end
       
@@ -196,7 +211,7 @@ describe CommonDomain::CommandHandler do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_optional_logic)
         end
         expect(aggregate).to receive(:test_optional_logic).with('first-arg-value', 'optional-1', 'optional-2')
-        cmd = DummyCommand.new 'aggregate-1', first_arg: 'first-arg-value', optional1: 'optional-1', optional2: 'optional-2'
+        cmd = DummyCommand.new aggregate_id: 'aggregate-1', first_arg: 'first-arg-value', optional1: 'optional-1', optional2: 'optional-2'
         subject.handle_message(cmd)
       end
       
@@ -205,7 +220,7 @@ describe CommonDomain::CommandHandler do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_optional_logic)
         end
         expect(aggregate).to receive(:test_optional_logic).with('first-arg-value')
-        cmd = DummyCommand.new 'aggregate-1', first_arg: 'first-arg-value'
+        cmd = DummyCommand.new aggregate_id: 'aggregate-1', first_arg: 'first-arg-value'
         subject.handle_message(cmd)
       end
       
@@ -213,7 +228,7 @@ describe CommonDomain::CommandHandler do
         subject.class.class_eval do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_logic)
         end
-        cmd = DummyCommand.new 'aggregate-1', first_arg: 'first-arg-value'
+        cmd = DummyCommand.new aggregate_id: 'aggregate-1', first_arg: 'first-arg-value'
         expect { subject.handle_message(cmd) }.to raise_error ArgumentError, 'Can not map arguments. The \'test_logic\' method expects \'second_arg\' parameter but the command does not have a corresponding attribute.'
       end
       
@@ -221,7 +236,7 @@ describe CommonDomain::CommandHandler do
         subject.class.class_eval do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_logic)
         end
-        cmd = DummyCommand.new 'aggregate-1', first_arg: 'first-arg-value', second_arg: 'first-arg-value', new_arg: 'new-value'
+        cmd = DummyCommand.new aggregate_id: 'aggregate-1', first_arg: 'first-arg-value', second_arg: 'first-arg-value', new_arg: 'new-value'
         expect { subject.handle_message(cmd) }.to raise_error ArgumentError, 'Can not map arguments. The command provides \'new_arg\' attribute but the \'test_logic\' method does not have a corresponding parameter.'
       end
     end
