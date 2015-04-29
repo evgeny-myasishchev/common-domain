@@ -10,8 +10,8 @@ describe CommonDomain::Command::DSL do
   describe "command" do
     before(:each) do
       subject.class_eval do
-        command :CreateAccount, :login_name, :email_address
-        command :RemoveAccount
+        command :CreateAccount, :aggregate_id, :login_name, :email_address
+        command :RemoveAccount, :aggregate_id
       end
     end
     
@@ -24,33 +24,9 @@ describe CommonDomain::Command::DSL do
     end
     
     it "should define reader attributes" do
+      expect(subject::CreateAccount.method_defined?(:aggregate_id)).to be_truthy
       expect(subject::CreateAccount.method_defined?(:login_name)).to be_truthy
       expect(subject::CreateAccount.method_defined?(:email_address)).to be_truthy
-    end
-    
-    it "should define initializer that initializes attributes" do
-      instance = subject::CreateAccount.new "aggregate-100", :login_name => "some login name", :email_address => "some@email.com"
-      expect(instance.aggregate_id).to eql "aggregate-100"
-      expect(instance.login_name).to eql "some login name"
-      expect(instance.email_address).to eql "some@email.com"
-    end
-    
-    it "should be able to initialize if there are no attributes" do
-      instance = subject::RemoveAccount.new "aggregate-100"
-      expect(instance.aggregate_id).to eql "aggregate-100"
-      
-      instance = subject::RemoveAccount.new
-      expect(instance.aggregate_id).to be_nil
-    end
-    
-    it "should open the command class with provided block" do
-      block_scope = nil
-      subject.class_eval do
-        command :AnotherCommand do
-          block_scope = self
-        end
-      end
-      expect(block_scope).to eql subject::AnotherCommand
     end
   end
   
