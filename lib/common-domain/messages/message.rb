@@ -1,13 +1,7 @@
 class CommonDomain::Messages::Message
   def initialize(*args)
     if args.length == 1 && args[0].is_a?(Hash)
-      hash = args[0]
-      attribute_names.each { |attr_name|
-        attr_key = attr_name
-        attr_key = attr_key.to_s unless hash.key?(attr_key)
-        raise ArgumentError.new "#{failed_to_initialize_message}. Value for the '#{attr_name}' attribute is missing." unless hash.key?(attr_key)
-        set_attr_val attr_name, hash[attr_key]
-      }
+      initialize_by_hash args[0]
     else
       raise ArgumentError.new "#{failed_to_initialize_message}. Expected #{attribute_names.length} arguments: #{attribute_names.join(', ')}, got #{args.length}." if args.length != attribute_names.length
       args.each_index { |index|
@@ -53,6 +47,16 @@ class CommonDomain::Messages::Message
   def self.json_create(data)
     new(data['attributes'])
   end
+  
+  protected
+    def initialize_by_hash hash
+      attribute_names.each { |attr_name|
+        attr_key = attr_name
+        attr_key = attr_key.to_s unless hash.key?(attr_key)
+        raise ArgumentError.new "#{failed_to_initialize_message}. Value for the '#{attr_name}' attribute is missing." unless hash.key?(attr_key)
+        set_attr_val attr_name, hash[attr_key]
+      }
+    end
   
   private
     def set_attr_val attr_name, value
