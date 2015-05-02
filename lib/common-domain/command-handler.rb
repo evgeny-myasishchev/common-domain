@@ -24,16 +24,16 @@ module CommonDomain
       # * handle(AccountCommands::RenameAccount).with(Domain::Account)
       # * handle(AccountCommands::RenameAccount).with(Domain::Account).using(:rename)
       #
-      def handle command_class
-        raise ArgumentError.new "Can not define handler. The command '#{command_class}' does not provide required 'aggregate_id' attribute." unless 
-          command_class.attribute_names.include?(:aggregate_id)
+      def handle command_class, aggregate_id: :aggregate_id
+        raise ArgumentError.new "Can not define handler. The command '#{command_class}' does not provide required '#{aggregate_id}' attribute." unless 
+          command_class.attribute_names.include?(aggregate_id)
         
         definition = HandleDefinition.new command_class
         on command_class do |command|
           raise "aggregate_class is not defined for command '#{command_class}' handler definition" unless definition.aggregate_class
           repository = repository_factory.create_repository
-          aggregate = repository.get_by_id definition.aggregate_class, command.aggregate_id
-          arguments = collect_arguments definition.aggregate_class, command, definition.method_name
+          aggregate = repository.get_by_id definition.aggregate_class, command.attribute(aggregate_id)
+          arguments = collect_arguments definition.aggregate_class, command, aggregate_id, definition.method_name
           aggregate.send(definition.method_name, *arguments)
           repository.save aggregate, command.headers
         end
@@ -41,12 +41,12 @@ module CommonDomain
       end
     end
     
-    private def collect_arguments(aggregate_class, command, method_name)
+    private def collect_arguments(aggregate_class, command, aggregate_id_attribute, method_name)
       action = aggregate_class.instance_method(method_name)
       return [] unless action.parameters.length
       
       # aggregate_id is skipped since it's used to find the aggregate
-      command_attributes = command.attribute_names.to_set.delete(:aggregate_id)
+      command_attributes = command.attribute_names.to_set.delete(aggregate_id_attribute)
       
       if command_attributes.length > action.parameters.length
         first_extra_attribute = (command_attributes - action.parameters.map { |param| param[1] }).first

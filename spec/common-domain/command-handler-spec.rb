@@ -51,17 +51,21 @@ describe CommonDomain::CommandHandler do
     
     class DummyCommand < CommonDomain::Command
       attr_reader :aggregate_id
-      attr_reader :attribute_names
       
-      def initialize_by_hash(hash)
+      class << self
         # Using dynamic attributes to simplify testing
-        if hash.key?(:attributes)
-          @attribute_names = hash[:attributes].keys.to_set
-        else
-          @attribute_names = hash.keys.to_set
+        alias_method :command_attribute_names, :attribute_names
+        def attribute_names
+          @custom_attribute_names || command_attribute_names
         end
-        super
+        def attribute_names=(value)
+          @custom_attribute_names = value
+        end
       end
+    end
+    
+    before do
+      DummyCommand.attribute_names = nil
     end
     
     class PerformDummyAction < CommonDomain::Command
@@ -95,6 +99,21 @@ describe CommonDomain::CommandHandler do
       expect(repository).to receive(:save).with(aggregate, command.headers)
       subject.class.class_eval do
         handle(DummyCommand).with(ac).using(:dummy_logic)
+      end
+      
+      expect(aggregate).to receive(:dummy_logic)
+      subject.handle_message command
+    end
+    
+    it 'should support custom aggregate_id attribute' do
+      ac = aggregate_class
+      DummyCommand.attribute_names = [:account_id]
+      command = DummyCommand.new attributes: {account_id: 'aggregate-1'}, headers: {header1: 'value-1'}
+      expect(repository_factory).to receive(:create_repository) { repository }
+      expect(repository).to get_by_id(aggregate_class, 'aggregate-1').and_return aggregate
+      expect(repository).to receive(:save).with(aggregate, command.headers)
+      subject.class.class_eval do
+        handle(DummyCommand, aggregate_id: :account_id).with(ac).using(:dummy_logic)
       end
       
       expect(aggregate).to receive(:dummy_logic)
@@ -183,6 +202,7 @@ describe CommonDomain::CommandHandler do
       end
       
       it 'should map command attributes to domain method arguments' do
+        DummyCommand.attribute_names = [:aggregate_id, :first_arg, :second_arg]
         subject.class.class_eval do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_logic)
         end
@@ -191,7 +211,18 @@ describe CommonDomain::CommandHandler do
         subject.handle_message(cmd)
       end
       
+      it 'should map command attributes to domain method arguments with custom aggregate_id' do
+        DummyCommand.attribute_names = [:account_id, :first_arg, :second_arg]
+        subject.class.class_eval do
+          handle(DummyCommand, aggregate_id: :account_id).with(TestAggregateToMapArguments).using(:test_logic)
+        end
+        expect(aggregate).to receive(:test_logic).with('first-arg-value', 'second-arg-value')
+        cmd = DummyCommand.new account_id: 'aggregate-1', first_arg: 'first-arg-value', second_arg: 'second-arg-value'
+        subject.handle_message(cmd)
+      end
+      
       it 'should map named command attributes' do
+        DummyCommand.attribute_names = [:aggregate_id, :first_arg, :second_arg, :named_arg1, :named_arg2]
         subject.class.class_eval do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_named_logic)
         end
@@ -201,6 +232,7 @@ describe CommonDomain::CommandHandler do
       end
       
       it 'should ignore missing named attributes' do
+        DummyCommand.attribute_names = [:aggregate_id, :first_arg, :second_arg]
         subject.class.class_eval do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_named_logic)
         end
@@ -210,6 +242,7 @@ describe CommonDomain::CommandHandler do
       end
       
       it 'should map named command attributes provided as strings' do
+        DummyCommand.attribute_names = [:aggregate_id, :first_arg, :second_arg, :named_arg1, :named_arg2]
         subject.class.class_eval do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_named_logic)
         end
@@ -219,6 +252,7 @@ describe CommonDomain::CommandHandler do
       end
       
       it 'should map optional arguments' do
+        DummyCommand.attribute_names = [:aggregate_id, :first_arg, :optional1, :optional2]
         subject.class.class_eval do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_optional_logic)
         end
@@ -228,6 +262,7 @@ describe CommonDomain::CommandHandler do
       end
       
       it 'should ignore missing optional arguments' do
+        DummyCommand.attribute_names = [:aggregate_id, :first_arg]
         subject.class.class_eval do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_optional_logic)
         end
@@ -237,6 +272,7 @@ describe CommonDomain::CommandHandler do
       end
       
       it 'should fail if the command does not provide some attributes' do
+        DummyCommand.attribute_names = [:aggregate_id, :first_arg]
         subject.class.class_eval do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_logic)
         end
@@ -245,6 +281,7 @@ describe CommonDomain::CommandHandler do
       end
       
       it 'should fail if the command has too much attributes' do
+        DummyCommand.attribute_names = [:aggregate_id, :first_arg, :second_arg, :new_arg]
         subject.class.class_eval do
           handle(DummyCommand).with(TestAggregateToMapArguments).using(:test_logic)
         end
