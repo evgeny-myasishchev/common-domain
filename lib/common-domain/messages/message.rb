@@ -53,9 +53,13 @@ class CommonDomain::Messages::Message
       attribute_names.each { |attr_name|
         attr_key = attr_name
         attr_key = attr_key.to_s unless hash.key?(attr_key)
-        raise ArgumentError.new "#{failed_to_initialize_message}. Value for the '#{attr_name}' attribute is missing." unless hash.key?(attr_key)
+        handle_missing_value! attr_name unless hash.key?(attr_key)
         set_attr_val attr_name, hash[attr_key]
       }
+    end
+    
+    def handle_missing_value!(attr_name)
+      raise ArgumentError.new "#{failed_to_initialize_message}. Value for the '#{attr_name}' attribute is missing."
     end
   
   private

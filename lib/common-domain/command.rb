@@ -22,7 +22,12 @@ module CommonDomain
         @headers = hash.key?(:headers) ? hash.delete(:headers) : {}
         super hash.key?(:attributes) ? hash[:attributes] : hash
       end
-    
+      
+      def handle_missing_value! attr_name
+        # Commands can be initialized with missing attributes
+        # Custom validation logic (like ActiveModel::Validations) can be applied to make sure required attributes provided
+      end
+      
     module DSL
       def self.included(receiver)
         receiver.class_eval do

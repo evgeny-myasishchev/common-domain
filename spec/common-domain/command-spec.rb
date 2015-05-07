@@ -39,6 +39,14 @@ describe CommonDomain::Command do
     expect(cmd.headers).to be_empty
   end
   
+  it 'should allow initializing with missing attributes' do
+    cmd = Commands::SampleCommand.new :name => "name-1"
+    expect(cmd.attribute_names).to eql [:aggregate_id, :name, :description]
+    expect(cmd.aggregate_id).to be_nil
+    expect(cmd.name).to eql 'name-1'
+    expect(cmd.description).to be_nil
+  end
+  
   describe "equality" do
     it "should do equality by all attributes" do
       left = Commands::SampleCommand.new aggregate_id: "aggregate-1", name: 'cmd 1', description: 'cmd 1 desc'
