@@ -19,8 +19,8 @@ module CommonDomain
     autoload :ConnectionSpecHelper, 'common-domain/infrastructure/connection-spec-helper'
   end
   autoload :Logger, 'common-domain/logger'
-  autoload :NonAtomicUnitOfWork, 'common-domain/non-atomic-unit-of-work'
   autoload :Persistence, 'common-domain/persistence'
+  autoload :UnitOfWork, 'common-domain/unit-of-work'
   module Projections
     autoload :ActiveRecord, 'common-domain/projections/activerecord'
     autoload :Base, 'common-domain/projections/base'
