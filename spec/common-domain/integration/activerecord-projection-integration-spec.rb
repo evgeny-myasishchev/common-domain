@@ -76,15 +76,15 @@ module ActiveRecordProjectionIntegrationSpec
       stream_1_id = SecureRandom.uuid
       stream = @app.event_store.open_stream(stream_1_id)
       stream.add EventStore::EventMessage.new Events::EmployeeCreated.new(stream_1_id, 'Initial name')
-      stream.commit_changes
+      @app.event_store.transaction { |t| stream.commit_changes t }
       expect(sequel_connection[:employees_projections][employee_id: stream_1_id]).to eql id: 1, employee_id: stream_1_id, name: 'Initial name'
     
       stream.add EventStore::EventMessage.new Events::EmployeeRenamed.new(stream_1_id, 'New name')
-      stream.commit_changes
+      @app.event_store.transaction { |t| stream.commit_changes t }
       expect(sequel_connection[:employees_projections][employee_id: stream_1_id]).to eql id: 1, employee_id: stream_1_id, name: 'New name'
     
       stream.add EventStore::EventMessage.new Events::EmployeeRemoved.new(stream_1_id)
-      stream.commit_changes
+      @app.event_store.transaction { |t| stream.commit_changes t }
       expect(sequel_connection[:employees_projections][employee_id: stream_1_id]).to be_nil
     end
   end

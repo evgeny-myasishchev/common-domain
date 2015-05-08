@@ -24,7 +24,7 @@ module CommonDomain::Persistence::EventStore
       aggregate
     end
     
-    def save(aggregate, headers = {})
+    def save(aggregate, headers = {}, transaction = nil)
       uncommitted_events = aggregate.get_uncommitted_events
       if uncommitted_events.length > 0
         Log.debug "Saving the aggregate '#{aggregate.aggregate_id}' with '#{uncommitted_events.length}' uncommitted events..."
@@ -33,7 +33,11 @@ module CommonDomain::Persistence::EventStore
           stream.add EventStore::EventMessage.new event
         }
         Log.debug "Committing changes..."
-        stream.commit_changes headers
+        if transaction
+          stream.commit_changes transaction, headers
+        else
+          @event_store.transaction { |t| stream.commit_changes t, headers }
+        end
         aggregate.clear_uncommitted_events
         Log.debug "Aggregate '#{aggregate.aggregate_id}' saved."
         add_snapshot_if_required aggregate, stream

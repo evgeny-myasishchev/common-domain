@@ -95,8 +95,12 @@ describe CommonDomain::Persistence::EventStore::Repository do
   end
   
   describe "save" do
+    let(:transaction_context) { double(:transaction_context) }
     before(:each) do
       allow(event_store).to receive(:open_stream) { stream }
+      allow(event_store).to receive(:transaction) do |&block|
+        block.call transaction_context
+      end
       allow(stream).to receive(:add)
       allow(stream).to receive(:commit_changes)
       allow(aggregate).to receive(:get_uncommitted_events) { [] }
@@ -116,9 +120,19 @@ describe CommonDomain::Persistence::EventStore::Repository do
       expect(stream).to receive(:add).with(EventStore::EventMessage.new evt1)
       expect(stream).to receive(:add).with(EventStore::EventMessage.new evt2)
       expect(stream).to receive(:add).with(EventStore::EventMessage.new evt3)
-      expect(stream).to receive(:commit_changes)
+      expect(stream).to receive(:commit_changes).with(transaction_context, {})
       expect(aggregate).to receive(:clear_uncommitted_events)
       subject.save(aggregate)
+    end
+    
+    it "commit changes with provided transaction context" do
+      custom_transaction_context = double(:custom_transaction_context)
+      evt1 = double(:evt1)
+      expect(aggregate).to receive(:get_uncommitted_events).and_return([evt1])
+      allow(stream).to receive(:add)
+      expect(event_store).not_to receive(:transaction)
+      expect(stream).to receive(:commit_changes).with(custom_transaction_context, {header1: true})
+      subject.save(aggregate, {header1: true}, custom_transaction_context)
     end
     
     it 'should reuse the stream' do
@@ -133,7 +147,7 @@ describe CommonDomain::Persistence::EventStore::Repository do
     it "should commit stream with headers" do
       headers = {header: 'header-1'}
       expect(aggregate).to receive(:get_uncommitted_events).and_return([double(:evt3)])
-      expect(stream).to receive(:commit_changes).with(headers)
+      expect(stream).to receive(:commit_changes).with(transaction_context, headers)
       subject.save(aggregate, headers)
     end
     

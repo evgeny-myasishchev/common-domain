@@ -29,6 +29,21 @@ describe "Integration - Common Domain - Event Store Repository" do
     expect(dispatched_events[0].body.aggregate_id).to eql 'employee-1'
     expect(dispatched_events[1].body.aggregate_id).to eql 'employee-2'
   end
+    
+  it "should save in transaction" do
+    emp1 = Domain::Aggregates::Employee.new
+    emp1.register 'employee-1'
+    
+    expect {
+      event_store.transaction { |t| 
+        subject.save emp1, {}, t
+        raise RuntimeError.new
+      }
+    }.to raise_error RuntimeError
+    
+    stream = event_store.open_stream('employee-1')
+    expect(stream.committed_events.length).to eql(0)
+  end
   
   it "should update existing aggregates" do
     emp1 = Domain::Aggregates::Employee.new

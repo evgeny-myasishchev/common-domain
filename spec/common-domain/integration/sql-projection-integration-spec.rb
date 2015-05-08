@@ -72,13 +72,13 @@ describe "Integration - CommonDomain::Projections::SqlProjection" do
     stream.add EventStore::EventMessage.new Events::EmployeeCreated.new('stream-1', 'Employee 1')
     stream.add EventStore::EventMessage.new Events::EmployeeCreated.new('stream-2', 'Employee 2')
     stream.add EventStore::EventMessage.new Events::EmployeeCreated.new('stream-3', 'Employee 3')
-    stream.commit_changes
+    @app.event_store.transaction { |t| stream.commit_changes t }
     
     stream.add EventStore::EventMessage.new Events::EmployeeRenamed.new('stream-2', 'New name 2')
-    stream.commit_changes
+    @app.event_store.transaction { |t| stream.commit_changes t }
     
     stream.add EventStore::EventMessage.new Events::EmployeeRemoved.new('stream-3')
-    stream.commit_changes
+    @app.event_store.transaction { |t| stream.commit_changes t }
     
     @app.event_store.dispatcher.stop
     
