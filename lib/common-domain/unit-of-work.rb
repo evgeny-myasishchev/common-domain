@@ -21,7 +21,7 @@ module CommonDomain::UnitOfWork
   
   #
   # This module presents non atomic Unit of Work. Affected aggregates will be sequentally saved one by one.
-  # Please use this kind of unit of work if the cost of the possible failure when saving each aggregate should is very low.
+  # This kind of unit of work should be used if the cost of the possible failure when saving each aggregate is very low.
   #  
   module NonAtomic
     class NonAtomicUnitOfWork < CommonDomain::UnitOfWork::AbstractUnitOfWork
@@ -46,9 +46,9 @@ module CommonDomain::UnitOfWork
   #
   module Atomic
     class AtomicUnitOfWork < CommonDomain::UnitOfWork::AbstractUnitOfWork
-      def initialize(repository)
-        raise 'Can not use AtomicUnitOfWork. Underlying persistence engine does not support transactions.' unless repository.event_store.persistence_engine.supports_transactions?
+      def initialize(*args)
         super
+        ensure_transactions_supported!
       end
       
       def commit(headers)
@@ -57,6 +57,10 @@ module CommonDomain::UnitOfWork
             @repository.save aggregate, headers, t
           end
         end
+      end
+      
+      private def ensure_transactions_supported!
+        raise 'Can not use AtomicUnitOfWork. Underlying persistence engine does not support transactions.' unless repository.event_store.persistence_engine.supports_transactions?
       end
     end
   

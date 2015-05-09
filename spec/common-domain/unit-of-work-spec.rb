@@ -95,6 +95,11 @@ module UnitOfWorkSpec
     
     it_behaves_like 'unit of work'
     
+    it 'should fail to initialize if persistence engine does not support transactions' do
+      expect(persistence_engine).to receive(:'supports_transactions?') { false }
+      expect { described_class.new subject.repository }.to raise_error 'Can not use AtomicUnitOfWork. Underlying persistence engine does not support transactions.'
+    end
+    
     describe 'commit' do
       let(:transaction_context) { double(:transaction_context) }
       
@@ -124,11 +129,6 @@ module UnitOfWorkSpec
         expect(repository).to receive(:save).with(aggregate1, with_dummy_headers, transaction_context)
         expect(repository).to receive(:save).with(aggregate2, with_dummy_headers, transaction_context)
         subject.commit dummy_headers
-      end
-      
-      it 'should fail to initialize if persistence engine does not support transactions' do
-        expect(persistence_engine).to receive(:'supports_transactions?') { false }
-        expect { described_class.new subject.repository }.to raise_error 'Can not use AtomicUnitOfWork. Underlying persistence engine does not support transactions.'
       end
     end
   end
