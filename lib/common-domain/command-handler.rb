@@ -34,8 +34,9 @@ module CommonDomain
           repository = repository_factory.create_repository
           aggregate = repository.get_by_id definition.aggregate_class, command.attribute(id)
           arguments = collect_arguments definition.aggregate_class, command, id, definition.method_name
-          aggregate.send(definition.method_name, *arguments)
+          result = aggregate.send(definition.method_name, *arguments)
           repository.save aggregate, command.headers
+          result
         end
         definition
       end

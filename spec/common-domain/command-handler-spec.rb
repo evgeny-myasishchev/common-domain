@@ -120,6 +120,18 @@ describe CommonDomain::CommandHandler do
       subject.handle_message command
     end
     
+    it 'should return handler value' do
+      DummyCommand.attribute_names = [:id]
+      ac = aggregate_class
+      expect(repository).to get_by_id(aggregate_class, 'aggregate-1').and_return aggregate
+      expect(repository).to receive(:save).with(aggregate, anything())
+      allow(aggregate).to receive(:dummy_logic) { 'dummy-command-result' }
+      subject.class.class_eval do
+        handle(DummyCommand).with(ac).using(:dummy_logic)
+      end
+      expect(subject.handle_message DummyCommand.new id: 'aggregate-1').to eql 'dummy-command-result'
+    end
+    
     it 'raise error if aggregate class was not specified using with' do
       ac = aggregate_class
       subject.class.class_eval do

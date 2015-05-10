@@ -86,6 +86,21 @@ describe CommonDomain::Messages::MessagesHandler do
       expect(subject.processed_message).to eql message
       expect(subject.headers).to eql({header1: "header-1", header2: "header-2"})
     end
+    
+    it 'should return handler value' do
+      handler_class = Class.new do
+        include CommonDomain::Messages::MessagesHandler
+        on MessageOne do |event|
+          'message-one-result'
+        end
+        on Messages::MessageTwo do |event, headers|
+          'message-two-result'
+        end
+      end
+      subject = handler_class.new
+      expect(subject.handle_message MessageOne.new).to eql 'message-one-result'
+      expect(subject.handle_message Messages::MessageTwo.new).to eql 'message-two-result'
+    end
   end
   
   describe "on" do
