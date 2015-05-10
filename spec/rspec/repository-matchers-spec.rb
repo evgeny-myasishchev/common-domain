@@ -31,6 +31,14 @@ describe "work-matchers" do
         repository.save(aggregate_instance, headers)
       end
       
+      it 'should setup save with headers and transaction context' do
+        headers = {header1: 'value1', header2: 'value2'}
+        transaction_context = EventStore::Persistence::PersistenceEngine::TransactionContext
+        expect(repository).to get_by_id(aggregate_class, 'aggregate-100').and_return(aggregate_instance).and_save(headers, transaction_context)
+        expect(repository.get_by_id(aggregate_class, 'aggregate-100')).to be aggregate_instance
+        repository.save(aggregate_instance, headers, transaction_context)
+      end
+      
       it 'should fail if headers are nil' do
         expect {
           expect(repository).to get_by_id(aggregate_class, 'aggregate-100').and_return(aggregate_instance).and_save(nil)

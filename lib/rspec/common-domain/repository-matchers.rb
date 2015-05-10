@@ -26,10 +26,11 @@ module RSpec::Matchers::CommonDomainMatchers
     chain :and_return do |aggregate|
       @aggregate = aggregate
     end
-    chain :and_save do |headers|
+    chain :and_save do |headers, transaction = nil|
       raise 'please provide aggregate instance with and_return chain' if @aggregate.nil?
       raise 'please provide expected headers to save with the aggregate' if headers.nil?
-      expect(repository).to receive(:save).with(@aggregate, headers)
+      expect(repository).to receive(:save).with(@aggregate, headers) unless transaction
+      expect(repository).to receive(:save).with(@aggregate, headers, transaction) if transaction
     end
   end
 end
