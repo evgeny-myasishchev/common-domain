@@ -215,4 +215,100 @@ describe CommonDomain::DomainContext do
       expect(subject.repository_factory()).to be(factory)
     end
   end
+  
+  describe 'dispatching' do
+    let(:events) { IntegrationSpecsAncillary::Domain::Events }
+    
+    let(:standard_handler) {
+      the_events = events
+      Class.new do
+        include CommonDomain::Messages::MessagesHandler
+        attr_reader :handled_events
+        def initialize
+          @handled_events = []
+        end
+        
+        on the_events::EmployeeRegistered do |event|
+          @handled_events << event
+        end
+        
+        on the_events::EmployeeResigned do |event|
+          @handled_events << event
+        end
+      end
+    }
+    
+    let(:handler_with_context) {
+      the_events = events
+      Class.new do
+        include CommonDomain::Messages::MessagesHandler
+        attr_reader :handled_events
+        def initialize
+          @handled_events = {}
+        end
+        
+        on the_events::EmployeeRegistered do |event, context|
+          @handled_events[event.class] = context
+        end
+        
+        on the_events::EmployeeResigned do |event, context|
+          @handled_events[event.class] = context
+        end
+      end
+    }
+    
+    before(:each) do
+      described_class.class_eval do
+        def with_event_store
+          bootstrap_event_store dispatcher: :synchronous do |with|
+            with.in_memory_persistence
+            with.log4r_logging
+          end
+        end
+      end
+      subject.with_event_store
+    end
+    
+    it 'should dispatch events' do
+      handler = standard_handler.new
+      subject.domain_event_bus.register handler
+      stream = subject.event_store.open_stream 'emp-1'
+      
+      registered = EventStore::EventMessage.new events::EmployeeRegistered.new 'emp-1'
+      resigned = EventStore::EventMessage.new events::EmployeeResigned.new 'emp-1'
+      
+      stream.add registered
+      subject.event_store.transaction { |t| stream.commit_changes t }
+      stream.add resigned
+      subject.event_store.transaction { |t| stream.commit_changes t }
+      
+      expect(handler.handled_events.length).to eql 2
+      expect(handler.handled_events).to include(registered.body)
+      expect(handler.handled_events).to include(resigned.body)
+    end
+    
+    it 'should dispatch events with commit context' do
+      handler = handler_with_context.new
+      subject.domain_event_bus.register handler
+      stream = subject.event_store.open_stream 'emp-1'
+      
+      registered = EventStore::EventMessage.new events::EmployeeRegistered.new 'emp-1'
+      resigned = EventStore::EventMessage.new events::EmployeeResigned.new 'emp-1'
+      
+      stream.add registered
+      commit1 = subject.event_store.transaction { |t| stream.commit_changes t }
+      stream.add resigned
+      commit2 = subject.event_store.transaction { |t| stream.commit_changes t }
+      expect(handler.handled_events.length).to eql 2
+      
+      context1 = handler.handled_events[events::EmployeeRegistered]
+      context2 = handler.handled_events[events::EmployeeResigned]
+      expect(context1).to be_an_instance_of CommonDomain::CommitContext
+      expect(context1.commit_id).to eql commit1.commit_id
+      expect(context1.commit_timestamp).to eql commit1.commit_timestamp
+      
+      expect(context2.commit_id).to eql commit2.commit_id
+      expect(context2.commit_timestamp).to eql commit2.commit_timestamp
+    end
+  end
 end

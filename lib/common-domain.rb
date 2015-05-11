@@ -4,6 +4,7 @@ module CommonDomain
   autoload :CommandHandler, 'common-domain/command-handler'
   autoload :CommandResult, 'common-domain/command-result'
   autoload :Command, 'common-domain/command'
+  autoload :CommitContext, 'common-domain/commit-context'
   autoload :DomainContext, 'common-domain/domain-context'
   autoload :DomainEvent, 'common-domain/domain-event'
   autoload :Entity, 'common-domain/entity'

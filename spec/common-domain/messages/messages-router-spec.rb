@@ -95,21 +95,21 @@ describe CommonDomain::Messages::MessagesRouter do
       end
     end
 
-    context "headers" do
-      it "should route the message with headers" do
-        headers = {header1: "header1", header2: "header2"}
+    context "context" do
+      it "should route the message with context" do
+        context = {header1: "header1", header2: "header2"}
         message = double(:message)
 
         handler_one = double(:handler_one, :can_handle_message? => true)
-        expect(handler_one).to receive(:handle_message).with(message, headers)
+        expect(handler_one).to receive(:handle_message).with(message, context)
 
         handler_two = double(:handler_two, :can_handle_message? => true)
-        expect(handler_two).to receive(:handle_message).with(message, headers)
+        expect(handler_two).to receive(:handle_message).with(message, context)
 
         subject.register handler_one
         subject.register handler_two
 
-        subject.route message, headers: headers
+        subject.route message, context: context
       end
     end
   end

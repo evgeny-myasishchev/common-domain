@@ -26,7 +26,7 @@ module CommonDomain::Messages
       options = {
         :fail_if_no_handlers => false,
         :ensure_single_handler => false,
-        :headers => nil
+        :context => nil
       }.merge!(options)
       ensure_single_handler = options[:ensure_single_handler]
       Log.debug "Routing message: #{message.class}"
@@ -36,10 +36,10 @@ module CommonDomain::Messages
       raise NoHandlersFound.new(message) if handlers.length == 0 && options[:fail_if_no_handlers]
       
       handler_result = nil
-      headers = options[:headers]
-      handle_message = headers.nil? ? 
+      message_context = options[:context]
+      handle_message = message_context.nil? ? 
         lambda { |handler| handler.handle_message(message) } : 
-        lambda { |handler| handler.handle_message(message, headers) }
+        lambda { |handler| handler.handle_message(message, message_context) }
       handlers.each { |handler|
         Log.debug " - to handler: #{handler}"
         handler_result = handle_message.call(handler)

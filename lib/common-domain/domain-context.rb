@@ -122,8 +122,9 @@ module CommonDomain
             with.sql_persistence event_store_database_config
           end
           with.send("#{dispatcher}_dispatcher") do |commit|
+            commit_context = CommonDomain::CommitContext.new commit
             commit.events.each { |event| 
-              domain_event_bus.publish(event.body) 
+              domain_event_bus.publish(event.body, context: commit_context)
             }
           end
         end
