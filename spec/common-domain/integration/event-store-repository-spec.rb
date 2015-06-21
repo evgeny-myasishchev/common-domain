@@ -41,8 +41,7 @@ describe "Integration - Common Domain - Event Store Repository" do
       }
     }.to raise_error RuntimeError
     
-    stream = event_store.open_stream('employee-1')
-    expect(stream.committed_events.length).to eql(0)
+    expect(event_store.stream_exists?('employee-1')).to be_falsey
   end
   
   it "should update existing aggregates" do

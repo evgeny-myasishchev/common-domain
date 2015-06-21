@@ -3,7 +3,7 @@ require 'spec-helper'
 describe CommonDomain::Persistence::EventStore::Repository do
   let(:builder) { double(:aggregate_builder) }
   let(:stream) { double(:stream, new_stream?: false, :committed_events => []) }
-  let(:event_store) { double(:event_store, :open_stream => stream) }
+  let(:event_store) { double(:event_store) }
   let(:aggregate_class) { double("aggregate-class") }
   let(:aggregate) { double("aggregate", :aggregate_id => "aggregate-1") }
   let(:s) { CommonDomain::Persistence::Snapshots }
@@ -23,6 +23,7 @@ describe CommonDomain::Persistence::EventStore::Repository do
     
     it "should use builder to construct new aggregate instance" do
       expect(builder).to receive(:build).with(aggregate_class, "aggregate-1").and_return(aggregate)
+      expect(event_store).to receive(:open_stream).with('aggregate-1').and_return(stream)
       expect(subject.get_by_id(aggregate_class, "aggregate-1")).to eql aggregate
     end
     
@@ -97,7 +98,7 @@ describe CommonDomain::Persistence::EventStore::Repository do
   describe "save" do
     let(:transaction_context) { double(:transaction_context) }
     before(:each) do
-      allow(event_store).to receive(:open_stream) { stream }
+      allow(event_store).to receive(:create_stream) { stream }
       allow(event_store).to receive(:transaction) do |&block|
         block.call transaction_context
       end
@@ -135,8 +136,9 @@ describe CommonDomain::Persistence::EventStore::Repository do
       subject.save(aggregate, {header1: true}, custom_transaction_context)
     end
     
-    it 'should reuse the stream' do
+    it 'should reuse previously open stream' do
       expect(event_store).to receive(:open_stream).and_return(stream).once
+      expect(event_store).not_to receive(:create_stream)
       expect(stream).to receive(:commit_changes).once
       allow(builder).to receive(:build).and_return(aggregate)
       subject.get_by_id(aggregate_class, "aggregate-1")
@@ -153,7 +155,7 @@ describe CommonDomain::Persistence::EventStore::Repository do
     
     it 'should do nothing if aggregate has no changes' do
       expect(aggregate).to receive(:get_uncommitted_events).and_return([])
-      expect(event_store).not_to receive(:open_stream)
+      expect(event_store).not_to receive(:create_stream)
       subject.save(aggregate)
     end
     

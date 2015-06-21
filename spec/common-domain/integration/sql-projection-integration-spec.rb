@@ -68,7 +68,7 @@ describe "Integration - CommonDomain::Projections::SqlProjection" do
   end
   
   it "should route domain messages to the projection" do
-    stream = @app.event_store.open_stream('stream-1')
+    stream = @app.event_store.create_stream('stream-1')
     stream.add EventStore::EventMessage.new Events::EmployeeCreated.new('stream-1', 'Employee 1')
     stream.add EventStore::EventMessage.new Events::EmployeeCreated.new('stream-2', 'Employee 2')
     stream.add EventStore::EventMessage.new Events::EmployeeCreated.new('stream-3', 'Employee 3')

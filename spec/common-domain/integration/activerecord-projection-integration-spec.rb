@@ -74,7 +74,7 @@ module ActiveRecordProjectionIntegrationSpec
   
     it "should route domain messages to the projection" do
       stream_1_id = SecureRandom.uuid
-      stream = @app.event_store.open_stream(stream_1_id)
+      stream = @app.event_store.create_stream(stream_1_id)
       stream.add EventStore::EventMessage.new Events::EmployeeCreated.new(stream_1_id, 'Initial name')
       @app.event_store.transaction { |t| stream.commit_changes t }
       expect(sequel_connection[:employees_projections][employee_id: stream_1_id]).to eql id: 1, employee_id: stream_1_id, name: 'Initial name'

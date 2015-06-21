@@ -28,7 +28,8 @@ module CommonDomain::Persistence::EventStore
       uncommitted_events = aggregate.get_uncommitted_events
       if uncommitted_events.length > 0
         Log.debug "Saving the aggregate '#{aggregate.aggregate_id}' with '#{uncommitted_events.length}' uncommitted events..."
-        stream = @streams[aggregate.aggregate_id] || @event_store.open_stream(aggregate.aggregate_id)
+        # If there is no open stream then this means we're creating new aggregate
+        stream = @streams[aggregate.aggregate_id] || @event_store.create_stream(aggregate.aggregate_id)
         uncommitted_events.each { |event|
           stream.add EventStore::EventMessage.new event
         }
