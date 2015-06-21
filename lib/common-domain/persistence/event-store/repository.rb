@@ -16,7 +16,8 @@ module CommonDomain::Persistence::EventStore
     
     def get_by_id(aggregate_class, aggregate_id)
       snapshot = get_snapshot(aggregate_id)
-      Log.debug "Loading the aggregate '#{aggregate_id}' from the snapshot (version=#{snapshot.version})." unless snapshot.nil?
+      Log.debug "Loading the aggregate #{aggregate_class} id='#{aggregate_id}'." if snapshot.nil?
+      Log.debug "Loading the aggregate #{aggregate_class} id='#{aggregate_id}' from the snapshot (version=#{snapshot.version})." unless snapshot.nil?
       stream = get_stream aggregate_id, snapshot
       raise CommonDomain::Persistence::AggregateNotFoundError.new(aggregate_class, aggregate_id) if stream.new_stream?
       aggregate = @builder.build(aggregate_class, snapshot || aggregate_id)
@@ -27,7 +28,7 @@ module CommonDomain::Persistence::EventStore
     def save(aggregate, headers = {}, transaction = nil)
       uncommitted_events = aggregate.get_uncommitted_events
       if uncommitted_events.length > 0
-        Log.debug "Saving the aggregate '#{aggregate.aggregate_id}' with '#{uncommitted_events.length}' uncommitted events..."
+        Log.debug "Saving the aggregate #{aggregate.class} id='#{aggregate.aggregate_id}' with '#{uncommitted_events.length}' uncommitted events..."
         # If there is no open stream then this means we're creating new aggregate
         stream = @streams[aggregate.aggregate_id] || @event_store.create_stream(aggregate.aggregate_id)
         uncommitted_events.each { |event|
@@ -40,10 +41,10 @@ module CommonDomain::Persistence::EventStore
           @event_store.transaction { |t| stream.commit_changes t, headers }
         end
         aggregate.clear_uncommitted_events
-        Log.debug "Aggregate '#{aggregate.aggregate_id}' saved."
+        Log.debug "Aggregate #{aggregate.class} id='#{aggregate.aggregate_id}' saved."
         add_snapshot_if_required aggregate, stream
       else
-        Log.debug "The aggregate '#{aggregate.aggregate_id}' has no uncommitted events. Saving skipped."
+        Log.debug "The aggregate #{aggregate.class} id='#{aggregate.aggregate_id}' has no uncommitted events. Saving skipped."
       end
       aggregate
     end
@@ -66,7 +67,7 @@ module CommonDomain::Persistence::EventStore
       def add_snapshot_if_required(aggregate, stream)
         return if @snapshots_repository.nil?
         return unless aggregate.class.add_snapshot?(aggregate)
-        Log.debug "Adding snapshot for aggregate #{stream.stream_id} (version: #{stream.stream_revision})"
+        Log.debug "Adding snapshot for aggregate #{aggregate.class} id=#{stream.stream_id} (version: #{stream.stream_revision})"
         snapshot = CommonDomain::Persistence::Snapshots::Snapshot.new stream.stream_id, stream.stream_revision, aggregate.get_snapshot
         @snapshots_repository.add snapshot
       end
