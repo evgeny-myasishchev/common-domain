@@ -2,7 +2,7 @@ module CommonDomain
   MAJOR = 3
   MINOR = 0
   PATCH = 1
-  BUILD = 'b2'
+  BUILD = 'rc1'
   
   VERSION = [MAJOR, MINOR, PATCH, BUILD].compact.join('.')
   
