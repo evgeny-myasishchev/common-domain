@@ -7,20 +7,19 @@ module CommonDomain
     
     attr_reader :event_store
     attr_reader :snapshots_repository
-    attr_reader :application_event_bus
-    attr_reader :domain_event_bus
+    attr_reader :event_bus
     attr_reader :projections
     attr_reader :command_dispatcher
     attr_reader :event_store_database_config
     attr_reader :read_store_database_config
     
     def initialize(&block)
-      @application_event_bus = EventBus.new
+      @event_bus = EventBus.new
       yield(self) if block_given?
     end
     
-    def with_event_bus(bus = nil)
-      @domain_event_bus = bus || CommonDomain::EventBus.new
+    def with_event_bus(bus)
+      @event_bus = bus
     end
     
     #
