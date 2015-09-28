@@ -49,7 +49,6 @@ describe "Integration - CommonDomain::Projections::SqlProjection" do
   
   before(:each) do
     @app = IntegrationContext.new do |bootstrap|
-      bootstrap.with_event_bus
       bootstrap.with_event_store
       bootstrap.with_projections(connection)
       bootstrap.with_projections_initialization

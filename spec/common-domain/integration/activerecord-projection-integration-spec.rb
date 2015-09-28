@@ -65,7 +65,6 @@ module ActiveRecordProjectionIntegrationSpec
       
       EmployeesProjection.ensure_schema!
       @app = IntegrationContext.new do |bootstrap|
-        bootstrap.with_event_bus
         bootstrap.with_event_store
         bootstrap.with_projections
         bootstrap.with_projections_initialization

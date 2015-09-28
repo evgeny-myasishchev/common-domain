@@ -8,11 +8,6 @@ describe CommonDomain::DomainContext do
       end
     end
   }
-  subject { 
-    c = described_class.new 
-    c.with_event_bus
-    c
-  }
   let(:rm1) { double(:read_model_one, :setup => nil) }
   let(:rm2) { double(:read_model_two, :setup => nil) }
   let(:rm3) { double(:read_model_three, :setup => nil) }
@@ -271,7 +266,7 @@ describe CommonDomain::DomainContext do
     
     it 'should dispatch events' do
       handler = standard_handler.new
-      subject.domain_event_bus.register handler
+      subject.event_bus.register handler
       stream = subject.event_store.create_stream 'emp-1'
       
       registered = EventStore::EventMessage.new events::EmployeeRegistered.new 'emp-1'
@@ -289,7 +284,7 @@ describe CommonDomain::DomainContext do
     
     it 'should dispatch events with commit context' do
       handler = handler_with_context.new
-      subject.domain_event_bus.register handler
+      subject.event_bus.register handler
       stream = subject.event_store.create_stream 'emp-1'
       
       registered = EventStore::EventMessage.new events::EmployeeRegistered.new 'emp-1'
