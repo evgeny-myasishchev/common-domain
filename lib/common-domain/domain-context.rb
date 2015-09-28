@@ -87,6 +87,7 @@ module CommonDomain
       end
     end
     
+    # TODO: Deprecate. Projections setup/update should be moved elsewhere
     # Rebuilds required projections.
     def with_projections_initialization
       initialize_projections :cleanup_all => false
@@ -103,8 +104,8 @@ module CommonDomain
 
     protected
       def bootstrap_projections(&block)
-        ensure_events_bus!
-        @projections       = CommonDomain::Projections::Registry.new @domain_event_bus
+        ensure_event_bus!
+        @projections = CommonDomain::Projections::Registry.new event_bus
         yield(@projections)
       end
     
@@ -112,7 +113,7 @@ module CommonDomain
         Log.info "Initializing event store..."
         Log.debug "Using connection specification: #{event_store_database_config}"
 
-        ensure_events_bus!
+        ensure_event_bus!
         @event_store = EventStore.bootstrap do |with|
           # with.log4r_logging
           yield(with)
@@ -123,7 +124,7 @@ module CommonDomain
           with.send("#{dispatcher}_dispatcher") do |commit|
             commit_context = CommonDomain::CommitContext.new commit
             commit.events.each { |event| 
-              domain_event_bus.publish(event.body, context: commit_context)
+              event_bus.publish(event.body, context: commit_context)
             }
           end
         end
@@ -133,8 +134,8 @@ module CommonDomain
         @command_dispatcher = CommandDispatcher.new(&block)
       end
       
-      def ensure_events_bus!
-        raise "Events Bus should be initialized" if domain_event_bus.nil?
+      def ensure_event_bus!
+        raise "Events Bus should be initialized" if event_bus.nil?
       end
   end
 end
