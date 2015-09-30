@@ -1,6 +1,7 @@
 require 'sequel'
 
 module CommonDomain
+  #TODO: Deprecate in favor of the ApplicationContext
   class DomainContext
     include CommonDomain::Infrastructure::ConnectionSpecHelper
     Log = Logger.get "common-domain::domain-context"
