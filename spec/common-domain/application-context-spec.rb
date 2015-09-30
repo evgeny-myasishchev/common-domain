@@ -26,4 +26,19 @@ describe CommonDomain::ApplicationContext do
       expect(subject.singleton_methods).to include :dep1
     end
   end
+  
+  describe 'bootstrap' do
+    it 'should setup all dependencies and create context' do
+      counter = 0
+      subject = described_class.bootstrap do
+        with -> (deps) { deps[:dep1] = "The Dep #{counter += 1}" }
+        with -> (deps) { deps[:dep2] = "The Dep #{counter += 1}" }
+        with -> (deps) { deps[:dep3] = "The Dep #{counter += 1}" }
+      end
+      expect(subject).to be_an_instance_of described_class
+      expect(subject.dep1).to eql 'The Dep 1'
+      expect(subject.dep2).to eql 'The Dep 2'
+      expect(subject.dep3).to eql 'The Dep 3'
+    end
+  end
 end
