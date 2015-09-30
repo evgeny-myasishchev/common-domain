@@ -1,5 +1,6 @@
 module CommonDomain
   autoload :Aggregate, 'common-domain/aggregate'
+  autoload :ApplicationContext, 'common-domain/application-context'
   autoload :CommandDispatcher, 'common-domain/command-dispatcher'
   autoload :CommandHandler, 'common-domain/command-handler'
   autoload :CommandResult, 'common-domain/command-result'
