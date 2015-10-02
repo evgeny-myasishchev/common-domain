@@ -1,5 +1,8 @@
 module CommonDomain
   
+  require_relative 'logger'
+  require_relative 'messages/messages-handler'
+  
   # 
   # Base class for all domain models.
   # 

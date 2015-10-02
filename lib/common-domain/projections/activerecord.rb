@@ -1,4 +1,5 @@
 module CommonDomain::Projections
+  require_relative 'base'
   
   # Contains basic stuff required to create a projection based on the ActiveRecord model.
   # Sample:

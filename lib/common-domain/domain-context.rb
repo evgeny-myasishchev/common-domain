@@ -3,6 +3,8 @@ require 'sequel'
 module CommonDomain
   #TODO: Deprecate in favor of the ApplicationContext
   class DomainContext
+    require_relative 'infrastructure/connection-spec-helper'
+    
     include CommonDomain::Infrastructure::ConnectionSpecHelper
     Log = Logger.get "common-domain::domain-context"
     

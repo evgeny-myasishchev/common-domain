@@ -1,5 +1,7 @@
 module CommonDomain
   
+  require_relative 'messages/messages-router'
+  
   # Used to register command handlers and dispatch commands to handlers.
   # Sample:
   #
