@@ -28,6 +28,5 @@ module CommonDomain
     require_relative 'common-domain/projections/activerecord'
     require_relative 'common-domain/projections/base'
     require_relative 'common-domain/projections/registry'
-    require_relative 'common-domain/projections/sql'
   end
 end
