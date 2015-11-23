@@ -12,7 +12,7 @@ module CommonDomain::Persistence
       raise "Not implemented"
     end
     
-    def save(aggregate, headers = {}, transaction = nil)
+    def save(aggregate, headers = {})
       raise "Not implemented"
     end
   end
