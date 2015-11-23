@@ -30,11 +30,14 @@ describe CommonDomain::ApplicationContext do
   describe 'bootstrap' do
     it 'should setup all dependencies and create context' do
       counter = 0
+      the_class = nil
       subject = described_class.bootstrap do
         with -> (deps) { deps[:dep1] = "The Dep #{counter += 1}" }
         with -> (deps) { deps[:dep2] = "The Dep #{counter += 1}" }
         with -> (deps) { deps[:dep3] = "The Dep #{counter += 1}" }
+        the_class = self
       end
+      expect(the_class).to be_an_instance_of Class
       expect(subject).to be_an_instance_of described_class
       expect(subject.dep1).to eql 'The Dep 1'
       expect(subject.dep2).to eql 'The Dep 2'

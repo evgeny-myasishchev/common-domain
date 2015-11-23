@@ -10,11 +10,18 @@ class CommonDomain::ApplicationContext
   
   class << self
     def bootstrap(&block)
-      dependencies = {}
-      setup = BootstrapSetup.new
+      deps = {}
+      dep_factories = []
+      setup = Class.new
+      setup.instance_exec(dep_factories) do |dep_factories|
+        @dep_factories = dep_factories
+        def with dependency_factory
+          @dep_factories << dependency_factory
+        end
+      end
       setup.instance_eval &block
-      setup.dependency_factories.each { |f| f.call(dependencies) }
-      new dependencies
+      dep_factories.each { |f| f.call(deps) }
+      new deps
     end
   end
   

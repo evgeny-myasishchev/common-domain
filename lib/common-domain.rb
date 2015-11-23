@@ -1,6 +1,7 @@
 module CommonDomain
   require_relative 'common-domain/aggregate'
   require_relative 'common-domain/application-context'
+  require_relative 'common-domain/bootstrap'
   require_relative 'common-domain/command-dispatcher'
   require_relative 'common-domain/command-handler'
   require_relative 'common-domain/command-result'
