@@ -32,6 +32,7 @@ module CommonDomain::UnitOfWork
       end
     end
   
+    # TODO: DRY
     def begin_unit_of_work(headers, &block)
       uow = NonAtomicUnitOfWork.new repository_factory.create_repository
       result = yield(uow)
@@ -52,9 +53,9 @@ module CommonDomain::UnitOfWork
       end
       
       def commit(headers)
-        @repository.event_store.transaction do |t|
+        @repository.event_store.transaction do
           @tracked_aggregates.values.each do |aggregate|
-            @repository.save aggregate, headers, t
+            @repository.save aggregate, headers
           end
         end
       end
@@ -64,6 +65,7 @@ module CommonDomain::UnitOfWork
       end
     end
   
+    # TODO: DRY
     def begin_unit_of_work(headers, &block)
       uow = AtomicUnitOfWork.new repository_factory.create_repository
       result = yield(uow)
