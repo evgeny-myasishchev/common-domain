@@ -27,21 +27,19 @@ module IntegrationSpecsAncillary
 
   def self.included(base)
     base.class_eval do
-      let(:dispatched_events) { Array.new }
-
       let(:event_store) {
         EventStore.bootstrap do |with|
           with.log4r_logging
           with.sql_persistence adapter: 'sqlite', database: ':memory:' #Using memory here to see more output in the log file
-          with.synchronous_dispatcher do |commit|
-            commit.events.each { |event| 
-              @dispatch_hook.call event unless @dispatch_hook.nil?
-              dispatched_events << event 
-            }
-          end
         end
       }
       let(:aggregates_builder) { CommonDomain::Persistence::AggregatesBuilder.new }
     end
+  end
+  
+  def fetch_events
+    events = []
+    event_store.for_each_commit { |c| events.concat c.events }
+    events
   end
 end

@@ -19,31 +19,13 @@ describe "Integration - Common Domain - Event Store Repository" do
     
     emp1_stream = event_store.open_stream('employee-1')
     expect(emp1_stream.committed_events.length).to eql(1)
-    expect(emp1_stream.committed_events[0].body).to be_instance_of Domain::Events::EmployeeRegistered
+    expect(emp1_stream.committed_events[0]).to be_instance_of Domain::Events::EmployeeRegistered
     
     emp2_stream = event_store.open_stream('employee-2')
     expect(emp2_stream.committed_events.length).to eql(1)
-    expect(emp2_stream.committed_events[0].body).to be_instance_of Domain::Events::EmployeeRegistered
-    
-    expect(dispatched_events.length).to eql(2)
-    expect(dispatched_events[0].body.aggregate_id).to eql 'employee-1'
-    expect(dispatched_events[1].body.aggregate_id).to eql 'employee-2'
+    expect(emp2_stream.committed_events[0]).to be_instance_of Domain::Events::EmployeeRegistered
   end
-    
-  it "should save in transaction" do
-    emp1 = Domain::Aggregates::Employee.new
-    emp1.register 'employee-1'
-    
-    expect {
-      event_store.transaction { |t| 
-        subject.save emp1, {}, t
-        raise RuntimeError.new
-      }
-    }.to raise_error RuntimeError
-    
-    expect(event_store.stream_exists?('employee-1')).to be_falsey
-  end
-  
+
   it "should update existing aggregates" do
     emp1 = Domain::Aggregates::Employee.new
     emp1.register 'employee-1'
@@ -51,7 +33,6 @@ describe "Integration - Common Domain - Event Store Repository" do
     emp2.register 'employee-2'
     subject.save emp1
     subject.save emp2
-    dispatched_events.clear
     
     emp1 = subject.get_by_id(Domain::Aggregates::Employee, 'employee-1')
     emp1.resign
@@ -65,15 +46,13 @@ describe "Integration - Common Domain - Event Store Repository" do
     
     emp1_stream = event_store.open_stream('employee-1')
     expect(emp1_stream.committed_events.length).to eql(2)
-    expect(emp1_stream.committed_events[1].body).to be_instance_of Domain::Events::EmployeeResigned
+    expect(emp1_stream.committed_events[1]).to be_instance_of Domain::Events::EmployeeResigned
     
     emp2_stream = event_store.open_stream('employee-2')
     expect(emp2_stream.committed_events.length).to eql(2)
-    expect(emp2_stream.committed_events[1].body).to be_instance_of Domain::Events::EmployeeResigned
-    
-    expect(dispatched_events.length).to eql(2)
+    expect(emp2_stream.committed_events[1]).to be_instance_of Domain::Events::EmployeeResigned
   end
-  
+
   it "should check if aggregate exists" do
     expect(subject.exists?('employee-1')).to be_falsey
     
