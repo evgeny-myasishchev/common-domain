@@ -24,7 +24,7 @@ describe CommonDomain::Persistence::EventStore::Repository do
     end
   end
   
-  describe "get_by_id" do    
+  describe "get_by_id" do
     before(:each) do
       allow(builder).to receive(:build) { aggregate }
     end
@@ -118,10 +118,25 @@ describe CommonDomain::Persistence::EventStore::Repository do
     end
 
     it 'should create new stream for new aggregate' do
-      fail 'not implemented'
+      aggregate.clear_uncommitted_events
+      expect(event_store).to receive(:create_stream).with(stream.stream_id) { stream }
+      evt1, evt2, evt3 = 'evt1', 'evt2', 'evt3'
+      aggregate.raise_event evt1
+      aggregate.raise_event evt2
+      aggregate.raise_event evt3
+      
+      expect(stream).to receive(:add).with(evt1)
+      expect(stream).to receive(:add).with(evt2)
+      expect(stream).to receive(:add).with(evt3)
+      expect(stream).to receive(:commit_changes).with({})
+      expect(aggregate).to receive(:clear_uncommitted_events)
+      subject.save(aggregate)
     end
     
-    it 'should get the stream, flush all the events into the stream and clear the aggregate' do
+    it 'should use open stream and flush all the events into it' do
+      expect(event_store).to receive(:open_stream).and_return(stream).once
+      expect(event_store).not_to receive(:create_stream)
+      
       evt1, evt2, evt3 = 'evt1', 'evt2', 'evt3'
       aggregate = subject.get_by_id aggregate_class, 'aggregate-1'
       aggregate.raise_event evt1
@@ -136,17 +151,7 @@ describe CommonDomain::Persistence::EventStore::Repository do
       subject.save(aggregate)
     end
     
-    it 'should reuse previously open stream' do
-      expect(event_store).to receive(:open_stream).and_return(stream).once
-      expect(event_store).not_to receive(:create_stream)
-      expect(stream).to receive(:commit_changes).once
-      allow(builder).to receive(:build).and_return(aggregate)
-      subject.get_by_id(aggregate_class, 'aggregate-1')
-      expect(aggregate).to receive(:get_uncommitted_events).and_return([double(:evt1)])
-      subject.save(aggregate)
-    end
-    
-    it 'should commit stream with headers' do      
+    it 'should commit stream with headers' do
       allow(builder).to receive(:build).and_return(aggregate)
       subject.get_by_id(aggregate_class, 'aggregate-1')
       aggregate.raise_event 'evt3'
@@ -156,7 +161,7 @@ describe CommonDomain::Persistence::EventStore::Repository do
     end
     
     it 'should do nothing if aggregate has no changes' do
-      expect(aggregate).to receive(:get_uncommitted_events).and_return([])
+      aggregate.clear_uncommitted_events
       expect(event_store).not_to receive(:create_stream)
       subject.save(aggregate)
     end

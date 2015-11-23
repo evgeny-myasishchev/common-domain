@@ -14,7 +14,7 @@ module CommonDomain::Persistence::EventStore
       @event_store.stream_exists?(aggregate_id)
     end
     
-    def get_by_id(aggregate_class, aggregate_id)      
+    def get_by_id(aggregate_class, aggregate_id)
       snapshot = get_snapshot(aggregate_id)
       Log.debug "Loading the aggregate #{aggregate_class} id='#{aggregate_id}'." if snapshot.nil?
       Log.debug "Loading the aggregate #{aggregate_class} id='#{aggregate_id}' from the snapshot (version=#{snapshot.version})." unless snapshot.nil?
