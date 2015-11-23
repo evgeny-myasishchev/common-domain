@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.files       = Dir["lib/**/*"]
   s.test_files  = Dir['spec/**/*']
   
-  s.add_dependency 'event-store', '~> 3'
+  s.add_dependency 'event-store', '~> 4'
   
   s.add_development_dependency 'log4r'
   s.add_development_dependency 'rspec', '~> 3'
