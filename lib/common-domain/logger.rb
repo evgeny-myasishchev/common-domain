@@ -1,5 +1,19 @@
 module CommonDomain
   class Logger
+    Levels = [:debug, :info, :warn, :error, :fatal]
+    
+    def initialize(name)
+      @name = name
+    end
+    
+    Levels.each { |level|
+      eval <<-EOF
+      def #{level}(*args)
+        self.class.factory.get(@name).#{level}(*args)
+      end
+      EOF
+    }
+    
     #Uses default ruby logger and writes to STDOUT
     class DefaultFactory
       def get(name)
@@ -21,12 +35,12 @@ module CommonDomain
     class << self
       attr_writer :factory
       
-      def get(name)
-        factory.get name
-      end
-      
       def factory
         @factory ||= DefaultFactory.new
+      end
+      
+      def get(name)
+        Logger.new name
       end
     end
   end
