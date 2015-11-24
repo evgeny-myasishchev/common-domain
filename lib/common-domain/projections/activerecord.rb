@@ -22,13 +22,6 @@ module CommonDomain::Projections
   #     end
   #   end
   # end
-  #
-  # To register the projection:
-  # def with_projections
-  #   bootstrap_projections do |projections|
-  #     projections.register :employee, Employee.create_projection
-  #   end
-  # end
   # 
   module ActiveRecord
     require 'active_record'
