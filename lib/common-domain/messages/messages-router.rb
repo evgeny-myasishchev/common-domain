@@ -2,7 +2,7 @@ module CommonDomain::Messages
   
   # Routes messages to appropriate handlers
   module MessagesRouter
-    Log = CommonDomain::Logger.get "common-domain::messages::messages-router"
+    include CommonDomain::Loggable
     
     class SeveralHandlersFound < ::StandardError
       def initialize(message)

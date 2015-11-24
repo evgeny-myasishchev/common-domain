@@ -26,7 +26,7 @@ file_outputter['filename'] = File.join(File.dirname(__FILE__), file_outputter['f
 Log4r::YamlConfigurator.decode_yaml(log4r_config['log4r_config'])
 
 CommonDomain::Logger.factory = CommonDomain::Logger::Log4rFactory.new
-ActiveRecord::Base.logger = CommonDomain::Logger.factory.get('spec::ar')
+ActiveRecord::Base.logger = CommonDomain::Logger.factory.get('Spec::ActiveRecord::Base')
 
 Dir[File.expand_path('../support/*.rb', __FILE__)].each { |helper| require helper }
 

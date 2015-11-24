@@ -7,7 +7,7 @@ module CommonDomain
   # Base class for all domain models.
   # 
   class Aggregate
-    Log = CommonDomain::Logger.get("common-domain::aggregate")
+    include CommonDomain::Loggable
     include Messages::MessagesHandler
     
     attr_reader :aggregate_id, :version

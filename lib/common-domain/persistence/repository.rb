@@ -1,6 +1,6 @@
 module CommonDomain::Persistence
   class Repository
-    Log = CommonDomain::Logger.get("common-domain::persistence::repository")
+    include CommonDomain::Loggable
     
     def exists?(aggregate_id)
       raise 'Not implemented'

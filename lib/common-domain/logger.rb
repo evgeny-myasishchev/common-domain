@@ -1,4 +1,12 @@
 module CommonDomain
+  module Loggable
+    def self.included(receiver)
+      receiver.class_eval do
+        const_set(:Log, CommonDomain::Logger.get(receiver.name))
+      end
+    end
+  end
+  
   class Logger
     Levels = [:debug, :info, :warn, :error, :fatal]
     
