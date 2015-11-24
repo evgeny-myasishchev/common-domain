@@ -97,22 +97,6 @@ describe CommonDomain::Aggregate do
     end
   end
   
-  describe "new_entity" do
-    it "should create entity instance initialized with self" do
-      entity_class = double(:entity_class)
-      entity = double(:entity)
-      expect(entity_class).to receive(:new).with(subject).and_return(entity)
-      expect(subject.send(:new_entity, entity_class)).to be entity
-    end
-    
-    it "should also pass all arguments when creating the entity" do
-      entity_class = double(:entity_class)
-      entity = double(:entity)
-      expect(entity_class).to receive(:new).with(subject, 'arg-1', 'arg-2').and_return(entity)
-      expect(subject.send(:new_entity, entity_class, 'arg-1', 'arg-2')).to be entity
-    end
-  end
-  
   describe "clear_uncommitted_events" do
     it "should empty uncommitted events" do
       account_opened  = double(:account_opened)

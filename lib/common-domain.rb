@@ -9,7 +9,6 @@ module CommonDomain
   require_relative 'common-domain/commit-context'
   require_relative 'common-domain/domain-context'
   require_relative 'common-domain/domain-event'
-  require_relative 'common-domain/entity'
   require_relative 'common-domain/event-bus'
   module Messages
     require_relative 'common-domain/messages/dsl'
@@ -27,6 +26,5 @@ module CommonDomain
   module Projections
     require_relative 'common-domain/projections/activerecord'
     require_relative 'common-domain/projections/base'
-    require_relative 'common-domain/projections/registry'
   end
 end
