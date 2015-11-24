@@ -1,12 +1,6 @@
 module CommonDomain
   require_relative 'messages/message'
   require_relative 'messages/dsl'
-  
-  class CommandClassMissingError < ::StandardError
-    def initialize
-      super("Can not determine command class because class_name parameter not found.")
-    end
-  end
 
   class Command < CommonDomain::Messages::Message
     attr_reader :headers

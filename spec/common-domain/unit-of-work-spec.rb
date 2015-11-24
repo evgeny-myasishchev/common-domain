@@ -101,33 +101,31 @@ module UnitOfWorkSpec
     end
     
     describe 'commit' do
-      let(:transaction_context) { double(:transaction_context) }
-      
       before(:each) do
         allow(repository).to receive(:get_by_id).with(TestAggregate1, 'aggregate-1').and_return(aggregate1)
         allow(repository).to receive(:get_by_id).with(TestAggregate2, 'aggregate-2').and_return(aggregate2)
         allow(repository).to receive(:event_store) { event_store }
         allow(event_store).to receive(:transaction) do |&block|
-          block.call(transaction_context)
+          block.call
         end
       end
       
       it 'should save each retrieved aggregates with headers within the transaction' do
         expect(event_store).to receive(:transaction) do |&block|
-          block.call(transaction_context)
+          block.call
         end
         subject.get_by_id TestAggregate1, 'aggregate-1'
         subject.get_by_id TestAggregate2, 'aggregate-2'
-        expect(repository).to receive(:save).with(aggregate1, with_dummy_headers, transaction_context)
-        expect(repository).to receive(:save).with(aggregate2, with_dummy_headers, transaction_context)
+        expect(repository).to receive(:save).with(aggregate1, with_dummy_headers)
+        expect(repository).to receive(:save).with(aggregate2, with_dummy_headers)
         subject.commit dummy_headers
       end
       
       it 'should save newly created aggregates' do
         subject.add_new aggregate1
         subject.add_new aggregate2
-        expect(repository).to receive(:save).with(aggregate1, with_dummy_headers, transaction_context)
-        expect(repository).to receive(:save).with(aggregate2, with_dummy_headers, transaction_context)
+        expect(repository).to receive(:save).with(aggregate1, with_dummy_headers)
+        expect(repository).to receive(:save).with(aggregate2, with_dummy_headers)
         subject.commit dummy_headers
       end
     end
