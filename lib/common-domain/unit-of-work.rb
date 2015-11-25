@@ -17,6 +17,13 @@ module CommonDomain::UnitOfWork
     def commit(headers)
       raise 'Not implemented'
     end
+
+    def self.begin_unit_of_work(repository, headers, &block)
+      uow = new repository
+      result = yield(uow)
+      uow.commit headers
+      result
+    end
   end
   
   #
@@ -31,13 +38,9 @@ module CommonDomain::UnitOfWork
         end
       end
     end
-  
-    # TODO: DRY
+
     def begin_unit_of_work(headers, &block)
-      uow = NonAtomicUnitOfWork.new repository_factory.create_repository
-      result = yield(uow)
-      uow.commit headers
-      result
+      NonAtomicUnitOfWork.begin_unit_of_work repository_factory.create_repository, headers, &block
     end
   end
   
@@ -46,7 +49,7 @@ module CommonDomain::UnitOfWork
   # Please use this module only if the underlying persistence engine supports transactions
   #
   module Atomic
-    class AtomicUnitOfWork < CommonDomain::UnitOfWork::AbstractUnitOfWork
+    class AtomicUnitOfWork < NonAtomic::NonAtomicUnitOfWork
       def initialize(*args)
         super
         ensure_transactions_supported!
@@ -54,9 +57,7 @@ module CommonDomain::UnitOfWork
       
       def commit(headers)
         @repository.event_store.transaction do
-          @tracked_aggregates.values.each do |aggregate|
-            @repository.save aggregate, headers
-          end
+          super
         end
       end
       
@@ -65,12 +66,8 @@ module CommonDomain::UnitOfWork
       end
     end
   
-    # TODO: DRY
     def begin_unit_of_work(headers, &block)
-      uow = AtomicUnitOfWork.new repository_factory.create_repository
-      result = yield(uow)
-      uow.commit headers
-      result
+      AtomicUnitOfWork.begin_unit_of_work repository_factory.create_repository, headers, &block
     end
   end
 end
