@@ -39,6 +39,10 @@ Dir[File.expand_path('../support/*.rb', __FILE__)].each { |helper| require helpe
 RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
   config.filter_run :focus
+
+  config.mock_with :rspec do |mocks|
+    mocks.verify_partial_doubles = true
+  end
   
   config.before(:all) do
     @tmp_root = Pathname.new(File.expand_path(File.join('..', 'tmp'), __FILE__))
