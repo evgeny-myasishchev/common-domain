@@ -17,7 +17,7 @@ module CommonDomain::Persistence
     
     # Returns the aggregate. Raises AggregateNotFoundError for not existing aggregates.
     # If block supplied then the aggregate will be automatically saved after the block exists
-    def get_by_id(aggregate_class, id)
+    def get_by_id(aggregate_class, aggregate_id)
       snapshot = get_snapshot(aggregate_id)
       Log.debug "Loading the aggregate #{aggregate_class} id='#{aggregate_id}'." if snapshot.nil?
       Log.debug "Loading the aggregate #{aggregate_class} id='#{aggregate_id}' from the snapshot (version=#{snapshot.version})." unless snapshot.nil?

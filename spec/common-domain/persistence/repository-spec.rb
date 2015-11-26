@@ -1,13 +1,14 @@
 require 'spec-helper'
 
-describe CommonDomain::Persistence::EventStore::Repository do
+describe CommonDomain::Persistence::Repository do
   let(:builder) { CommonDomain::Persistence::AggregatesBuilder.new }
   let(:stream) { event_store.create_stream('aggregate-1') }
-  let(:event_store) { 
+  let(:event_store) {
     store = EventStore.bootstrap do |with|
       with.log4r_logging
       with.in_memory_persistence
     end
+    store
   }
   let(:aggregate_class) { Class.new(CommonDomain::Aggregate) do
     def raise_event(*args) super; end
