@@ -3,6 +3,7 @@ module CommonDomain::Persistence
     include CommonDomain::Loggable
 
     attr_reader :event_store
+    
     def initialize(event_store, builder, snapshots_repository = nil)
       @event_store = event_store
       @builder = builder
@@ -36,7 +37,7 @@ module CommonDomain::Persistence
         uncommitted_events.each { |event|
           stream.add event
         }
-        Log.debug "Committing changes..."
+        Log.debug 'Committing changes...'
         stream.commit_changes headers
         aggregate.clear_uncommitted_events
         Log.debug "Aggregate #{aggregate.class} id='#{aggregate.aggregate_id}' saved."
