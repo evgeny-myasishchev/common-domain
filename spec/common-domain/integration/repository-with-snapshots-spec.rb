@@ -1,6 +1,6 @@
 require 'spec-helper'
 
-module EventStoreRepositoryWithSnapshotsSpec
+module RepositoryWithSnapshotsSpec
   include CommonDomain::Persistence::Snapshots
   class InMemorySnapshotsRepo < CommonDomain::Persistence::Snapshots::SnapshotsRepository
     def initialize
@@ -53,10 +53,10 @@ module EventStoreRepositoryWithSnapshotsSpec
     end
   end
   
-  describe "Integration - Common Domain - Event Store Repository - Snapshots" do
+  describe "Integration - Common Domain - Repository - Snapshots" do
     include IntegrationSpecsAncillary
     let(:snapshots_repo) { InMemorySnapshotsRepo.new }
-    subject { CommonDomain::Persistence::EventStore::Repository.new(event_store, aggregates_builder, snapshots_repo) }
+    subject { CommonDomain::Persistence::Repository.new(event_store, aggregates_builder, snapshots_repo) }
     let(:aggregate) { Domain::EmployeeWithSnapshot.new }
     
     before(:each) do

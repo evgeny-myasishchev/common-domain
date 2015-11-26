@@ -1,11 +1,11 @@
 require 'spec-helper'
 
-describe "Integration - Common Domain - Event Store Repository" do
+describe "Integration - Common Domain - Repository" do
   include IntegrationSpecsAncillary
   class Domain
     include IntegrationSpecsAncillary::Domain
   end
-  subject { CommonDomain::Persistence::EventStore::Repository.new(event_store, aggregates_builder) }
+  subject { CommonDomain::Persistence::Repository.new(event_store, aggregates_builder) }
   
   it "should save new aggregates" do
     emp1 = Domain::Aggregates::Employee.new
