@@ -1,9 +1,13 @@
 module CommonDomain
   class CommandHandler
-    include Messages::MessagesHandler
-    attr_reader :repository_factory
-    def initialize(repository_factory = nil)
-      @repository_factory = repository_factory
+    extend Forwardable
+    include Messages::MessagesHandler    
+
+    def_delegators :persistence_factory, :begin_unit_of_work, :create_repository
+
+    attr_reader :persistence_factory
+    def initialize(persistence_factory = nil)
+      @persistence_factory = persistence_factory
     end
     
     class << self
@@ -31,7 +35,7 @@ module CommonDomain
         definition = HandleDefinition.new command_class
         on command_class do |command|
           raise "aggregate_class is not defined for command '#{command_class}' handler definition" unless definition.aggregate_class
-          repository = repository_factory.create_repository
+          repository = persistence_factory.create_repository
           aggregate = repository.get_by_id definition.aggregate_class, command.attribute(id)
           arguments = collect_arguments definition.aggregate_class, command, id, definition.method_name
           result = aggregate.send(definition.method_name, *arguments)

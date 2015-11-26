@@ -36,6 +36,21 @@ describe CommonDomain::CommandHandler do
       end
     }.to raise_error ArgumentError, 'Messages::Dummy handler block is expected to receive single arguemnt that would be the command itself.'
   end
+
+  it 'should delegate begin_unit_of_work to persistence_factory' do
+    headers = double(:headers)
+    result = double(:result)
+    b = Proc.new {}
+    expect(persistence_factory).to receive(:begin_unit_of_work).with(headers, &b).and_return(result)
+    expect(subject.begin_unit_of_work(headers, &b)).to be result
+  end
+
+  it 'should delegate create_repository to persistence_factory' do
+    headers = double(:headers)
+    repo = double(:repo)
+    expect(persistence_factory).to receive(:create_repository).and_return(repo)
+    expect(subject.create_repository).to be repo
+  end
   
   describe 'handle DSL' do
     class TestAggregate < CommonDomain::Aggregate
