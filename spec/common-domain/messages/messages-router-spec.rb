@@ -2,12 +2,13 @@ require 'spec-helper'
 
 describe CommonDomain::Messages::MessagesRouter do
   subject { Class.new { include CommonDomain::Messages::MessagesRouter }.new }
+
+  let(:handler_class) { Class.new { include CommonDomain::Messages::MessagesHandler } }
+  let!(:new_handler) { instance_double(handler_class) }
   
   describe "handlers?" do
-    let(:handler) { double(:handler) }
-    
     it "shold return true if there is at least one handler registered" do
-      subject.register(handler)
+      subject.register(new_handler)
       expect(subject.handlers?).to be_truthy
     end
     
@@ -25,13 +26,13 @@ describe CommonDomain::Messages::MessagesRouter do
       message_one = double(:message_one)
       message_two = double(:message_two)
       
-      handler_one = double(:handler_one)
+      handler_one = new_handler
       expect(handler_one).to receive(:can_handle_message?).with(message_one).and_return(true)
       expect(handler_one).to receive(:handle_message).with(message_one)
       expect(handler_one).to receive(:can_handle_message?).with(message_two).and_return(true)
       expect(handler_one).to receive(:handle_message).with(message_two)
       
-      handler_two = double(:handler_one_two)
+      handler_two = new_handler
       expect(handler_two).to receive(:can_handle_message?).with(message_one).and_return(true)
       expect(handler_two).to receive(:handle_message).with(message_one)
       expect(handler_two).to receive(:can_handle_message?).with(message_two).and_return(true)
@@ -48,7 +49,7 @@ describe CommonDomain::Messages::MessagesRouter do
       message_one = double(:message_one)
       message_two = double(:message_two)
       
-      handler_one = double(:handler_one)
+      handler_one = new_handler
       expect(handler_one).to receive(:can_handle_message?).with(message_one).and_return(false)
       expect(handler_one).to receive(:can_handle_message?).with(message_two).and_return(false)
       
@@ -60,7 +61,7 @@ describe CommonDomain::Messages::MessagesRouter do
     
     it "should return nil" do
       message_one = double(:message_one)
-      handler_one = double(:handler_one, :can_handle_message? => true, :handle_message => "handler result")
+      handler_one = instance_double(handler_class, :can_handle_message? => true, :handle_message => "handler result")
       subject.register handler_one
       expect(subject.route(message_one)).to be_nil
     end
@@ -89,7 +90,7 @@ describe CommonDomain::Messages::MessagesRouter do
       
       it "should return handler result" do
         message_one = double(:message_one)
-        handler_one = double(:handler_one, :can_handle_message? => true, :handle_message => "handler result")
+        handler_one = instance_double(handler_class, :can_handle_message? => true, :handle_message => "handler result")
         subject.register handler_one
         expect(subject.route(message_one, ensure_single_handler: true)).to eql "handler result"
       end
@@ -100,10 +101,10 @@ describe CommonDomain::Messages::MessagesRouter do
         context = {header1: "header1", header2: "header2"}
         message = double(:message)
 
-        handler_one = double(:handler_one, :can_handle_message? => true)
+        handler_one = instance_double(handler_class, :can_handle_message? => true)
         expect(handler_one).to receive(:handle_message).with(message, context)
 
-        handler_two = double(:handler_two, :can_handle_message? => true)
+        handler_two = instance_double(handler_class, :can_handle_message? => true)
         expect(handler_two).to receive(:handle_message).with(message, context)
 
         subject.register handler_one

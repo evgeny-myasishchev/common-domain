@@ -9,11 +9,11 @@ describe CommonDomain::CommandHandler do
       attr_accessor :headers
     end
   end
-  let(:repository) { double(:repository) }
-  let(:repository_factory) { double(:repository_factory, create_repository: repository )}
+  let(:repository) { instance_double(CommonDomain::Persistence::Repository) }
+  let(:persistence_factory) { instance_double(CommonDomain::PersistenceFactory, create_repository: repository )}
   subject { Class.new(CommonDomain::CommandHandler) do
     
-  end.new(repository_factory)}
+  end.new(persistence_factory)}
   
   it "should be a kind of a MessagesHandler" do
     expect(CommonDomain::CommandHandler.new).to be_a_kind_of CommonDomain::Messages::MessagesHandler
@@ -94,7 +94,7 @@ describe CommonDomain::CommandHandler do
     it 'should define a handler and route the command to the given aggregate using specified method' do
       ac = aggregate_class
       command = DummyCommand.new attributes: {id: 'aggregate-1'}, headers: {header1: 'value-1'}
-      expect(repository_factory).to receive(:create_repository) { repository }
+      expect(persistence_factory).to receive(:create_repository) { repository }
       expect(repository).to get_by_id(aggregate_class, 'aggregate-1').and_return aggregate
       expect(repository).to receive(:save).with(aggregate, command.headers)
       subject.class.class_eval do
@@ -109,7 +109,7 @@ describe CommonDomain::CommandHandler do
       ac = aggregate_class
       DummyCommand.attribute_names = [:account_id]
       command = DummyCommand.new attributes: {account_id: 'aggregate-1'}, headers: {header1: 'value-1'}
-      expect(repository_factory).to receive(:create_repository) { repository }
+      expect(persistence_factory).to receive(:create_repository) { repository }
       expect(repository).to get_by_id(aggregate_class, 'aggregate-1').and_return aggregate
       expect(repository).to receive(:save).with(aggregate, command.headers)
       subject.class.class_eval do

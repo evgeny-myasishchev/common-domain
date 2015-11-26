@@ -38,8 +38,8 @@ describe CommonDomain::Persistence::Repository do
     end
     
     it "should use event store to obtain event stream and apply all events from it" do      
-      event1 = double(:event1, :body => double(:body1))
-      event2 = double(:event1, :body => double(:body2))
+      event1 = double(:event1)
+      event2 = double(:event1)
       stream.add(event1).add(event2).commit_changes
             
       expect(aggregate).to receive(:apply_event).with(event1)
@@ -48,8 +48,8 @@ describe CommonDomain::Persistence::Repository do
     end
     
     it 'should cache the stream for subsequent calls on the same repo' do
-      event1 = double(:event1, :body => double(:body1))
-      event2 = double(:event1, :body => double(:body2))
+      event1 = double(:event1)
+      event2 = double(:event1)
       stream.add(event1).add(event2).commit_changes
       allow(aggregate).to receive(:apply_event)
       expect(event_store).to receive(:open_stream).with('aggregate-1').and_return(stream).once
@@ -62,15 +62,15 @@ describe CommonDomain::Persistence::Repository do
     end
     
     describe 'snapshots' do
-      let(:snapshots_repo) { double(:snapshots_repository, get: nil, add: nil)}
+      let(:snapshots_repo) { instance_double(CommonDomain::Persistence::Snapshots::SnapshotsRepository, get: nil, add: nil)}
       
       it 'should reconstruct the aggregate from snapshot if available' do
         snapshot = s::Snapshot.new('aggregate-1', 10, 'snapshot-data')
         expect(snapshots_repo).to receive(:get).with('aggregate-1') { snapshot }
         expect(builder).to receive(:build).with(aggregate_class, snapshot) { aggregate }
         
-        event1 = double(:event1, :body => double(:body1))
-        event2 = double(:event1, :body => double(:body2))
+        event1 = double(:event1)
+        event2 = double(:event1)
         
         expect(event_store).to receive(:stream_exists?).with('aggregate-1') { true }
         expect(event_store).to receive(:open_stream).with('aggregate-1', min_revision: snapshot.version + 1).and_return(stream)
@@ -88,8 +88,8 @@ describe CommonDomain::Persistence::Repository do
         expect(snapshots_repo).to receive(:get).with('aggregate-1').and_return(snapshot).once
         allow(builder).to receive(:build) { aggregate }
         
-        event1 = double(:event1, :body => double(:body1))
-        event2 = double(:event1, :body => double(:body2))
+        event1 = double(:event1)
+        event2 = double(:event1)
         
         expect(event_store).to receive(:stream_exists?) { true }
         expect(event_store).to receive(:open_stream).with('aggregate-1', min_revision: snapshot.version + 1).and_return(stream).once
@@ -168,7 +168,7 @@ describe CommonDomain::Persistence::Repository do
     end
     
     describe 'snapshots' do
-      let(:snapshots_repo) { double(:snapshots_repo) }
+      let(:snapshots_repo) { instance_double(CommonDomain::Persistence::Snapshots::SnapshotsRepository) }
 
       before do
         allow(event_store).to receive(:create_stream) { stream }

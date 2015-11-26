@@ -29,8 +29,8 @@ describe CommonDomain::Aggregate do
     end
     
     it "should process events" do
-      event1 = double(:event1, :version => 1)
-      event2 = double(:event2, :version => 2)
+      event1 = double(:event1)
+      event2 = double(:event2)
       
       expect(subject).to receive(:handle_message).with(event1)
       expect(subject).to receive(:handle_message).with(event2)
@@ -40,8 +40,8 @@ describe CommonDomain::Aggregate do
     end
     
     it "should set aggregate version to event version" do
-      event1 = double(:event1, :version => 1)
-      event2 = double(:event2, :version => 2)
+      event1 = double(:event1)
+      event2 = double(:event2)
       
       subject.apply_event event1
       expect(subject.version).to eql 1
@@ -50,11 +50,11 @@ describe CommonDomain::Aggregate do
     end
     
     it 'should increment applied_events_number number' do
-      subject.apply_event double(:event1, :version => 1)
+      subject.apply_event double(:event1)
       expect(subject.applied_events_number).to eql 1
-      subject.apply_event double(:event1, :version => 1)
+      subject.apply_event double(:event1)
       expect(subject.applied_events_number).to eql 2
-      subject.apply_event double(:event1, :version => 1)
+      subject.apply_event double(:event1)
       expect(subject.applied_events_number).to eql 3
     end
     
@@ -68,7 +68,7 @@ describe CommonDomain::Aggregate do
     end
     
     it "should return self" do
-      expect(subject.apply_event(double(:event1, :version => 1))).to be subject
+      expect(subject.apply_event(double(:event1))).to be subject
     end
   end
   
