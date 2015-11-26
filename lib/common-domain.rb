@@ -12,7 +12,6 @@ module CommonDomain
     require_relative 'common-domain/messages/messages-router'
   end
   module Infrastructure
-    require_relative 'common-domain/infrastructure/aggregate-id'
     require_relative 'common-domain/infrastructure/connection-spec-helper'
   end
   require_relative 'common-domain/logger'

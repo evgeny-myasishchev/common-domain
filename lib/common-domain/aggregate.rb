@@ -1,5 +1,6 @@
 module CommonDomain
   
+  require 'securerandom'  
   require_relative 'logger'
   require_relative 'messages/messages-handler'
   
@@ -80,6 +81,13 @@ module CommonDomain
     #
     def self.add_snapshot?(aggregate)
       false
+    end
+    
+    #
+    # Generate new unique aggregate_id
+    #
+    def self.new_id
+      SecureRandom.uuid
     end
     
     protected
