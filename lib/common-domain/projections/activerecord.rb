@@ -36,6 +36,7 @@ module CommonDomain::Projections
       end
       
       def purge!
+        logger.warn "Purging projection: #{self}"
         @model_class.delete_all
       end
     end
@@ -52,6 +53,10 @@ module CommonDomain::Projections
           projection_class = Class.new do
             include Base
             include ProjectionInstanceMethods
+            
+            def logger
+              @logger ||= CommonDomain::Logger.get(self.class.name)
+            end
           end
           projection_class.class_exec(*args, &@projection_init_block) if @projection_init_block
           self.const_set(:Projection, projection_class)
