@@ -15,6 +15,7 @@ module CommonDomain
     require_relative 'common-domain/infrastructure/connection-spec-helper'
   end
   require_relative 'common-domain/logger'
+  require_relative 'common-domain/persistence-factory'
   require_relative 'common-domain/persistence'
   require_relative 'common-domain/unit-of-work'
   module Projections
