@@ -11,23 +11,20 @@ module CommonDomain
   end
   
   class Logger
+    extend Forwardable
+    
     Levels = [:debug, :info, :warn, :error, :fatal]
+    
+    def_delegators :target_logger, :level, :level=, :formatter
+    Levels.each { |level| def_delegators :target_logger, level, "#{level}?".to_sym }
     
     def initialize(name)
       @name = name
     end
     
-    # Required only to be Ruby logger compatible. 
-    # Actual can be configured via config.
-    attr_accessor :level
-    
-    Levels.each { |level|
-      eval <<-EOF
-      def #{level}(*args)
-        self.class.factory.get(@name).#{level}(*args)
-      end
-      EOF
-    }
+    private def target_logger
+      self.class.factory.get(@name)
+    end
     
     #Uses default ruby logger and writes to STDOUT
     class DefaultFactory
