@@ -1,7 +1,7 @@
 module CommonDomain
   class CommandHandler
     extend Forwardable
-    include Messages::MessagesHandler    
+    include Messages::MessagesHandler
 
     def_delegators :persistence_factory, :begin_unit_of_work, :create_repository
 
