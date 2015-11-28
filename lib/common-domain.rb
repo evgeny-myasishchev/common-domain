@@ -1,4 +1,7 @@
 module CommonDomain
+  #Must go first since can be used by others
+  require_relative 'common-domain/loggable'
+  
   require_relative 'common-domain/aggregate'
   require_relative 'common-domain/command-dispatcher'
   require_relative 'common-domain/command-handler'
@@ -14,7 +17,6 @@ module CommonDomain
   module Infrastructure
     require_relative 'common-domain/infrastructure/connection-spec-helper'
   end
-  require_relative 'common-domain/logger'
   require_relative 'common-domain/persistence-factory'
   require_relative 'common-domain/persistence'
   require_relative 'common-domain/unit-of-work'

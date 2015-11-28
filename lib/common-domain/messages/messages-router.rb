@@ -29,7 +29,7 @@ module CommonDomain::Messages
         :context => nil
       }.merge!(options)
       ensure_single_handler = options[:ensure_single_handler]
-      Log.debug "Routing message: #{message.class}"
+      logger.debug "Routing message: #{message.class}"
       
       handlers = registered_handlers.select { |handler| handler.can_handle_message?(message) }
       raise SeveralHandlersFound.new(message) if handlers.length > 1 && ensure_single_handler
@@ -41,7 +41,7 @@ module CommonDomain::Messages
         lambda { |handler| handler.handle_message(message) } : 
         lambda { |handler| handler.handle_message(message, message_context) }
       handlers.each { |handler|
-        Log.debug " - to handler: #{handler}"
+        logger.debug " - to handler: #{handler}"
         handler_result = handle_message.call(handler)
       }
       ensure_single_handler ? handler_result : nil
@@ -49,7 +49,7 @@ module CommonDomain::Messages
     
     #Register messages handler
     def register(messages_handler)
-      Log.debug "Registering handler: #{messages_handler.class}"
+      logger.debug "Registering handler: #{messages_handler.class}"
       registered_handlers << messages_handler
     end
     

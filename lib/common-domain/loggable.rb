@@ -2,7 +2,10 @@ module CommonDomain
   module Loggable
     def self.included(receiver)
       receiver.class_eval do
-        const_set(:Log, CommonDomain::Logger.get(receiver.name))
+        define_method :logger do
+          @logger ||= CommonDomain::Logger.get(self.class.name || receiver.name)
+        end
+        private :logger
       end
     end
   end

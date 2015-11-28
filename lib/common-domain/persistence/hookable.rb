@@ -8,8 +8,7 @@ module CommonDomain::Persistence
     
     def call_hooks(type)
       if hooks[type]
-        # TODO: Rework loggable to inject instance logger method.
-        # Log.debug "Calling #{type} hooks..."
+        logger.debug "Calling #{type} hooks..."
         @hooks[type].map(&:call)
       end
     end

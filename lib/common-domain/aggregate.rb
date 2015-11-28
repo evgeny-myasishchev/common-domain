@@ -1,14 +1,12 @@
 module CommonDomain
   
   require 'securerandom'  
-  require_relative 'logger'
   require_relative 'messages/messages-handler'
   
   # 
   # Base class for all domain models.
   # 
   class Aggregate
-    include CommonDomain::Loggable
     include Messages::MessagesHandler
     
     attr_reader :aggregate_id, :version

@@ -1,5 +1,6 @@
 module CommonDomain
   class UnitOfWork
+    include CommonDomain::Loggable
     include CommonDomain::Persistence::Hookable
     
     attr_reader :repository
