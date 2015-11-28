@@ -1,10 +1,13 @@
 module CommonDomain
   class UnitOfWork
+    include CommonDomain::Persistence::Hookable
+    
     attr_reader :repository
+    
     def initialize(repository)
       ensure_transactions_supported! repository
       @repository = repository
-      @tracked_aggregates = {}      
+      @tracked_aggregates = {}
     end
     
     def get_by_id aggregate_class, aggregate_id
@@ -21,6 +24,8 @@ module CommonDomain
           @repository.save aggregate, headers
         end
       end
+      call_hooks :after_commit
+      nil
     end
     
     private def ensure_transactions_supported! repository

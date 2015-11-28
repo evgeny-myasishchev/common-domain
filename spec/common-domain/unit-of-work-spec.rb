@@ -45,6 +45,7 @@ module UnitOfWorkSpec
         allow(event_store).to receive(:transaction) do |&block|
           block.call
         end
+        allow(repository).to receive(:save)
       end
       
       it 'should save each aggregate with headers within the transaction' do
@@ -64,6 +65,14 @@ module UnitOfWorkSpec
         expect(repository).to receive(:save).with(aggregate1, with_dummy_headers)
         expect(repository).to receive(:save).with(aggregate2, with_dummy_headers)
         subject.commit dummy_headers
+      end
+      
+      it 'should call after_commit hooks' do
+        after_commit_hook_called = 0
+        subject.hook after_commit: -> { after_commit_hook_called += 1}
+        subject.hook after_commit: -> { after_commit_hook_called += 1}
+        subject.commit dummy_headers
+        expect(after_commit_hook_called).to eql 2
       end
     end
   end
