@@ -1,6 +1,7 @@
 module CommonDomain
   module Persistence
     require_relative 'persistence/aggregates-builder'
+    require_relative 'persistence/hookable'
     require_relative 'persistence/repository'
     require_relative 'persistence/snapshots'
     

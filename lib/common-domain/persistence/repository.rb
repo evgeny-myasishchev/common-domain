@@ -1,6 +1,7 @@
 module CommonDomain::Persistence
   class Repository
     include CommonDomain::Loggable
+    include CommonDomain::Persistence::Hookable
 
     attr_reader :event_store
     
@@ -10,11 +11,6 @@ module CommonDomain::Persistence
       @snapshots_repository = snapshots_repository
       @streams = {}
       @snapshots = {}
-      @hooks = {}
-    end
-    
-    def hook(after_commit: nil)
-      (@hooks[:after_commit] ||= []) << after_commit if after_commit
     end
     
     def exists?(aggregate_id)
@@ -75,13 +71,6 @@ module CommonDomain::Persistence
       Log.debug "Adding snapshot for aggregate #{aggregate.class} id=#{stream.stream_id} (version: #{stream.stream_revision})"
       snapshot = CommonDomain::Persistence::Snapshots::Snapshot.new stream.stream_id, stream.stream_revision, aggregate.get_snapshot
       @snapshots_repository.add snapshot
-    end
-    
-    def call_hooks(type)
-      if @hooks[type]
-        Log.debug "Calling #{type} hooks..."
-        @hooks[type].map(&:call)
-      end
     end
   end
 end
