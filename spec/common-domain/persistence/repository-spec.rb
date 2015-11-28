@@ -167,6 +167,16 @@ describe CommonDomain::Persistence::Repository do
       subject.save(aggregate)
     end
     
+    it 'should call after_commit hook' do
+      subject.get_by_id(aggregate_class, 'aggregate-1')
+      aggregate.raise_event 'evt3'
+      after_commit_hook_call_count = 0
+      subject.hook after_commit: -> { after_commit_hook_call_count += 1 }
+      subject.hook after_commit: -> { after_commit_hook_call_count += 1 }
+      subject.save(aggregate)
+      expect(after_commit_hook_call_count).to eql 2
+    end
+    
     describe 'snapshots' do
       let(:snapshots_repo) { instance_double(CommonDomain::Persistence::Snapshots::SnapshotsRepository) }
 
