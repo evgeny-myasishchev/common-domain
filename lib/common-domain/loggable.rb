@@ -17,6 +17,10 @@ module CommonDomain
       @name = name
     end
     
+    # Required only to be Ruby logger compatible. 
+    # Actual can be configured via config.
+    attr_accessor :level
+    
     Levels.each { |level|
       eval <<-EOF
       def #{level}(*args)
